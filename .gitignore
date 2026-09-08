@@ -1,0 +1,34 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Datasets
+*.npz
+*.npy
+labels.csv
+
+# Training outputs
+runs/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+
+# EDA outputs
+eda_results/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+#assets
