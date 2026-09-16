@@ -153,7 +153,7 @@
           <!-- 5kg here vs ~15kg total robot = significant COM shift -->
           <geom type="sphere" pos="0 0 0.3" size="0.05"
             material="red_mass"
-            contype="0" conaffinity="0" />
+            contype="1" conaffinity="1" />
 
           <!-- IMU site on pendulum tip -->
           <site name="pendulum_tip" pos="0 0 0.3" size="0.01" />

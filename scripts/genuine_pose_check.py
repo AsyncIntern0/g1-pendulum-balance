@@ -1,6 +1,6 @@
 import mujoco
 import numpy as np
-import phase3_pose_design as p3
+import old_files.phase3_pose_design as p3
 import generate_fall_dataset_final as p1
 
 model = p3.load_instrumented_model(r'C:\Users\Asyncronix\Downloads\Asyncronix_Intern\g1-pendulum-balance\unitree_g1\g1_pendulum.xml')

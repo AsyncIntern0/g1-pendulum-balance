@@ -1,0 +1,2960 @@
+{
+  "lead_time_s_used_for_design": 0.3,
+  "pose_transition_budget_s": 0.3,
+  "velocity_quantiles_sampled": [
+    0.5,
+    0.7,
+    0.85
+  ],
+  "velocity_estimate_source": "base linear velocity magnitude (||qvel[0:3]||) measured at the instant the pose is triggered -- proxy for the Phase-2 TCN's Stage-3 velocity-regression output. Verify qvel[0:3] really is the free-joint base linear velocity against g1_pendulum.xml's actual joint ordering before trusting this in Phase 4/5.",
+  "impact_proxies": {
+    "pelvis": "pelvis collision geom (existing)",
+    "head": "pendulum bob, contact enabled at runtime",
+    "hands": "NOT MODELED -- rig has no arms",
+    "other": "any other non-foot body (e.g. knee/hip) -- weighted lower than pelvis/head, but not free"
+  },
+  "open_questions_for_mentor": [
+    "Spec says 6 actuated joints; this rig has model.nu actuators (14 on the real g1_pendulum.xml: 2 pendulum + 12 leg). This library outputs angles for every actuator on the loaded model -- confirm which joint set Stage 4 actually expects.",
+    "Lookup table is keyed on BOTH scenario_fn and category for 'cause' because it isn't yet confirmed which granularity the Phase 2 TCN's Cause-class output uses. Resolve before Phase 5."
+  ],
+  "excluded_scenarios_needing_recalibration": [
+    {
+      "scenario_id": 11,
+      "scenario_fn": "actuator_fault",
+      "quantiles_tried": [
+        0.5,
+        0.7,
+        0.85
+      ]
+    },
+    {
+      "scenario_id": 13,
+      "scenario_fn": "asymmetric_gain",
+      "quantiles_tried": [
+        0.5,
+        0.7,
+        0.85
+      ]
+    }
+  ],
+  "n_poses": 12,
+  "poses": [
+    {
+      "pose_id": 0,
+      "covers_scenario_ids": [
+        1
+      ],
+      "covers_scenario_fns": [
+        "push"
+      ],
+      "covers_categories": [
+        "push"
+      ],
+      "fall_directions": [
+        "forward"
+      ],
+      "reference_bin_score": 1200.2964093100256,
+      "reference_bin_velocity_mps": 1.6000494554446147,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.5160262243362779,
+          "magnitude_used": 154.336,
+          "quantile": 0.5,
+          "pose": [
+            0.3965153725089923,
+            -0.720104114993799,
+            0.8364522510031938,
+            0.03726321831553364,
+            0.2194510195757926,
+            1.0402300389480058e-05,
+            -0.12175818307111437,
+            0.09215446233411201,
+            1.119795781579442,
+            -0.08484084607542422,
+            0.09100710141241623,
+            0.003833554135075733,
+            -0.41940363183398954,
+            0.031155710253522928
+          ],
+          "score": 633.1414466251997,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.28,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 1.4806384593828896
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.28,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 1.4812847633003938
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2468.8159644102193,
+              "transition_time_s": 0.47400000000000003,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9900000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5510907260231537
+            },
+            {
+              "peak_force_pelvis": 28.63189149494759,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2229.0518256014825,
+              "transition_time_s": 0.436,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9900000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5510909486386746
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.5664900949241556,
+          "magnitude_used": 185.20319999999998,
+          "quantile": 0.7,
+          "pose": [
+            -0.08259737417874002,
+            -0.7316400037576464,
+            1.2797602349610517,
+            -0.1398655765744755,
+            -0.022244159647572648,
+            0.1973263908303462,
+            -0.19729124292469263,
+            0.3413312223116486,
+            1.34363585331532,
+            -0.11848234791574798,
+            -0.3467082446854981,
+            0.3539104404173317,
+            0.026932382189913895,
+            0.1153260779736327
+          ],
+          "score": 1251.0658433994504,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2186.3055643768803,
+              "transition_time_s": 0.438,
+              "transition_complete": true,
+              "time_to_impact_s": 1.078,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5254855371953355
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2593.3585263595073,
+              "transition_time_s": 0.446,
+              "transition_complete": true,
+              "time_to_impact_s": 1.078,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5254842978205767
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2733.5791486096787,
+              "transition_time_s": 0.446,
+              "transition_complete": true,
+              "time_to_impact_s": 0.89,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6074951591367568
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1927.2835078495366,
+              "transition_time_s": 0.438,
+              "transition_complete": true,
+              "time_to_impact_s": 0.89,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6074953855439533
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.6000494554446147,
+          "magnitude_used": 208.3536,
+          "quantile": 0.85,
+          "pose": [
+            -0.24636871115318054,
+            -0.7652753614821461,
+            1.195296927255157,
+            -0.11008662499072655,
+            0.01017815261394972,
+            0.23891385501183307,
+            -0.20340086804808544,
+            0.3380196270761173,
+            0.9833549208904132,
+            -0.26564224084917637,
+            -0.5237741704577471,
+            0.04777948444770788,
+            -0.50138217221915,
+            0.052173996702180786
+          ],
+          "score": 1200.2964093100256,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2033.0001155432878,
+              "transition_time_s": 0.436,
+              "transition_complete": true,
+              "time_to_impact_s": 0.982,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5617912387412445
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1638.233402617122,
+              "transition_time_s": 0.434,
+              "transition_complete": true,
+              "time_to_impact_s": 0.982,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5617903718787176
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3135.744578561301,
+              "transition_time_s": 0.44,
+              "transition_complete": true,
+              "time_to_impact_s": 0.832,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.638308075403215
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2235.3931777584953,
+              "transition_time_s": 0.45,
+              "transition_complete": true,
+              "time_to_impact_s": 0.832,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6383081357552811
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 1,
+      "covers_scenario_ids": [
+        2
+      ],
+      "covers_scenario_fns": [
+        "push"
+      ],
+      "covers_categories": [
+        "push"
+      ],
+      "fall_directions": [
+        "backward"
+      ],
+      "reference_bin_score": 1755.6791961330684,
+      "reference_bin_velocity_mps": 1.6602148352249857,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.583556373982242,
+          "magnitude_used": 154.336,
+          "quantile": 0.5,
+          "pose": [
+            0.424741081877684,
+            0.7315809820021026,
+            0.043030959867076904,
+            -0.054193546854319985,
+            -0.40883791594311814,
+            0.2548655822542075,
+            0.62216972088438,
+            0.14306020837291183,
+            -0.2597531874630892,
+            0.09762027302449236,
+            0.6692148743934964,
+            0.004630163481829943,
+            0.2799769809040343,
+            -0.16446614833905515
+          ],
+          "score": 1932.8411274831017,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 578.5890483094839,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2735.0120191755686,
+              "transition_time_s": 0.17,
+              "transition_complete": true,
+              "time_to_impact_s": 0.8140000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6110788413202697
+            },
+            {
+              "peak_force_pelvis": 636.5412677498908,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2781.4476115785837,
+              "transition_time_s": 0.17,
+              "transition_complete": true,
+              "time_to_impact_s": 0.8140000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6110787713274655
+            },
+            {
+              "peak_force_pelvis": 563.1455100864539,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2633.7231644835833,
+              "transition_time_s": 0.154,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9960000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.556033708316781
+            },
+            {
+              "peak_force_pelvis": 564.0243146519826,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2627.9459430314546,
+              "transition_time_s": 0.154,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9960000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5560341749644513
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.627851768822462,
+          "magnitude_used": 185.20319999999998,
+          "quantile": 0.7,
+          "pose": [
+            0.6563285552627702,
+            0.6478246979702877,
+            -0.2527912746537705,
+            -0.07160812445528135,
+            0.788784397371144,
+            0.0473056385111026,
+            -0.35812668177752804,
+            -0.2716407563268512,
+            -0.46624148668449084,
+            0.08450819924148013,
+            0.5057388380244274,
+            0.0035409679122389262,
+            -0.20779338233115174,
+            0.08265513063990648
+          ],
+          "score": 1860.7421802714885,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 363.82972627528324,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2927.784628013273,
+              "transition_time_s": 0.242,
+              "transition_complete": true,
+              "time_to_impact_s": 0.754,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6593164284112405
+            },
+            {
+              "peak_force_pelvis": 421.1000620711603,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3025.9210172649978,
+              "transition_time_s": 0.23800000000000002,
+              "transition_complete": true,
+              "time_to_impact_s": 0.754,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6592125132325688
+            },
+            {
+              "peak_force_pelvis": 349.0334692478035,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2965.649448179883,
+              "transition_time_s": 0.23800000000000002,
+              "transition_complete": true,
+              "time_to_impact_s": 0.892,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.596439404057625
+            },
+            {
+              "peak_force_pelvis": 393.6977231997864,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2911.260387125687,
+              "transition_time_s": 0.23800000000000002,
+              "transition_complete": true,
+              "time_to_impact_s": 0.892,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.596438729588414
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.6602148352249857,
+          "magnitude_used": 208.3536,
+          "quantile": 0.85,
+          "pose": [
+            0.7849950939991269,
+            0.7154096849449072,
+            -0.18838474762897148,
+            0.06710247404269694,
+            0.47121405143382816,
+            0.005268990421623245,
+            -0.3521957425017629,
+            -0.3475625097696299,
+            -0.5012786732034249,
+            -0.2489941998354571,
+            0.16859582783118907,
+            0.018762455246797895,
+            0.014356849901020395,
+            0.13423665425107967
+          ],
+          "score": 1755.6791961330684,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 274.34066627790367,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2987.512903441761,
+              "transition_time_s": 0.228,
+              "transition_complete": true,
+              "time_to_impact_s": 0.716,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6979343468788892
+            },
+            {
+              "peak_force_pelvis": 290.5850442441588,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2909.614304075403,
+              "transition_time_s": 0.228,
+              "transition_complete": true,
+              "time_to_impact_s": 0.716,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6979330335228153
+            },
+            {
+              "peak_force_pelvis": 313.7905861761387,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2914.2663768130506,
+              "transition_time_s": 0.228,
+              "transition_complete": true,
+              "time_to_impact_s": 0.834,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6224341634129515
+            },
+            {
+              "peak_force_pelvis": 275.8252054942894,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2924.956980349353,
+              "transition_time_s": 0.226,
+              "transition_complete": true,
+              "time_to_impact_s": 0.834,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.622557797085286
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 2,
+      "covers_scenario_ids": [
+        3
+      ],
+      "covers_scenario_fns": [
+        "push"
+      ],
+      "covers_categories": [
+        "push"
+      ],
+      "fall_directions": [
+        "left"
+      ],
+      "reference_bin_score": 1930.3670160218676,
+      "reference_bin_velocity_mps": 1.5027365176133558,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.400156670731457,
+          "magnitude_used": 185.20319999999998,
+          "quantile": 0.7,
+          "pose": [
+            -0.42726506694981586,
+            0.5609082850013988,
+            -0.17599474961578243,
+            -0.7814453152088533,
+            0.49733261436513343,
+            0.44705081618866527,
+            -0.1801333293691772,
+            -0.29108554447664775,
+            0.9118434880576897,
+            -0.46165173935086584,
+            0.014977071792758617,
+            1.4686997659104968,
+            0.4808381654177931,
+            -0.3483095793609661
+          ],
+          "score": 1103.6050838441338,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1605.1674780866242,
+              "transition_time_s": 0.41600000000000004,
+              "transition_complete": true,
+              "time_to_impact_s": 1.086,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.3970749799544364
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3305.309880950559,
+              "transition_time_s": 0.432,
+              "transition_complete": true,
+              "time_to_impact_s": 1.028,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4135496115593396
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1945.8784502191672,
+              "transition_time_s": 0.418,
+              "transition_complete": true,
+              "time_to_impact_s": 1.1139999999999999,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4027490870698585
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1490.484861496719,
+              "transition_time_s": 0.41600000000000004,
+              "transition_complete": true,
+              "time_to_impact_s": 1.0939999999999999,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.387253004342194
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.449448444438158,
+          "magnitude_used": 208.3536,
+          "quantile": 0.85,
+          "pose": [
+            -0.6072345407015574,
+            -0.33838038827121475,
+            -0.5032997090967147,
+            -0.7851630173212156,
+            -0.04897720846734377,
+            0.003925289411173269,
+            -0.13832274199059935,
+            0.3095815757806166,
+            0.028448794282105443,
+            -0.3941106912064506,
+            0.0973254741122532,
+            0.3718416092649989,
+            0.6861963511925945,
+            0.26420854467216204
+          ],
+          "score": 661.5170487789101,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1053.9438329476088,
+              "transition_time_s": 0.434,
+              "transition_complete": true,
+              "time_to_impact_s": 0.974,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4443471719779022
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1516.1157973307802,
+              "transition_time_s": 0.252,
+              "transition_complete": true,
+              "time_to_impact_s": 0.928,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4559886108323639
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1094.9415129388378,
+              "transition_time_s": 0.446,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9920000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.46117048168911
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1219.1352470140537,
+              "transition_time_s": 0.428,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9740000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4362875132532562
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.5027365176133558,
+          "magnitude_used": 154.336,
+          "quantile": 0.5,
+          "pose": [
+            -0.7838696279989793,
+            0.637146440041651,
+            -0.4262014453433455,
+            0.3563873058458523,
+            0.7794467488700372,
+            0.019588984138519613,
+            0.332046467348033,
+            0.34988097476711655,
+            0.1647204965294889,
+            -0.6521999040283907,
+            0.5672175930424339,
+            0.13305568247295882,
+            0.22503503984099416,
+            -0.053140798870262886
+          ],
+          "score": 1930.3670160218676,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.3820000000000001,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 363.5198585201048,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2715.8964111347323,
+              "transition_time_s": 0.228,
+              "transition_complete": true,
+              "time_to_impact_s": 1.27,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5027365176133558
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.4660000000000002,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.4260000000000002,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 3,
+      "covers_scenario_ids": [
+        4
+      ],
+      "covers_scenario_fns": [
+        "push"
+      ],
+      "covers_categories": [
+        "push"
+      ],
+      "fall_directions": [
+        "right"
+      ],
+      "reference_bin_score": 1918.8757375912098,
+      "reference_bin_velocity_mps": 1.502715673687328,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.400150606962812,
+          "magnitude_used": 185.20319999999998,
+          "quantile": 0.7,
+          "pose": [
+            0.6344944648854746,
+            0.4886958691219895,
+            0.591875255496265,
+            0.5422065900956782,
+            0.014655973078687531,
+            1.329632538953453,
+            -0.09622152514867548,
+            0.10041995369902305,
+            -0.31243644371857043,
+            0.7689540051661269,
+            -0.7003939917112265,
+            0.35878315670901384,
+            -0.5160791090996528,
+            0.3373513814335869
+          ],
+          "score": 1088.353403541708,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3243.771736195706,
+              "transition_time_s": 0.242,
+              "transition_complete": true,
+              "time_to_impact_s": 1.028,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4135426464142595
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1598.5923074797192,
+              "transition_time_s": 0.444,
+              "transition_complete": true,
+              "time_to_impact_s": 1.086,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.3970615779224076
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1529.301299754258,
+              "transition_time_s": 0.448,
+              "transition_complete": true,
+              "time_to_impact_s": 1.0939999999999999,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.3872509040132874
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1901.161884903981,
+              "transition_time_s": 0.442,
+              "transition_complete": true,
+              "time_to_impact_s": 1.1139999999999999,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4027472995012933
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.4494438956979974,
+          "magnitude_used": 208.3536,
+          "quantile": 0.85,
+          "pose": [
+            -0.5301376706525478,
+            0.6176091410693797,
+            1.2183443567575507,
+            0.4845415452885397,
+            0.49644115785576304,
+            2.467314097724148e-06,
+            0.37294954885365034,
+            -0.25856378718706285,
+            0.2150201580967458,
+            0.7878335689070525,
+            -0.24447998920359737,
+            0.004686282868842573,
+            -0.14590473880687616,
+            -0.19510873296129094
+          ],
+          "score": 1370.5691511194823,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3639.987165900234,
+              "transition_time_s": 0.628,
+              "transition_complete": true,
+              "time_to_impact_s": 0.928,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4559845279823775
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1288.814488819492,
+              "transition_time_s": 0.51,
+              "transition_complete": true,
+              "time_to_impact_s": 0.974,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4443375344915335
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1515.7375101459597,
+              "transition_time_s": 0.47600000000000003,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9740000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4362843109156498
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3674.0140440901714,
+              "transition_time_s": 0.432,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9920000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4611692094024287
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.502715673687328,
+          "magnitude_used": 154.336,
+          "quantile": 0.5,
+          "pose": [
+            0.13785985560885233,
+            0.7721412295189175,
+            -0.09394721646554836,
+            -0.15336232490202592,
+            -0.7792747701170171,
+            0.0012170648898427833,
+            0.5862429172081047,
+            -0.054600329975802,
+            -0.47725669167700174,
+            -0.2753121643377427,
+            0.27321366000116026,
+            0.011431566462542583,
+            -0.3999499603070886,
+            0.12946556309221213
+          ],
+          "score": 1918.8757375912098,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 400.8214760595249,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2549.362948610629,
+              "transition_time_s": 0.222,
+              "transition_complete": true,
+              "time_to_impact_s": 1.27,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.502715673687328
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.3820000000000001,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.4260000000000002,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.4660000000000002,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 4,
+      "covers_scenario_ids": [
+        5
+      ],
+      "covers_scenario_fns": [
+        "push"
+      ],
+      "covers_categories": [
+        "push"
+      ],
+      "fall_directions": [
+        "forward-left"
+      ],
+      "reference_bin_score": 1710.941302166376,
+      "reference_bin_velocity_mps": 1.5255419616661716,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.4670230262664492,
+          "magnitude_used": 185.20319999999998,
+          "quantile": 0.7,
+          "pose": [
+            -0.5468021700195516,
+            -0.7822663725642933,
+            0.5773030814092517,
+            -0.4447576326890738,
+            -0.7308520605049837,
+            0.30484553643233203,
+            -0.03055910092961006,
+            -0.2541851378271674,
+            -0.0728681588174089,
+            -0.3756085311350991,
+            0.5836572528461605,
+            0.1226052186757068,
+            0.1480265325800702,
+            0.0024656264347652085
+          ],
+          "score": 2117.3587987326127,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 540.1851428108367,
+              "peak_force_head": 511.45830187214625,
+              "peak_force_other": 2818.0097316412175,
+              "transition_time_s": 0.246,
+              "transition_complete": true,
+              "time_to_impact_s": 1.16,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.510965716759939
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.276,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 1.3795408553392756
+            },
+            {
+              "peak_force_pelvis": 468.8688031761451,
+              "peak_force_head": 435.73088007318694,
+              "peak_force_other": 2766.5513498417235,
+              "transition_time_s": 0.246,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9460000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.582431389210957
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 481.97334067885265,
+              "peak_force_other": 3619.5513259072522,
+              "transition_time_s": 0.234,
+              "transition_complete": true,
+              "time_to_impact_s": 1.17,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.3951541437556263
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.4994966895468196,
+          "magnitude_used": 208.3536,
+          "quantile": 0.85,
+          "pose": [
+            -0.7752708776038792,
+            -0.7451857064142934,
+            2.0854642288187555,
+            0.5845010963266666,
+            -0.43370624423150494,
+            1.7920778904170203,
+            -0.3902344469366581,
+            0.2785873448300386,
+            1.1334563578320764,
+            -0.09158643556630008,
+            -0.7606390280875917,
+            0.7101573026248448,
+            -0.21504108268174527,
+            -0.19984237458265774
+          ],
+          "score": 1354.9583083279517,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 393.23614471301744,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2140.4783244226473,
+              "transition_time_s": 0.682,
+              "transition_complete": true,
+              "time_to_impact_s": 1.056,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5345394114222417
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1363.8242448530061,
+              "transition_time_s": 0.5760000000000001,
+              "transition_complete": true,
+              "time_to_impact_s": 1.1,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.412559928160581
+            },
+            {
+              "peak_force_pelvis": 540.2679059241193,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2018.2654525523574,
+              "transition_time_s": 0.686,
+              "transition_complete": true,
+              "time_to_impact_s": 0.884,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6125253044384962
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2216.09034352133,
+              "transition_time_s": 0.49,
+              "transition_complete": true,
+              "time_to_impact_s": 1.0299999999999998,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4383621141659588
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.5255419616661716,
+          "magnitude_used": 154.336,
+          "quantile": 0.5,
+          "pose": [
+            0.5518758173642472,
+            -0.6013492776012371,
+            1.104933977776691,
+            -0.05157092863546485,
+            -0.7763956148548974,
+            0.19700146419545525,
+            -0.12762212709347806,
+            0.07730028005451475,
+            1.331987096700529,
+            0.10523189799364954,
+            -0.42352028425477606,
+            0.4961817498630863,
+            -0.5094255208174129,
+            0.34982391421645237
+          ],
+          "score": 1710.941302166376,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.3840000000000001,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 2.896,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1545.5304173310083,
+              "transition_time_s": 0.442,
+              "transition_complete": true,
+              "time_to_impact_s": 1.0579999999999998,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5255419616661716
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.512,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 5,
+      "covers_scenario_ids": [
+        6
+      ],
+      "covers_scenario_fns": [
+        "push"
+      ],
+      "covers_categories": [
+        "push"
+      ],
+      "fall_directions": [
+        "forward-right"
+      ],
+      "reference_bin_score": 1750.0537415100898,
+      "reference_bin_velocity_mps": 1.5255434048683092,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.467017460679556,
+          "magnitude_used": 185.20319999999998,
+          "quantile": 0.7,
+          "pose": [
+            0.011721661161635255,
+            -0.7621094630713325,
+            0.1791530516854869,
+            0.10790999373106182,
+            -0.508434474143017,
+            0.46110220730012863,
+            -0.3495878776752098,
+            -0.11818991348371069,
+            -0.18586497918483635,
+            0.21878395536837345,
+            0.21754202536213418,
+            0.659566589414584,
+            0.648325246726738,
+            0.27293078756173383
+          ],
+          "score": 2403.669363252041,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.276,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 1.3795079092140752
+            },
+            {
+              "peak_force_pelvis": 398.55322912682544,
+              "peak_force_head": 585.3194437302726,
+              "peak_force_other": 2070.143238709829,
+              "transition_time_s": 0.18,
+              "transition_complete": true,
+              "time_to_impact_s": 1.16,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5109713905604882
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 1491.1041098802507,
+              "peak_force_other": 2222.6997692898185,
+              "transition_time_s": 0.168,
+              "transition_complete": true,
+              "time_to_impact_s": 1.17,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.395156979977825
+            },
+            {
+              "peak_force_pelvis": 748.9605923273105,
+              "peak_force_head": 544.2903031696338,
+              "peak_force_other": 2158.6288279877776,
+              "transition_time_s": 0.162,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9460000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.582433562965836
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.4993993838207818,
+          "magnitude_used": 208.3536,
+          "quantile": 0.85,
+          "pose": [
+            0.7610547309732815,
+            -0.4161995820732465,
+            -0.3441742899146587,
+            0.6604105956279814,
+            -0.4063914553022223,
+            0.4199212603974811,
+            0.3616443532546558,
+            0.32804863888950136,
+            0.37205315927107013,
+            0.7482412409211155,
+            0.3710896242102179,
+            0.6066643883338888,
+            -0.35870293277867454,
+            -0.33304545487763015
+          ],
+          "score": 2408.1956850902466,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 595.8063871546026,
+              "peak_force_other": 1760.5662956181939,
+              "transition_time_s": 0.276,
+              "transition_complete": true,
+              "time_to_impact_s": 1.1,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4125421299518954
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 866.3198570109345,
+              "peak_force_other": 2477.5736345542587,
+              "transition_time_s": 0.276,
+              "transition_complete": true,
+              "time_to_impact_s": 1.056,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5345458573854158
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3383.0647765090166,
+              "transition_time_s": 0.516,
+              "transition_complete": true,
+              "time_to_impact_s": 1.0299999999999998,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.437984271057146
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 891.8050650953495,
+              "peak_force_other": 2012.6355369969579,
+              "transition_time_s": 0.276,
+              "transition_complete": true,
+              "time_to_impact_s": 0.884,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6125252768886704
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.5255434048683092,
+          "magnitude_used": 154.336,
+          "quantile": 0.5,
+          "pose": [
+            -0.1378880371086424,
+            -0.7257387908276948,
+            1.3739461586080086,
+            0.3492175702087974,
+            -0.5594971096229255,
+            0.21865827528034384,
+            -0.3605879099261362,
+            0.21839867735802376,
+            1.3668102285065766,
+            -0.20324413948638428,
+            0.1381890167164941,
+            0.4972380236966394,
+            -0.5060195503114102,
+            -0.02846182798515462
+          ],
+          "score": 1750.0537415100898,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 2.894,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.3840000000000001,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.512,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1866.4299320807177,
+              "transition_time_s": 0.434,
+              "transition_complete": true,
+              "time_to_impact_s": 1.0579999999999998,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5255434048683092
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 6,
+      "covers_scenario_ids": [
+        7
+      ],
+      "covers_scenario_fns": [
+        "floor_tilt_pitch"
+      ],
+      "covers_categories": [
+        "surface"
+      ],
+      "fall_directions": [
+        "surface"
+      ],
+      "reference_bin_score": 1992.7834514321912,
+      "reference_bin_velocity_mps": 1.6722855435158168,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.6396177346894685,
+          "magnitude_used": 0.10200000000000001,
+          "quantile": 0.5,
+          "pose": [
+            0.7750226633671582,
+            0.5934123578962088,
+            -0.33438557566893135,
+            0.2913855744189125,
+            0.7894781782924922,
+            0.28400548001188775,
+            -0.42602058467281195,
+            -0.19952372505364224,
+            -0.5167015772517504,
+            -0.07313352366950691,
+            0.6946453262610198,
+            0.07556302496595274,
+            -0.24078410092405456,
+            0.16190145759187735
+          ],
+          "score": 1908.8948016454074,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 345.3140222799461,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2944.9511620217368,
+              "transition_time_s": 0.234,
+              "transition_complete": true,
+              "time_to_impact_s": 1.1420000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6396177346894685
+            },
+            {
+              "peak_force_pelvis": 345.3140222799461,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2944.9511620217368,
+              "transition_time_s": 0.234,
+              "transition_complete": true,
+              "time_to_impact_s": 1.1420000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6396177346894685
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.452,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.452,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.6543728137272942,
+          "magnitude_used": 0.12240000000000001,
+          "quantile": 0.7,
+          "pose": [
+            -0.7572863165255042,
+            0.7837458637994075,
+            -0.5190832483561968,
+            0.028114016671491125,
+            0.06137275764608597,
+            0.0016842585796583982,
+            0.2424570709284389,
+            0.10741777250748426,
+            -0.4630737284225553,
+            0.09804750850516324,
+            -0.2650858315299547,
+            0.2673528246910134,
+            -0.406766716459573,
+            -0.3464204834644665
+          ],
+          "score": 1925.0633630435755,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 346.9731201622894,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3006.307211849723,
+              "transition_time_s": 0.246,
+              "transition_complete": true,
+              "time_to_impact_s": 1.068,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6543728137272942
+            },
+            {
+              "peak_force_pelvis": 346.9731201622894,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3006.307211849723,
+              "transition_time_s": 0.246,
+              "transition_complete": true,
+              "time_to_impact_s": 1.068,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6543728137272942
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.3279999999999998,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.3279999999999998,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.6722855435158168,
+          "magnitude_used": 0.1377,
+          "quantile": 0.85,
+          "pose": [
+            0.7626233918893721,
+            0.7832381684298434,
+            -0.3579103193200455,
+            0.07030126776665013,
+            0.22804849699048702,
+            0.16767403522139335,
+            -0.5155959956572702,
+            -0.3114260415579867,
+            -0.4981801082838935,
+            0.1059160806440268,
+            0.7313532168844901,
+            0.006874925596978272,
+            0.7362739811459608,
+            0.006229520388264742
+          ],
+          "score": 1992.7834514321912,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 475.50329875482817,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3049.7800817119496,
+              "transition_time_s": 0.23,
+              "transition_complete": true,
+              "time_to_impact_s": 1.024,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6713698663102212
+            },
+            {
+              "peak_force_pelvis": 475.50329875482817,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3049.7800817119496,
+              "transition_time_s": 0.23,
+              "transition_complete": true,
+              "time_to_impact_s": 1.024,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6713698663102212
+            },
+            {
+              "peak_force_pelvis": 439.0693901106837,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3092.208346285792,
+              "transition_time_s": 0.23,
+              "transition_complete": true,
+              "time_to_impact_s": 1.254,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6732012207214122
+            },
+            {
+              "peak_force_pelvis": 439.0693901106837,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3092.208346285792,
+              "transition_time_s": 0.23,
+              "transition_complete": true,
+              "time_to_impact_s": 1.254,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.6732012207214122
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 8,
+      "covers_scenario_ids": [
+        9
+      ],
+      "covers_scenario_fns": [
+        "floor_drop"
+      ],
+      "covers_categories": [
+        "surface"
+      ],
+      "fall_directions": [
+        "surface"
+      ],
+      "reference_bin_score": 20.510307373629278,
+      "reference_bin_velocity_mps": 0.7259670781180168,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 0.10102498396221202,
+          "magnitude_used": 0.3209,
+          "quantile": 0.7,
+          "pose": [
+            0.2725747208956192,
+            -0.37528060230751203,
+            0.05140491808169809,
+            0.1459313638611831,
+            -0.015453044173787456,
+            0.11852166193340033,
+            -0.10461184307243726,
+            0.11545205071207396,
+            0.15559674109685162,
+            -0.13347537840373216,
+            -0.21169930778133403,
+            0.22786585999805697,
+            -0.14043464869999017,
+            0.014243735995833758
+          ],
+          "score": 0.0,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 0.26,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 0.08044600303169329
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 0.26,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 0.08044600303169329
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": 1.016,
+              "transition_complete": true,
+              "time_to_impact_s": 0.272,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 0.12160396489273076
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": 1.016,
+              "transition_complete": true,
+              "time_to_impact_s": 0.272,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 0.12160396489273076
+            }
+          ]
+        },
+        {
+          "velocity_mps": 0.10102498396221202,
+          "magnitude_used": 0.36095,
+          "quantile": 0.85,
+          "pose": [
+            0.42547374576300684,
+            -0.35525619951751586,
+            -0.37497557919571356,
+            0.14562606570015618,
+            -0.42819752758858537,
+            0.21202067631397337,
+            -0.16044192866005416,
+            0.33727905775329337,
+            -0.49948873092210394,
+            -0.1429333269673859,
+            0.1987648869983465,
+            0.06187445877062754,
+            -0.13070556601993374,
+            -0.21844220560529914
+          ],
+          "score": 0.0,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": 0.26,
+              "transition_complete": true,
+              "time_to_impact_s": 0.26,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 0.08044600303169329
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": 0.26,
+              "transition_complete": true,
+              "time_to_impact_s": 0.26,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 0.08044600303169329
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": 0.254,
+              "transition_complete": true,
+              "time_to_impact_s": 0.272,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 0.12160396489273076
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": 0.254,
+              "transition_complete": true,
+              "time_to_impact_s": 0.272,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 0.12160396489273076
+            }
+          ]
+        },
+        {
+          "velocity_mps": 0.7259670781180168,
+          "magnitude_used": 0.2675,
+          "quantile": 0.5,
+          "pose": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            -0.05,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.1,
+            -0.05,
+            0.0
+          ],
+          "score": 20.510307373629278,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 82.04122949451711,
+              "transition_time_s": 0.002,
+              "transition_complete": true,
+              "time_to_impact_s": 0.26,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 0.08044600303169329
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 82.04122949451711,
+              "transition_time_s": 0.002,
+              "transition_complete": true,
+              "time_to_impact_s": 0.26,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 0.08044600303169329
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.2799999999999998,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 1.3714881532043401
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.2799999999999998,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 1.3714881532043401
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 9,
+      "covers_scenario_ids": [
+        10
+      ],
+      "covers_scenario_fns": [
+        "low_friction"
+      ],
+      "covers_categories": [
+        "surface"
+      ],
+      "fall_directions": [
+        "surface"
+      ],
+      "reference_bin_score": 978.6973650568382,
+      "reference_bin_velocity_mps": 1.5282079436843081,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.5099082906075192,
+          "magnitude_used": 114.25800000000001,
+          "quantile": 0.5,
+          "pose": [
+            0.028754825397163786,
+            -0.11151479223131355,
+            0.3650961867636277,
+            0.08820998104386085,
+            0.7871341846723658,
+            0.1917465311119107,
+            0.27844810235033995,
+            -0.08280952079367382,
+            0.7911727671282547,
+            -0.24068282334957558,
+            0.12396990565434085,
+            0.0009095635193140947,
+            0.5864022166490468,
+            -0.0622002159487651
+          ],
+          "score": 1000.0,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 2.712,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 2.712,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.1800000000000002,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 1.5099082906075192
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.1800000000000002,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": true,
+              "velocity_at_trigger_mps": 1.5099082906075192
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.5231963146449117,
+          "magnitude_used": 137.1096,
+          "quantile": 0.7,
+          "pose": [
+            0.16081453065970486,
+            -0.5391847450995173,
+            1.4800154129397374,
+            0.14996988422939386,
+            -0.2045288642456839,
+            0.017363442591918347,
+            -0.5197834231645971,
+            -0.14542859593276136,
+            1.3199017969318503,
+            -0.21926858641980962,
+            -0.22025151398329867,
+            0.1377593802075648,
+            -0.2493251893936964,
+            0.05189601441934116
+          ],
+          "score": 1473.4546832543324,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.446,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.446,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1743.8187330173298,
+              "transition_time_s": 0.45,
+              "transition_complete": true,
+              "time_to_impact_s": 1.0419999999999998,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5231963146449117
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1743.8187330173298,
+              "transition_time_s": 0.45,
+              "transition_complete": true,
+              "time_to_impact_s": 1.0419999999999998,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.5231963146449117
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.5282079436843081,
+          "magnitude_used": 154.2483,
+          "quantile": 0.85,
+          "pose": [
+            -0.7513119798274172,
+            -0.7849711924894224,
+            1.1939146847673567,
+            -0.07713981136211003,
+            0.5255039239997757,
+            0.6182023039369104,
+            -0.5071528796758026,
+            0.30698454394330743,
+            0.8853816127056109,
+            -0.14121590825650432,
+            -0.26498148412246225,
+            0.1453197730051161,
+            -0.18044228668818305,
+            0.01732527817350106
+          ],
+          "score": 978.6973650568382,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1503.4872554369922,
+              "transition_time_s": 0.398,
+              "transition_complete": true,
+              "time_to_impact_s": 1.24,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4903345320884933
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1503.4872554369922,
+              "transition_time_s": 0.398,
+              "transition_complete": true,
+              "time_to_impact_s": 1.24,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4903345320884933
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2213.3022047903605,
+              "transition_time_s": 0.4,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9700000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.566081355280123
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 2213.3022047903605,
+              "transition_time_s": 0.4,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9700000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.566081355280123
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 10,
+      "covers_scenario_ids": [
+        12
+      ],
+      "covers_scenario_fns": [
+        "actuator_stuck"
+      ],
+      "covers_categories": [
+        "actuator"
+      ],
+      "fall_directions": [
+        "actuator"
+      ],
+      "reference_bin_score": 772.0447822835114,
+      "reference_bin_velocity_mps": 1.4119169347174796,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.3957632401197135,
+          "magnitude_used": 0.368,
+          "quantile": 0.5,
+          "pose": [
+            0.6418870411643366,
+            0.6197884326864164,
+            0.05984382547740141,
+            -0.1433389110655789,
+            -0.16941146723835027,
+            0.0006578432890043017,
+            0.5430328323672441,
+            -0.34525985866332776,
+            0.3666443904238706,
+            -0.009935455831603945,
+            -0.06963904713874429,
+            1.0429731906990822,
+            0.5042846609641815,
+            -0.2433460306015759
+          ],
+          "score": 2025.2703325268158,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 656.1079729297143,
+              "peak_force_other": 1476.649438388406,
+              "transition_time_s": 0.136,
+              "transition_complete": true,
+              "time_to_impact_s": 1.23,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.3957632401197135
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 656.1079729297143,
+              "peak_force_other": 1476.649438388406,
+              "transition_time_s": 0.136,
+              "transition_complete": true,
+              "time_to_impact_s": 1.23,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.3957632401197135
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.52,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.52,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.4059268534770617,
+          "magnitude_used": 0.4968,
+          "quantile": 0.85,
+          "pose": [
+            -0.6446851133425264,
+            0.5626145579847271,
+            -0.49914786902273967,
+            -0.325049940785312,
+            0.7224670852671579,
+            0.23250992801325465,
+            -0.14131115103148617,
+            0.027006834327596718,
+            0.5130370667624189,
+            -0.746633415528436,
+            0.4183002893120513,
+            1.3329407323156521,
+            -0.36448445607181157,
+            0.12372455191795018
+          ],
+          "score": 1612.0987554510752,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3151.034848903226,
+              "transition_time_s": 0.396,
+              "transition_complete": true,
+              "time_to_impact_s": 1.1360000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.400335541493049
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3151.034848903226,
+              "transition_time_s": 0.396,
+              "transition_complete": true,
+              "time_to_impact_s": 1.1360000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.400335541493049
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3107.3601729010747,
+              "transition_time_s": 0.394,
+              "transition_complete": true,
+              "time_to_impact_s": 1.6420000000000003,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4115181654610744
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3107.3601729010747,
+              "transition_time_s": 0.394,
+              "transition_complete": true,
+              "time_to_impact_s": 1.6420000000000003,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4115181654610744
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.4119169347174796,
+          "magnitude_used": 0.4416,
+          "quantile": 0.7,
+          "pose": [
+            -0.7082899816744086,
+            -0.08294308831723879,
+            -0.22761395906820459,
+            -0.748867888782401,
+            0.46074710228325616,
+            0.019964712614809182,
+            -0.45988323432418415,
+            0.3163438587594092,
+            0.43776267393636886,
+            -0.4556675468789104,
+            -0.06280397019679484,
+            0.7101617628924937,
+            -0.4161266189571201,
+            -0.29379404353495503
+          ],
+          "score": 772.0447822835114,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1572.4402198043888,
+              "transition_time_s": 0.262,
+              "transition_complete": true,
+              "time_to_impact_s": 1.1480000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4105222803179924
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1572.4402198043888,
+              "transition_time_s": 0.262,
+              "transition_complete": true,
+              "time_to_impact_s": 1.1480000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4105222803179924
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1515.7389093296567,
+              "transition_time_s": 0.26,
+              "transition_complete": true,
+              "time_to_impact_s": 1.5819999999999999,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4133115891169665
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1515.7389093296567,
+              "transition_time_s": 0.26,
+              "transition_complete": true,
+              "time_to_impact_s": 1.5819999999999999,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4133115891169665
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 11,
+      "covers_scenario_ids": [
+        14
+      ],
+      "covers_scenario_fns": [
+        "trip"
+      ],
+      "covers_categories": [
+        "trip"
+      ],
+      "fall_directions": [
+        "trip"
+      ],
+      "reference_bin_score": 1482.8594917926075,
+      "reference_bin_velocity_mps": 1.4644200531327882,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.4195013458095156,
+          "magnitude_used": 308.54875,
+          "quantile": 0.85,
+          "pose": [
+            -0.6274834984216017,
+            0.7797918122122702,
+            -0.5177980020000864,
+            -0.5541638647553664,
+            -0.14958424948338722,
+            0.019337331334454578,
+            0.12612022796708056,
+            -0.32569000529848674,
+            0.064710410899279,
+            -0.14473312844926806,
+            0.0987354766796722,
+            0.012730738752589942,
+            -0.5146121592018125,
+            -0.1866672368876936
+          ],
+          "score": 2724.255464409025,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 1086.1634988549636,
+              "peak_force_other": 2056.2601329584154,
+              "transition_time_s": 0.396,
+              "transition_complete": true,
+              "time_to_impact_s": 1.036,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.433016583027664
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 1086.1634988549636,
+              "peak_force_other": 2056.2601329584154,
+              "transition_time_s": 0.396,
+              "transition_complete": true,
+              "time_to_impact_s": 1.036,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.433016583027664
+            },
+            {
+              "peak_force_pelvis": 521.4230899866162,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3197.261549284598,
+              "transition_time_s": 0.46,
+              "transition_complete": true,
+              "time_to_impact_s": 1.242,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4059861085913674
+            },
+            {
+              "peak_force_pelvis": 521.4230899866162,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3197.261549284598,
+              "transition_time_s": 0.46,
+              "transition_complete": true,
+              "time_to_impact_s": 1.242,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4059861085913674
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.4492663793477023,
+          "magnitude_used": 274.2655,
+          "quantile": 0.7,
+          "pose": [
+            0.3128318816112885,
+            -0.4705758222204335,
+            1.7890334440381501,
+            0.32755942363658175,
+            -0.5563220472494723,
+            0.3626442811404248,
+            -0.29184177073437423,
+            -0.01074420674701479,
+            1.8817366301114107,
+            0.33808989532222977,
+            0.7121268772705466,
+            1.034038144290974,
+            -0.3528558817079784,
+            -0.17684004450085178
+          ],
+          "score": 1367.8315908845057,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1823.883103531071,
+              "transition_time_s": 0.45,
+              "transition_complete": true,
+              "time_to_impact_s": 1.198,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4838521464669934
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1823.883103531071,
+              "transition_time_s": 0.45,
+              "transition_complete": true,
+              "time_to_impact_s": 1.198,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4838521464669934
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3355.4432600069517,
+              "transition_time_s": 0.442,
+              "transition_complete": true,
+              "time_to_impact_s": 1.028,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4146806122284112
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 3355.4432600069517,
+              "transition_time_s": 0.442,
+              "transition_complete": true,
+              "time_to_impact_s": 1.028,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4146806122284112
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.4644200531327882,
+          "magnitude_used": 228.55450000000002,
+          "quantile": 0.5,
+          "pose": [
+            -0.6535009917059642,
+            -0.7788662599698292,
+            1.2722313226677544,
+            0.056241158505171,
+            0.10105084139539117,
+            0.6262091175299751,
+            -0.3374767478972305,
+            0.015753630101054183,
+            1.3708339014497721,
+            -0.2569124935682905,
+            0.6786946923973866,
+            0.10882433976711092,
+            -0.1167372267686496,
+            0.3428134480931233
+          ],
+          "score": 1482.8594917926075,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 2.46,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 2.46,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1801.4379671704303,
+              "transition_time_s": 0.43,
+              "transition_complete": true,
+              "time_to_impact_s": 1.4660000000000002,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4644200531327882
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1801.4379671704303,
+              "transition_time_s": 0.43,
+              "transition_complete": true,
+              "time_to_impact_s": 1.4660000000000002,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.4644200531327882
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "pose_id": 12,
+      "covers_scenario_ids": [
+        15,
+        8
+      ],
+      "covers_scenario_fns": [
+        "floor_tilt_roll",
+        "sudden_load"
+      ],
+      "covers_categories": [
+        "surface",
+        "trip"
+      ],
+      "fall_directions": [
+        "surface",
+        "trip"
+      ],
+      "reference_bin_score": 1486.1670464051913,
+      "reference_bin_velocity_mps": 1.1936692741804515,
+      "velocity_control_points": [
+        {
+          "velocity_mps": 1.0761148370279954,
+          "magnitude_used": 25.842550000000003,
+          "quantile": 0.85,
+          "pose": [
+            -0.4430575808049648,
+            -0.608927216111421,
+            1.871238477060674,
+            -0.70858654015934,
+            0.12448421264191761,
+            0.6567573128343235,
+            -0.4392371743794513,
+            0.028555133676046108,
+            -0.2601192586277489,
+            0.7898531534475316,
+            -0.41065565147476013,
+            0.5070007918612296,
+            -0.4874004286463862,
+            -0.1259103345380349
+          ],
+          "score": 1634.8904354482838,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 712.9664339601792,
+              "peak_force_other": 307.3523673907959,
+              "transition_time_s": 0.406,
+              "transition_complete": true,
+              "time_to_impact_s": 0.78,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.0816784501241647
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 712.9664339601792,
+              "peak_force_other": 307.3523673907959,
+              "transition_time_s": 0.406,
+              "transition_complete": true,
+              "time_to_impact_s": 0.78,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.0816784501241647
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 704.4808376965625,
+              "peak_force_other": 348.4202877753725,
+              "transition_time_s": 0.40800000000000003,
+              "transition_complete": true,
+              "time_to_impact_s": 1.08,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.070551223931826
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 704.4808376965625,
+              "peak_force_other": 348.4202877753725,
+              "transition_time_s": 0.40800000000000003,
+              "transition_complete": true,
+              "time_to_impact_s": 1.08,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.070551223931826
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.1246741009997496,
+          "magnitude_used": 22.9711,
+          "quantile": 0.7,
+          "pose": [
+            0.7825067145479764,
+            -0.7848070553703413,
+            -0.5120760289746963,
+            -0.7882340106083584,
+            -0.5689470531253891,
+            1.8517862474104811,
+            0.025589308352401342,
+            -0.30831977696493373,
+            0.6134430645857541,
+            -0.6956763232579752,
+            0.6589430917199398,
+            0.25114430194270193,
+            -0.09465430628445021,
+            0.03317676675753809
+          ],
+          "score": 10456.498541848181,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 5172.411506094154,
+              "peak_force_other": 0.0,
+              "transition_time_s": 0.29,
+              "transition_complete": true,
+              "time_to_impact_s": 0.842,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.1185319516246004
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 5172.411506094154,
+              "peak_force_other": 0.0,
+              "transition_time_s": 0.29,
+              "transition_complete": true,
+              "time_to_impact_s": 0.842,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.1185319516246004
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 5284.087035754026,
+              "peak_force_other": 0.0,
+              "transition_time_s": 0.294,
+              "transition_complete": true,
+              "time_to_impact_s": 1.182,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.1308162503748986
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 5284.087035754026,
+              "peak_force_other": 0.0,
+              "transition_time_s": 0.294,
+              "transition_complete": true,
+              "time_to_impact_s": 1.182,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.1308162503748986
+            }
+          ]
+        },
+        {
+          "velocity_mps": 1.1936692741804515,
+          "magnitude_used": 19.1425,
+          "quantile": 0.5,
+          "pose": [
+            -0.7739799369867124,
+            -0.7721413246170501,
+            2.081864874342045,
+            0.16217838445975524,
+            -0.7856937851821777,
+            2.3790855325401665,
+            0.8699352855143598,
+            0.069809889375956,
+            -0.19402299506527587,
+            -0.4782682351935066,
+            -0.26023803923495514,
+            2.4314807940410854,
+            0.3835746327142806,
+            -0.2843892748064222
+          ],
+          "score": 1486.1670464051913,
+          "diagnostics": [
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1546.6681856207656,
+              "transition_time_s": 0.6980000000000001,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9480000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.1936692741804515
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 1546.6681856207656,
+              "transition_time_s": 0.6980000000000001,
+              "transition_complete": true,
+              "time_to_impact_s": 0.9480000000000001,
+              "fell": true,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": 1.1936692741804515
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.3559999999999999,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            },
+            {
+              "peak_force_pelvis": 0.0,
+              "peak_force_head": 0.0,
+              "peak_force_other": 0.0,
+              "transition_time_s": -1.0,
+              "transition_complete": false,
+              "time_to_impact_s": 1.3559999999999999,
+              "fell": false,
+              "no_natural_fall": false,
+              "recovered": false,
+              "velocity_at_trigger_mps": -1.0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "lookup_keys": [
+    {
+      "scenario_id": 1,
+      "category": "push",
+      "scenario_fn": "push",
+      "direction": "forward",
+      "pose_id": 0
+    },
+    {
+      "scenario_id": 2,
+      "category": "push",
+      "scenario_fn": "push",
+      "direction": "backward",
+      "pose_id": 1
+    },
+    {
+      "scenario_id": 3,
+      "category": "push",
+      "scenario_fn": "push",
+      "direction": "left",
+      "pose_id": 2
+    },
+    {
+      "scenario_id": 4,
+      "category": "push",
+      "scenario_fn": "push",
+      "direction": "right",
+      "pose_id": 3
+    },
+    {
+      "scenario_id": 5,
+      "category": "push",
+      "scenario_fn": "push",
+      "direction": "forward-left",
+      "pose_id": 4
+    },
+    {
+      "scenario_id": 6,
+      "category": "push",
+      "scenario_fn": "push",
+      "direction": "forward-right",
+      "pose_id": 5
+    },
+    {
+      "scenario_id": 7,
+      "category": "surface",
+      "scenario_fn": "floor_tilt_pitch",
+      "direction": "surface",
+      "pose_id": 6
+    },
+    {
+      "scenario_id": 9,
+      "category": "surface",
+      "scenario_fn": "floor_drop",
+      "direction": "surface",
+      "pose_id": 8
+    },
+    {
+      "scenario_id": 10,
+      "category": "surface",
+      "scenario_fn": "low_friction",
+      "direction": "surface",
+      "pose_id": 9
+    },
+    {
+      "scenario_id": 12,
+      "category": "actuator",
+      "scenario_fn": "actuator_stuck",
+      "direction": "actuator",
+      "pose_id": 10
+    },
+    {
+      "scenario_id": 14,
+      "category": "trip",
+      "scenario_fn": "trip",
+      "direction": "trip",
+      "pose_id": 11
+    },
+    {
+      "scenario_id": 15,
+      "category": "trip",
+      "scenario_fn": "sudden_load",
+      "direction": "trip",
+      "pose_id": 12
+    },
+    {
+      "scenario_id": 8,
+      "category": "surface",
+      "scenario_fn": "floor_tilt_roll",
+      "direction": "surface",
+      "pose_id": 12
+    }
+  ]
+}

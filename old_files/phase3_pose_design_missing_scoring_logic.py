@@ -129,11 +129,6 @@ W_OTHER = 0.5                   # weight on any other non-foot body hitting the
                                  # entirely just by landing somewhere untracked.
 TRANSITION_OVERRUN_PENALTY_PER_S = 500.0   # N-equivalent penalty per second over budget
 INCOMPLETE_TRANSITION_PENALTY = 2000.0     # fixed penalty if pose never reached before impact
-                                            # -- ONLY applied when an impact actually
-                                            # occurred (TrialResult.fell). A trial that
-                                            # fully recovers (TrialResult.recovered) is
-                                            # never penalized for this, however qpos
-                                            # settled -- see score_pose.
 
 # Phase 1 stops a trial at the FIRST new ground contact (correct for
 # detection labeling). For impact-force measurement that first contact is
@@ -333,19 +328,6 @@ class TrialResult:
     no_natural_fall: bool             # True if baseline never falls unprotected
                                        # -> pose was not applied; excluded from
                                        # meaningful optimization signal
-    recovered: bool                   # True if the pose fired (no_natural_fall is
-                                       # False) but the robot never actually fell
-                                       # (fell stayed False) -- a full save, not
-                                       # just a softened impact. Zero injury risk
-                                       # by definition (no contact ever registered),
-                                       # regardless of whether qpos happened to
-                                       # settle exactly on pose_ctrl. See score_pose:
-                                       # this must NOT be penalized as an incomplete
-                                       # transition -- doing so previously punished
-                                       # the single best possible outcome as if it
-                                       # were a failure, just because the actuators
-                                       # settled at a different (but still safe)
-                                       # equilibrium than the literal commanded angle.
     velocity_at_trigger_mps: float    # ||base linear velocity|| (qvel[0:3]) at
                                        # the instant the pose is first commanded
                                        # -- the measured proxy for Phase 2's
@@ -462,14 +444,12 @@ def run_protected_trial(model, scenario, magnitude, direction_deg, timing_phase_
                 stable = True
                 break
 
-    recovered = trigger_fired and (not fell) and (not no_natural_fall)
-
     return TrialResult(
         peak_force_pelvis=peak["pelvis"], peak_force_head=peak["head"],
         peak_force_other=peak["other"],
         transition_time_s=transition_time_s, transition_complete=transition_complete,
         time_to_impact_s=t_impact if t_impact is not None else -1.0, fell=fell,
-        no_natural_fall=no_natural_fall, recovered=recovered,
+        no_natural_fall=no_natural_fall,
         velocity_at_trigger_mps=velocity_at_trigger_mps,
     )
 
@@ -564,27 +544,7 @@ def score_pose(model, scenario, pose_ctrl, conditions, impact_ids, lead_time_s, 
             continue
         s = (W_HEAD * r.peak_force_head + W_PELVIS * r.peak_force_pelvis
              + W_OTHER * r.peak_force_other)
-        if r.recovered:
-            # Pose fired and the robot never fell at all (no contact of any
-            # kind was ever registered -- forces above are all exactly 0).
-            # This is strictly the best possible outcome: zero injury risk.
-            # Do NOT apply the incomplete-transition penalty just because
-            # qpos didn't settle on the literal commanded pose_ctrl -- under
-            # a real disturbance the actuators can (and often should) settle
-            # at a different equilibrium than the blind target while still
-            # fully arresting the fall. FIX: a prior version of this scorer
-            # applied INCOMPLETE_TRANSITION_PENALTY here unconditionally,
-            # which punished full recoveries as if they were failures and
-            # measurably inflated several bins' scores in pose_library.json
-            # (e.g. push/left's highest-scoring bin was mostly zero-force
-            # recovered trials being penalized 2000 each) -- steering the
-            # search toward "hit the exact setpoint" over "prevent the fall
-            # by whatever path works".
-            pass
-        elif not r.transition_complete:
-            # An impact DID happen (or never will -- see no_natural_fall
-            # above, already excluded) and the pose never got there in time.
-            # This is a genuine failure mode: keep the penalty.
+        if not r.transition_complete:
             s += INCOMPLETE_TRANSITION_PENALTY
         else:
             overrun = max(0.0, r.transition_time_s - POSE_TRANSITION_BUDGET_S)

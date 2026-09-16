@@ -64,7 +64,7 @@ print("bob height at end (t=2.0s):", heights[-1]) """
 #     print(f"  at ceiling ({ceiling}N) -> t_impact={t_ceiling}")
 
 import mujoco
-import phase3_pose_design as p3
+import old_files.phase3_pose_design as p3
 import generate_fall_dataset_final as p1
 
 model = p3.load_instrumented_model(r'C:\Users\Asyncronix\Downloads\Asyncronix_Intern\g1-pendulum-balance\unitree_g1\g1_pendulum.xml')
