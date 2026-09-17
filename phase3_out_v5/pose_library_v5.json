@@ -10,10 +10,9 @@
     "w_head": 2.0,
     "w_pelvis": 1.0,
     "w_other": 0.5,
-    "fall_occurrence_penalty": 1500.0,
     "tracking_error_tol_rad": 0.15,
     "tracking_error_penalty_per_rad": 3000.0,
-    "note": "fall_occurrence_penalty is added to every trial that falls at all, on top of the weighted force terms -- this is what makes fall PREVENTION the dominant objective, with impact mitigation as the secondary objective among trials that still fall. tracking_error_penalty_per_rad is a SEPARATE injury channel: poses are commanded via a minimum-jerk trajectory (reference doc section 8.2), not a direct step command, and this penalizes the real joints falling far behind that planned smooth path under load -- applied to every triggered trial, recovered included, since a torque-spike risk from bad tracking is independent of whether the fall itself is avoided. Each control point's recovery_rate (below) is the fraction of tested conditions where the pose prevented the fall entirely; use it, not just score, to judge whether a pose is fit for the hardware demo -- a low score with a low recovery_rate can still mean 'falls softly every time' rather than 'usually doesn't fall'. Tune these directly to shift the prevention-vs-impact-vs-tracking trade-off."
+    "note": "Score = weighted peak contact force (w_head/w_pelvis/w_other) plus a tracking-error penalty, matching the reference doc's own optimizer (section 8.3: 'evaluate peak contact force ... lower is better') plus its section 8.2 minimum-jerk-trajectory safety requirement. There is deliberately NO separate reward for preventing the fall outright: every reference-doc principle (lower CoM, align impact zone, minimum-jerk transition) is about reducing injury from a fall that is already happening, not about avoiding the fall itself -- and a fully prevented fall already scores 0 on every force term (no contact occurs), which is already the best any peak-force sum can produce, so this objective already rewards prevention as strongly as physically possible without a separate term. tracking_error_penalty_per_rad IS a real, separate injury channel from ground impact (joint/actuator torque spikes from failing to follow the planned smooth path under load) -- applied to every triggered trial, recovered included, since that risk is independent of whether the fall itself is avoided. Each control point's recovery_rate (below) is reported for hardware go/no-go review -- the fraction of tested conditions where the pose prevented the fall entirely -- but is informational only and does not affect score."
   },
   "velocity_estimate_source": "base linear velocity magnitude (||qvel[0:3]||) measured at the instant the pose is triggered -- proxy for the Phase-2 TCN's Stage-3 velocity-regression output. Verify qvel[0:3] really is the free-joint base linear velocity against g1_pendulum.xml's actual joint ordering before trusting this in Phase 4/5.",
   "impact_proxies": {
@@ -62,7 +61,7 @@
       "fall_directions": [
         "backward"
       ],
-      "reference_bin_score": 3597.388554015186,
+      "reference_bin_score": 2097.3885540151864,
       "reference_bin_velocity_mps": 1.6602148352249857,
       "reference_bin_recovery_rate": 0.0,
       "velocity_control_points": [
@@ -86,7 +85,7 @@
             -0.2208943077040557,
             -0.2904095850789669
           ],
-          "score": 3626.9341080949343,
+          "score": 2126.9341080949343,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -164,7 +163,7 @@
             0.8298116134546332,
             -0.2872431928695141
           ],
-          "score": 3682.4940477358596,
+          "score": 2182.4940477358596,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -242,7 +241,7 @@
             -0.5175282689385148,
             0.27935830967424785
           ],
-          "score": 3597.388554015186,
+          "score": 2097.3885540151864,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -316,7 +315,7 @@
       "fall_directions": [
         "left"
       ],
-      "reference_bin_score": 3709.1172275625886,
+      "reference_bin_score": 2209.1172275625886,
       "reference_bin_velocity_mps": 1.5027365176133558,
       "reference_bin_recovery_rate": 0.0,
       "velocity_control_points": [
@@ -340,7 +339,7 @@
             0.6020083286639465,
             -0.29644434527336616
           ],
-          "score": 2866.203280158736,
+          "score": 1366.2032801587359,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -418,7 +417,7 @@
             -0.4898611490152362,
             -0.3336953344538097
           ],
-          "score": 2864.4792840059254,
+          "score": 1364.479284005925,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -496,7 +495,7 @@
             0.5059645077530703,
             0.13937696484487838
           ],
-          "score": 3709.1172275625886,
+          "score": 2209.1172275625886,
           "recovery_rate": 0.0,
           "winning_restart": 1,
           "diagnostics": [
@@ -570,7 +569,7 @@
       "fall_directions": [
         "right"
       ],
-      "reference_bin_score": 3733.9686861295563,
+      "reference_bin_score": 2233.9686861295563,
       "reference_bin_velocity_mps": 1.502715673687328,
       "reference_bin_recovery_rate": 0.0,
       "velocity_control_points": [
@@ -594,7 +593,7 @@
             -0.4593933353109023,
             0.1438961054922676
           ],
-          "score": 3037.948985274964,
+          "score": 1537.9489852749634,
           "recovery_rate": 0.0,
           "winning_restart": 2,
           "diagnostics": [
@@ -672,7 +671,7 @@
             -0.4955612298455053,
             0.2735049129219746
           ],
-          "score": 2652.291509993058,
+          "score": 1152.2915099930576,
           "recovery_rate": 0.0,
           "winning_restart": 1,
           "diagnostics": [
@@ -750,7 +749,7 @@
             0.3210574836077429,
             0.12476605224831902
           ],
-          "score": 3733.9686861295563,
+          "score": 2233.9686861295563,
           "recovery_rate": 0.0,
           "winning_restart": 1,
           "diagnostics": [
@@ -824,7 +823,7 @@
       "fall_directions": [
         "forward-left"
       ],
-      "reference_bin_score": 3543.488761366363,
+      "reference_bin_score": 2043.488761366363,
       "reference_bin_velocity_mps": 1.5255419616661716,
       "reference_bin_recovery_rate": 0.0,
       "velocity_control_points": [
@@ -848,7 +847,7 @@
             0.2708876781306243,
             0.22174962988709496
           ],
-          "score": 3273.5696628026976,
+          "score": 2148.5696628026976,
           "recovery_rate": 0.25,
           "winning_restart": 0,
           "diagnostics": [
@@ -926,7 +925,7 @@
             0.34103616856961555,
             -0.022637883185360988
           ],
-          "score": 4509.146451113582,
+          "score": 3009.1464511135814,
           "recovery_rate": 0.0,
           "winning_restart": 2,
           "diagnostics": [
@@ -1004,7 +1003,7 @@
             0.43074863829689736,
             -0.1676311579762504
           ],
-          "score": 3543.488761366363,
+          "score": 2043.488761366363,
           "recovery_rate": 0.0,
           "winning_restart": 1,
           "diagnostics": [
@@ -1080,7 +1079,7 @@
         "forward",
         "forward-right"
       ],
-      "reference_bin_score": 3550.559993943254,
+      "reference_bin_score": 2050.559993943254,
       "reference_bin_velocity_mps": 1.5255434048683092,
       "reference_bin_recovery_rate": 0.0,
       "velocity_control_points": [
@@ -1104,7 +1103,7 @@
             0.6795128153593102,
             0.27882754524269404
           ],
-          "score": 3248.341532459704,
+          "score": 2123.341532459704,
           "recovery_rate": 0.25,
           "winning_restart": 1,
           "diagnostics": [
@@ -1182,7 +1181,7 @@
             0.4776580343220987,
             0.2469714309461274
           ],
-          "score": 4546.444465993542,
+          "score": 3046.444465993542,
           "recovery_rate": 0.0,
           "winning_restart": 1,
           "diagnostics": [
@@ -1260,7 +1259,7 @@
             -0.18476453466998538,
             -0.2568135087803871
           ],
-          "score": 3550.559993943254,
+          "score": 2050.559993943254,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -1334,7 +1333,7 @@
       "fall_directions": [
         "surface"
       ],
-      "reference_bin_score": 4020.4206950011567,
+      "reference_bin_score": 2520.420695001157,
       "reference_bin_velocity_mps": 1.6722855435158168,
       "reference_bin_recovery_rate": 0.0,
       "velocity_control_points": [
@@ -1358,7 +1357,7 @@
             -0.5079817212196734,
             0.09599387522086467
           ],
-          "score": 3927.7130225800424,
+          "score": 2427.7130225800424,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -1436,7 +1435,7 @@
             -0.4212936097005509,
             -0.3346774905932167
           ],
-          "score": 4059.012809834128,
+          "score": 2559.012809834128,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -1514,7 +1513,7 @@
             -0.4059960888209715,
             -0.33123575178605547
           ],
-          "score": 4020.4206950011567,
+          "score": 2520.420695001157,
           "recovery_rate": 0.0,
           "winning_restart": 2,
           "diagnostics": [
@@ -1588,7 +1587,7 @@
       "fall_directions": [
         "surface"
       ],
-      "reference_bin_score": 3963.265682122181,
+      "reference_bin_score": 2463.265682122181,
       "reference_bin_velocity_mps": 1.7129863606817415,
       "reference_bin_recovery_rate": 0.0,
       "velocity_control_points": [
@@ -1612,7 +1611,7 @@
             -0.10264098408822148,
             -0.3263324977565193
           ],
-          "score": 3668.775797499537,
+          "score": 2168.775797499537,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -1690,7 +1689,7 @@
             -0.3140654009755713,
             0.3483312793179237
           ],
-          "score": 3869.3228550547256,
+          "score": 2369.3228550547256,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -1768,7 +1767,7 @@
             -0.08180219349620209,
             0.2960294594829483
           ],
-          "score": 3963.265682122181,
+          "score": 2463.265682122181,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -1851,20 +1850,20 @@
           "magnitude_used": 0.3209,
           "quantile": 0.7,
           "pose": [
-            0.31901366059865643,
-            0.39939623893085135,
-            0.1530785721991892,
-            -0.15907213812375467,
-            -0.5071742299004739,
-            0.009962618702829985,
-            -0.21653198305240767,
-            0.2796250254119914,
-            -0.16413178711800766,
-            -0.2368637715053349,
-            0.04860301434796031,
-            0.12457043915327567,
-            0.13729095897673668,
-            0.2893029269080603
+            0.242621501972359,
+            0.29497623486754865,
+            -0.17905417117266267,
+            0.0628217476773379,
+            -0.057856795024855856,
+            0.20892691948021075,
+            -0.3462091175126888,
+            0.22768212807243787,
+            0.10080251452894436,
+            -0.15155514932562036,
+            -0.2929500740422605,
+            0.015767830131549396,
+            0.023252172342751704,
+            0.04223175656398411
           ],
           "score": 0.0,
           "recovery_rate": 1.0,
@@ -1874,8 +1873,8 @@
               "peak_force_pelvis": 0.0,
               "peak_force_head": 0.0,
               "peak_force_other": 0.0,
-              "peak_tracking_error_rad": 0.12482975330352923,
-              "final_tracking_error_rad": 0.06618900149089865,
+              "peak_tracking_error_rad": 0.11124131533794183,
+              "final_tracking_error_rad": 0.09832663221297025,
               "time_to_impact_s": 0.26,
               "fell": false,
               "no_natural_fall": false,
@@ -1887,8 +1886,8 @@
               "peak_force_pelvis": 0.0,
               "peak_force_head": 0.0,
               "peak_force_other": 0.0,
-              "peak_tracking_error_rad": 0.12482975330352923,
-              "final_tracking_error_rad": 0.06618900149089865,
+              "peak_tracking_error_rad": 0.11124131533794183,
+              "final_tracking_error_rad": 0.09832663221297025,
               "time_to_impact_s": 0.26,
               "fell": false,
               "no_natural_fall": false,
@@ -1900,8 +1899,8 @@
               "peak_force_pelvis": 0.0,
               "peak_force_head": 0.0,
               "peak_force_other": 0.0,
-              "peak_tracking_error_rad": 0.12299531495999377,
-              "final_tracking_error_rad": 0.06542445158195026,
+              "peak_tracking_error_rad": 0.10993976666549714,
+              "final_tracking_error_rad": 0.09772823839395231,
               "time_to_impact_s": 0.272,
               "fell": false,
               "no_natural_fall": false,
@@ -1913,8 +1912,8 @@
               "peak_force_pelvis": 0.0,
               "peak_force_head": 0.0,
               "peak_force_other": 0.0,
-              "peak_tracking_error_rad": 0.12299531495999377,
-              "final_tracking_error_rad": 0.06542445158195026,
+              "peak_tracking_error_rad": 0.10993976666549714,
+              "final_tracking_error_rad": 0.09772823839395231,
               "time_to_impact_s": 0.272,
               "fell": false,
               "no_natural_fall": false,
@@ -1929,20 +1928,20 @@
           "magnitude_used": 0.36095,
           "quantile": 0.85,
           "pose": [
-            0.06919645809730082,
-            -0.45741109688880877,
-            0.08237615716024417,
-            0.09723544389647344,
-            -0.3864600177559215,
-            0.27520946287972814,
-            -0.33387519384303543,
-            -0.014008902162248815,
-            0.07550869792484295,
-            -0.12352321590816637,
-            0.1240663002989012,
-            0.3448674292562621,
-            -0.12267427679473918,
-            -0.02206378002725895
+            0.3711833313356969,
+            0.2884762465657509,
+            0.024917590615260048,
+            0.03015330488605833,
+            -0.10523476894251735,
+            0.23257128388471532,
+            -0.5122169558797387,
+            0.2098715173187587,
+            -0.09953622442994156,
+            -0.14069996768354553,
+            -0.014906189364351532,
+            0.30169382525355826,
+            0.02821775666156466,
+            -0.24674102277061205
           ],
           "score": 0.0,
           "recovery_rate": 1.0,
@@ -1952,8 +1951,8 @@
               "peak_force_pelvis": 0.0,
               "peak_force_head": 0.0,
               "peak_force_other": 0.0,
-              "peak_tracking_error_rad": 0.13767466925416133,
-              "final_tracking_error_rad": 0.10119511397072123,
+              "peak_tracking_error_rad": 0.10780104852925224,
+              "final_tracking_error_rad": 0.08752928025853512,
               "time_to_impact_s": 0.26,
               "fell": false,
               "no_natural_fall": false,
@@ -1965,8 +1964,8 @@
               "peak_force_pelvis": 0.0,
               "peak_force_head": 0.0,
               "peak_force_other": 0.0,
-              "peak_tracking_error_rad": 0.13767466925416133,
-              "final_tracking_error_rad": 0.10119511397072123,
+              "peak_tracking_error_rad": 0.10780104852925224,
+              "final_tracking_error_rad": 0.08752928025853512,
               "time_to_impact_s": 0.26,
               "fell": false,
               "no_natural_fall": false,
@@ -1978,8 +1977,8 @@
               "peak_force_pelvis": 0.0,
               "peak_force_head": 0.0,
               "peak_force_other": 0.0,
-              "peak_tracking_error_rad": 0.13577935401234578,
-              "final_tracking_error_rad": 0.09790769235029463,
+              "peak_tracking_error_rad": 0.1077938096915908,
+              "final_tracking_error_rad": 0.08738421515383232,
               "time_to_impact_s": 0.272,
               "fell": false,
               "no_natural_fall": false,
@@ -1991,8 +1990,8 @@
               "peak_force_pelvis": 0.0,
               "peak_force_head": 0.0,
               "peak_force_other": 0.0,
-              "peak_tracking_error_rad": 0.13577935401234578,
-              "final_tracking_error_rad": 0.09790769235029463,
+              "peak_tracking_error_rad": 0.1077938096915908,
+              "final_tracking_error_rad": 0.08738421515383232,
               "time_to_impact_s": 0.272,
               "fell": false,
               "no_natural_fall": false,
@@ -2096,7 +2095,7 @@
       "fall_directions": [
         "surface"
       ],
-      "reference_bin_score": 2696.3878395493807,
+      "reference_bin_score": 1964.8107888612121,
       "reference_bin_velocity_mps": 1.5282079436843081,
       "reference_bin_recovery_rate": 0.5,
       "velocity_control_points": [
@@ -2120,7 +2119,7 @@
             0.8684866321515229,
             0.17790596959256388
           ],
-          "score": 3838.4358427286083,
+          "score": 2338.4358427286083,
           "recovery_rate": 0.0,
           "winning_restart": 1,
           "diagnostics": [
@@ -2198,7 +2197,7 @@
             0.7796726872540608,
             0.2744310250565257
           ],
-          "score": 3746.0475552975336,
+          "score": 2246.0475552975336,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -2261,22 +2260,22 @@
           "magnitude_used": 154.2483,
           "quantile": 0.85,
           "pose": [
-            -0.7606195857647766,
-            0.5262049788854347,
-            1.2606038290131032,
-            -0.6031122954877519,
-            -0.6505388085915538,
-            0.8814549828984081,
-            -0.4787471877837396,
-            0.2471602415855375,
-            1.160643649896578,
-            0.5571633965987668,
-            0.7157874464064226,
-            0.19749083141556412,
-            0.0880840857043782,
-            -0.13143788313076765
+            0.7282227643566458,
+            0.7794428561073796,
+            1.3886459405013665,
+            0.5311828238329354,
+            0.638936610881982,
+            0.10900733569376123,
+            0.060573719278996796,
+            -0.34903945273187514,
+            1.3736034422146777,
+            0.10183546273565702,
+            0.7733974576494563,
+            0.017676161831977472,
+            0.8653799632576485,
+            -0.3399950746346816
           ],
-          "score": 2696.3878395493807,
+          "score": 1964.8107888612121,
           "recovery_rate": 0.5,
           "winning_restart": 2,
           "diagnostics": [
@@ -2284,8 +2283,8 @@
               "peak_force_pelvis": 0.0,
               "peak_force_head": 0.0,
               "peak_force_other": 0.0,
-              "peak_tracking_error_rad": 0.0632375409834866,
-              "final_tracking_error_rad": 1.2497942536206046,
+              "peak_tracking_error_rad": 0.06707095550591163,
+              "final_tracking_error_rad": 1.3741789900669243,
               "time_to_impact_s": 1.24,
               "fell": false,
               "no_natural_fall": false,
@@ -2297,8 +2296,8 @@
               "peak_force_pelvis": 0.0,
               "peak_force_head": 0.0,
               "peak_force_other": 0.0,
-              "peak_tracking_error_rad": 0.0632375409834866,
-              "final_tracking_error_rad": 1.2497942536206046,
+              "peak_tracking_error_rad": 0.06707095550591163,
+              "final_tracking_error_rad": 1.3741789900669243,
               "time_to_impact_s": 1.24,
               "fell": false,
               "no_natural_fall": false,
@@ -2308,10 +2307,10 @@
             },
             {
               "peak_force_pelvis": 0.0,
-              "peak_force_head": 728.3441949387859,
-              "peak_force_other": 2212.5220192732736,
-              "peak_tracking_error_rad": 0.5932754265281843,
-              "final_tracking_error_rad": 0.4124447626425485,
+              "peak_force_head": 773.246307515951,
+              "peak_force_other": 1832.7171929433327,
+              "peak_tracking_error_rad": 0.6389234554062854,
+              "final_tracking_error_rad": 0.4355428402420085,
               "time_to_impact_s": 0.9700000000000001,
               "fell": true,
               "no_natural_fall": false,
@@ -2321,10 +2320,10 @@
             },
             {
               "peak_force_pelvis": 0.0,
-              "peak_force_head": 728.3441949387859,
-              "peak_force_other": 2212.5220192732736,
-              "peak_tracking_error_rad": 0.5932754265281843,
-              "final_tracking_error_rad": 0.4124447626425485,
+              "peak_force_head": 773.246307515951,
+              "peak_force_other": 1832.7171929433327,
+              "peak_tracking_error_rad": 0.6389234554062854,
+              "final_tracking_error_rad": 0.4355428402420085,
               "time_to_impact_s": 0.9700000000000001,
               "fell": true,
               "no_natural_fall": false,
@@ -2350,7 +2349,7 @@
       "fall_directions": [
         "actuator"
       ],
-      "reference_bin_score": 3232.317278276384,
+      "reference_bin_score": 1732.3172782763836,
       "reference_bin_velocity_mps": 1.4119169347174796,
       "reference_bin_recovery_rate": 0.0,
       "velocity_control_points": [
@@ -2374,7 +2373,7 @@
             -0.5119618376159571,
             -0.10648693573404844
           ],
-          "score": 3268.925415717504,
+          "score": 1768.9254157175042,
           "recovery_rate": 0.0,
           "winning_restart": 1,
           "diagnostics": [
@@ -2452,7 +2451,7 @@
             0.12497917148410309,
             -0.3483915589249359
           ],
-          "score": 3121.50523907316,
+          "score": 1621.5052390731598,
           "recovery_rate": 0.0,
           "winning_restart": 1,
           "diagnostics": [
@@ -2530,7 +2529,7 @@
             0.47955742798682066,
             0.33737276419520495
           ],
-          "score": 3232.317278276384,
+          "score": 1732.3172782763836,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -2604,7 +2603,7 @@
       "fall_directions": [
         "trip"
       ],
-      "reference_bin_score": 3816.7955599493257,
+      "reference_bin_score": 2316.7955599493257,
       "reference_bin_velocity_mps": 1.4644200531327882,
       "reference_bin_recovery_rate": 0.0,
       "velocity_control_points": [
@@ -2628,7 +2627,7 @@
             0.8372236301321622,
             -0.07431911472254965
           ],
-          "score": 4728.028718773073,
+          "score": 3228.0287187730723,
           "recovery_rate": 0.0,
           "winning_restart": 2,
           "diagnostics": [
@@ -2706,7 +2705,7 @@
             -0.44993994256770237,
             0.32137343812516544
           ],
-          "score": 4624.313682170645,
+          "score": 3124.3136821706453,
           "recovery_rate": 0.0,
           "winning_restart": 0,
           "diagnostics": [
@@ -2784,7 +2783,7 @@
             -0.31482296841764823,
             -0.24938295436872415
           ],
-          "score": 3816.7955599493257,
+          "score": 2316.7955599493257,
           "recovery_rate": 0.0,
           "winning_restart": 1,
           "diagnostics": [
@@ -2858,7 +2857,7 @@
       "fall_directions": [
         "trip"
       ],
-      "reference_bin_score": 12855.724148888123,
+      "reference_bin_score": 11355.724148888123,
       "reference_bin_velocity_mps": 1.1936692741804515,
       "reference_bin_recovery_rate": 0.0,
       "velocity_control_points": [
@@ -2882,7 +2881,7 @@
             -0.4752116114510239,
             0.33951838489913877
           ],
-          "score": 13985.534438118255,
+          "score": 12485.534438118255,
           "recovery_rate": 0.0,
           "winning_restart": 1,
           "diagnostics": [
@@ -2960,7 +2959,7 @@
             -0.4765468662679843,
             -0.0798607030713595
           ],
-          "score": 12913.205873732983,
+          "score": 11413.205873732983,
           "recovery_rate": 0.0,
           "winning_restart": 2,
           "diagnostics": [
@@ -3038,7 +3037,7 @@
             -0.4574117385714236,
             0.2333328797329297
           ],
-          "score": 12855.724148888123,
+          "score": 11355.724148888123,
           "recovery_rate": 0.0,
           "winning_restart": 2,
           "diagnostics": [

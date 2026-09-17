@@ -1,5 +1,4 @@
 """
-ACTUALLY THIS ONE UNDERGONE CHANGES VIA GPT , ACCORDING TO THE DOC .
 phase3_pose_design.py
 ======================
 AXON-R Phase 3 -- protective pose LOOKUP TABLE via biomechanical analysis in
@@ -69,9 +68,11 @@ PIPELINE
 2. Optimize a joint-angle pose per (scenario, bin) with CMA-ES (gradient-free
    -- contact/impact events are discontinuous and non-differentiable) that
    minimizes weighted peak impact force on the pelvis+head proxies when
-   commanded at (t_impact - LEAD_TIME_S), subject to joint limits and a
-   POSE_TRANSITION_BUDGET_S transition deadline. Records the measured base
-   velocity at trigger time for that bin.
+   commanded at (t_impact - LEAD_TIME_S) via a minimum-jerk trajectory (NOT
+   a direct step command -- see minimum_jerk_trajectory and the reference
+   doc's section 8.2) over POSE_TRANSITION_BUDGET_S, subject to joint
+   limits and a tracking-error penalty (see TRACKING_ERROR_TOL_RAD).
+   Records the measured base velocity at trigger time for that bin.
 3. Cross-evaluate every scenario's MOST SEVERE (highest-velocity) pose
    against every OTHER scenario's most severe conditions, to measure
    robustness to Phase 2's ~25% fall-type misclassification rate.
@@ -117,10 +118,13 @@ import numpy as np
 LEAD_TIME_S = 0.30              # conservative trigger-to-impact budget to design
                                  # against (worst realistic case). Phase 2 achieved
                                  # median 396ms / mean 380ms -- see confirm_margin().
-POSE_TRANSITION_BUDGET_S = 0.30 # mentor's spec: pose must land within 300ms
-TRANSITION_TOL_RAD = 0.05       # target-reaching tolerance per joint (~2.9 deg)
-T_TRACKING_TOL_RAD = 0.05       # allowed actual-vs-commanded tracking error
-TRACKING_ERROR_PENALTY_PER_RAD = 1000.0  # N-equivalent penalty per rad above tolerance
+POSE_TRANSITION_BUDGET_S = 0.30 # mentor's spec AND the reference doc's own
+                                 # T_transition: pose must land within 300ms. This
+                                 # is now literally the minimum-jerk trajectory's
+                                 # duration T (see minimum_jerk_trajectory below),
+                                 # not just a deadline checked after the fact --
+                                 # the commanded path reaches pose_ctrl at exactly
+                                 # t=T by construction, every time.
 
 W_HEAD = 2.0                    # weight on pendulum-bob (head-proxy) peak force
 W_PELVIS = 1.0                  # weight on pelvis peak force
@@ -130,13 +134,49 @@ W_OTHER = 0.5                   # weight on any other non-foot body hitting the
                                  # the hip/thigh is genuinely less dangerous --
                                  # but NOT zero, so a pose can't escape scoring
                                  # entirely just by landing somewhere untracked.
-TRANSITION_OVERRUN_PENALTY_PER_S = 500.0   # N-equivalent penalty per second over budget
-INCOMPLETE_TRANSITION_PENALTY = 2000.0     # fixed penalty if pose never reached before impact
-                                            # -- ONLY applied when an impact actually
-                                            # occurred (TrialResult.fell). A trial that
-                                            # fully recovers (TrialResult.recovered) is
-                                            # never penalized for this, however qpos
-                                            # settled -- see score_pose.
+TRACKING_ERROR_TOL_RAD = 0.15   # How far the REAL joints may lag the commanded
+                                 # minimum-jerk path before it counts as a
+                                 # meaningful tracking failure rather than
+                                 # ordinary servo lag under load (~8.6 deg --
+                                 # looser than the old fixed-pose arrival
+                                 # tolerance of 0.05 rad, deliberately: a MOVING
+                                 # target under an active disturbance will
+                                 # legitimately lag some; this tolerance is for
+                                 # catching genuinely large deviations, i.e. the
+                                 # "enormous joint torques" case the reference
+                                 # doc's 8.2 warns about, not small expected lag).
+TRACKING_ERROR_PENALTY_PER_RAD = 3000.0   # N-equivalent penalty per radian of peak
+                                 # tracking error beyond TRACKING_ERROR_TOL_RAD.
+                                 # Applied to EVERY triggered trial, recovered or
+                                 # not -- unlike the ground-impact force terms
+                                 # (correctly 0 when there's no contact), a large
+                                 # tracking error is itself a real, separate
+                                 # injury channel (actuator torque spikes /
+                                 # secondary joint injury from failing to follow
+                                 # the planned smooth path) that can happen
+                                 # regardless of whether the fall is ultimately
+                                 # avoided -- see score_pose.
+FALL_OCCURRENCE_PENALTY = 1500.0           # Flat cost added whenever a trial falls at
+                                            # all, on top of the weighted force terms.
+                                            # This is what makes "prevent the fall"
+                                            # dominate over "reduce force a bit among
+                                            # falls that still happen" -- without it,
+                                            # CMA-ES only ever sees force-magnitude
+                                            # gradients, so a pose that trims a couple
+                                            # hundred N off every trial can look just as
+                                            # good as one that fully prevents some of
+                                            # them. Set well below a catastrophic
+                                            # tracking-error penalty so a wildly
+                                            # untrackable-AND-consequential fall still
+                                            # scores worse than a well-tracked one, and
+                                            # well above typical single-trial force costs
+                                            # (~500-2000 in early runs) so that going
+                                            # from "falls with moderate force" to "falls
+                                            # with near-zero force" is NOT enough to beat
+                                            # "doesn't fall" -- prevention is meant to
+                                            # dominate, not just add another force term.
+                                            # Tune this directly if your team wants a
+                                            # different prevention-vs-impact trade-off.
 
 # Phase 1 stops a trial at the FIRST new ground contact (correct for
 # detection labeling). For impact-force measurement that first contact is
@@ -178,6 +218,34 @@ MERGE_TOLERANCE = 0.15   # allow <=15% score degradation when reusing one
                           # scenario's pose for another, to permit a merge
 TARGET_LIBRARY_MIN = 12
 TARGET_LIBRARY_MAX = 15
+
+
+# ─────────────────────────────────────────────────────────────────
+# MINIMUM-JERK TRAJECTORY (reference doc section 8.2)
+# ─────────────────────────────────────────────────────────────────
+
+def minimum_jerk_trajectory(t, T, q_start, q_target):
+    """Smooth position trajectory from q_start to q_target over duration T
+    (Flash & Hogan 1985, "The coordination of arm movements", J. Neurosci.
+    5(7):1688-1703 -- as specified in the reference doc's section 8.2).
+
+    Commanding a position actuator straight to q_target in one step makes it
+    compute (target-current)*kp instantly -- a torque spike that is a real
+    secondary-injury risk on hardware, which is exactly why the doc calls
+    that pattern out by name ("data.ctrl = target_pose # DO NOT DO THIS").
+    This is the replacement: run_protected_trial calls this every step from
+    the trigger instant onward and commands its output instead of pose_ctrl
+    directly.
+
+    t: time since trigger (s). T: transition duration (POSE_TRANSITION_
+    BUDGET_S). q_start/q_target: (n_act,) arrays. tau is clamped to [0,1],
+    so this is safe to call unconditionally for the whole post-trigger
+    window, including steps at or after t>=T (it just holds q_target
+    exactly from then on) -- no separate "transition finished" branch
+    needed anywhere that calls it."""
+    tau = min(t / T, 1.0) if T > 0 else 1.0
+    s = 10 * tau ** 3 - 15 * tau ** 4 + 6 * tau ** 5
+    return q_start + (q_target - q_start) * s
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -320,29 +388,32 @@ def build_conditions(scenario, magnitude):
 # PROTECTED ROLLOUT (the thing we optimize)
 # ─────────────────────────────────────────────────────────────────
 
-def minimum_jerk_trajectory(t, T, q_start, q_target):
-    """Smooth Section-8.2 trajectory from the actual trigger state to target."""
-    q_start = np.asarray(q_start, dtype=float)
-    q_target = np.asarray(q_target, dtype=float)
-    if T <= 0.0:
-        return q_target.copy()
-    tau = min(max(float(t) / T, 0.0), 1.0)
-    s = 10.0 * tau**3 - 15.0 * tau**4 + 6.0 * tau**5
-    return q_start + (q_target - q_start) * s
-
-
 @dataclass
 class TrialResult:
     peak_force_pelvis: float
     peak_force_head: float
     peak_force_other: float           # any non-foot, non-pelvis, non-head body
                                        # hitting the ground -- e.g. a knee/hip
-    transition_time_s: float          # prescribed minimum-jerk duration once triggered
-    transition_complete: bool         # actual joints reached target tolerance by T
-    max_tracking_error_rad: float     # max actual-vs-commanded error during trajectory
-    mean_tracking_error_rad: float    # mean actual-vs-commanded error during trajectory
-    com_height_at_impact_m: float     # whole-model CoM height at first impact, -1 if none
-    standing_com_height_m: float      # whole-model CoM height after settling
+    peak_tracking_error_rad: float    # max over all joints and all steps during the
+                                       # transition window [trigger, trigger+POSE_
+                                       # TRANSITION_BUDGET_S] of |actual qpos - the
+                                       # COMMANDED minimum-jerk trajectory position at
+                                       # that instant| (not vs. the final target -- vs.
+                                       # where the smooth path itself says the joint
+                                       # should be right now). Large values mean the
+                                       # disturbance is overpowering the controller's
+                                       # ability to follow the planned smooth path,
+                                       # which is itself an injury-risk channel per the
+                                       # reference doc's minimum-jerk rationale
+                                       # (uncontrolled joint deviation -> torque spikes),
+                                       # independent of whether the fall is prevented.
+                                       # 0.0 if never triggered.
+    final_tracking_error_rad: float   # |actual qpos - pose_ctrl| at the end of the
+                                       # transition window (how close the REAL robot,
+                                       # not the reference trajectory, ended up to the
+                                       # true target once the smooth ramp finished) --
+                                       # reporting/diagnostic only, not scored directly.
+                                       # -1.0 if never triggered.
     time_to_impact_s: float           # -1.0 if the UNPROTECTED baseline never
                                        # fell within the observation window --
                                        # in that case the pose is never
@@ -351,19 +422,34 @@ class TrialResult:
     no_natural_fall: bool             # True if baseline never falls unprotected
                                        # -> pose was not applied; excluded from
                                        # meaningful optimization signal
+    triggered: bool                   # True iff the pose was actually commanded at
+                                       # some point during THIS trial. False covers
+                                       # TWO distinct cases that must both be excluded
+                                       # from scoring, not penalized: (1) no_natural_fall
+                                       # (trigger_t_rel = inf, pose never meant to fire),
+                                       # and (2) a subtler one -- _find_time_to_impact
+                                       # (used only to time the trigger) has no stability
+                                       # check, so it can find a fall further out in time
+                                       # than run_protected_trial's OWN pre-trigger loop
+                                       # ever reaches, because that loop's stability
+                                       # early-exit (same STABLE_WINDOW logic Phase 1
+                                       # uses) can fire first during a slow topple that
+                                       # transiently looks stable. The trigger point
+                                       # calculated from pass 1 is then never reached in
+                                       # pass 2, so the pose is never tested under that
+                                       # condition at all. See score_pose -- this was
+                                       # previously mis-scored as a failed transition.
     recovered: bool                   # True if the pose fired (no_natural_fall is
                                        # False) but the robot never actually fell
                                        # (fell stayed False) -- a full save, not
                                        # just a softened impact. Zero injury risk
-                                       # by definition (no contact ever registered),
-                                       # regardless of whether qpos happened to
-                                       # settle exactly on pose_ctrl. See score_pose:
-                                       # this must NOT be penalized as an incomplete
-                                       # transition -- doing so previously punished
-                                       # the single best possible outcome as if it
-                                       # were a failure, just because the actuators
-                                       # settled at a different (but still safe)
-                                       # equilibrium than the literal commanded angle.
+                                       # by definition (no ground contact ever
+                                       # registered), regardless of tracking error --
+                                       # see score_pose: FALL_OCCURRENCE_PENALTY is
+                                       # never applied here, but the tracking-error
+                                       # penalty still is (it's a separate,
+                                       # joint/actuator-level injury channel that can
+                                       # occur even when the fall itself is avoided).
     velocity_at_trigger_mps: float    # ||base linear velocity|| (qvel[0:3]) at
                                        # the instant the pose is first commanded
                                        # -- the measured proxy for Phase 2's
@@ -373,10 +459,12 @@ class TrialResult:
 
 def run_protected_trial(model, scenario, magnitude, direction_deg, timing_phase_s,
                          pose_ctrl, trigger_lead_s, impact_ids, snapshot, p1):
-    """Re-run the Phase-1 disturbance. At trigger, capture the actual
-    joint state and move to pose_ctrl using the Section-8.2 minimum-jerk
-    trajectory. Track actual-vs-commanded joint error during the transition."""
-
+    """Re-run the same disturbance mechanism as Phase 1, but from
+    (t_impact_estimate - trigger_lead_s) onward, command `pose_ctrl` instead
+    of holding `stand`. `model` must already be mj.MjModel instrumented via
+    load_instrumented_model(); a fresh MjData is created per trial. `snapshot`
+    (from snapshot_model_state) is restored first so mutations left over from
+    a PREVIOUS trial can't leak in."""
     import mujoco
     restore_model_state(model, snapshot)
     scen_id, category, fn_name, nominal_dir = scenario
@@ -423,48 +511,43 @@ def run_protected_trial(model, scenario, magnitude, direction_deg, timing_phase_
     step = 0
     pose_ctrl = np.asarray(pose_ctrl)
     n_act = pose_ctrl.shape[0]
-    transition_time_s = -1.0
-    transition_complete = False
+    peak_tracking_error_rad = 0.0
+    final_tracking_error_rad = -1.0
+    q_start = None
     trigger_fired = False
     trigger_step = None
     fell_step = None
     velocity_at_trigger_mps = -1.0
 
-    q_start = None
-    max_tracking_error_rad = 0.0
-    tracking_error_sum = 0.0
-    tracking_error_samples = 0
-    total_mass = float(np.sum(model.body_mass))
-    standing_com_height_m = (
-        float(np.sum(model.body_mass * d.xipos[:, 2]) / total_mass)
-        if total_mass > 0 else -1.0
-    )
-    com_height_at_impact_m = -1.0
-
     while step < max_steps:
         t_rel = (step - timing_steps) * dt
-        pose_active = (
-            step >= timing_steps and max(t_rel, 0.0) >= trigger_t_rel
-        )
-
-        if pose_active:
+        if step >= timing_steps and max(t_rel, 0.0) >= trigger_t_rel:
             if not trigger_fired:
                 trigger_fired = True
                 trigger_step = step
-                q_start = d.qpos[7:7 + n_act].copy()
+                # Base linear velocity at the moment the pose is commanded --
+                # the measured proxy for the Stage-3 velocity estimate this
+                # pose's control point is filed under.
                 velocity_at_trigger_mps = float(np.linalg.norm(d.qvel[0:3]))
-
+                # ACTUAL current joint angles, not the commanded 'stand'
+                # target -- per the reference doc's own
+                # q_start = get_current_joint_angles(data). The disturbance
+                # may already have pushed real qpos away from whatever was
+                # commanded before trigger, and the minimum-jerk trajectory
+                # must start from where the robot actually is.
+                q_start = d.qpos[7:7 + n_act].copy()
+            # Minimum-jerk trajectory (Flash & Hogan 1985), per the reference
+            # doc's 8.2: NEVER command the target angle directly in one step
+            # -- that produces an instantaneous (target-current)*kp torque
+            # spike, a real secondary-injury risk on hardware and exactly the
+            # anti-pattern the doc calls out by name. self-clamps at t>=T
+            # (tau capped at 1.0), so this is safe to call unconditionally
+            # for the entire post-trigger window with no separate branching
+            # for "transition finished" needed.
             t_since_trigger = (step - trigger_step) * dt
-            q_cmd = minimum_jerk_trajectory(
-                t_since_trigger, POSE_TRANSITION_BUDGET_S, q_start, pose_ctrl
-            )
+            q_cmd = minimum_jerk_trajectory(t_since_trigger, POSE_TRANSITION_BUDGET_S,
+                                             q_start, pose_ctrl)
             d.ctrl[:n_act] = q_cmd
-
-            tracking_err = np.abs(d.qpos[7:7 + n_act] - q_cmd)
-            max_tracking_error_rad = max(max_tracking_error_rad,
-                                          float(np.max(tracking_err)))
-            tracking_error_sum += float(np.mean(tracking_err))
-            tracking_error_samples += 1
         else:
             d.ctrl[:] = stand_ctrl
 
@@ -479,23 +562,29 @@ def run_protected_trial(model, scenario, magnitude, direction_deg, timing_phase_
         peak["head"] = max(peak["head"], forces["head"])
         peak["other"] = max(peak["other"], forces["other"])
 
-        if trigger_fired and not transition_complete:
-            # The command reaches the target at T by construction. Here we
-            # measure whether the real joints can actually reach it by T.
-            if (step - trigger_step) * dt >= POSE_TRANSITION_BUDGET_S:
-                err_to_target = np.abs(d.qpos[7:7 + n_act] - pose_ctrl)
-                transition_complete = bool(np.all(err_to_target < TRANSITION_TOL_RAD))
-                transition_time_s = POSE_TRANSITION_BUDGET_S
+        if trigger_fired:
+            t_since_trigger = (step - trigger_step) * dt
+            if t_since_trigger <= POSE_TRANSITION_BUDGET_S + 1e-9:
+                # Tracking error vs. the COMMANDED trajectory at this instant
+                # (not vs. the final target) -- this is what the doc's
+                # "enormous joint torques" risk actually looks like: the real
+                # joints falling far behind the smooth reference path because
+                # the disturbance is overpowering the controller, not the
+                # ordinary/expected small following lag of a well-behaved
+                # position servo. Both peak (worst moment) and final (state
+                # at the nominal end of the transition) are tracked; only
+                # peak is scored -- see score_pose -- final is diagnostic.
+                q_cmd_now = minimum_jerk_trajectory(t_since_trigger, POSE_TRANSITION_BUDGET_S,
+                                                     q_start, pose_ctrl)
+                cur_err = float(np.max(np.abs(d.qpos[7:7 + n_act] - q_cmd_now)))
+                peak_tracking_error_rad = max(peak_tracking_error_rad, cur_err)
+                final_tracking_error_rad = float(np.max(np.abs(d.qpos[7:7 + n_act] - pose_ctrl)))
 
         current_contacts = p1.snapshot_contacts(model, d, ground_id)
         new_bad_contacts = (current_contacts - baseline_contacts) - foot_ids
         if new_bad_contacts and not fell:
             fell = True
             fell_step = step
-            if total_mass > 0:
-                com_height_at_impact_m = float(
-                    np.sum(model.body_mass * d.xipos[:, 2]) / total_mass
-                )
         if fell and (step - fell_step) * dt >= POST_FALL_OBSERVATION_S:
             break
 
@@ -509,21 +598,14 @@ def run_protected_trial(model, scenario, magnitude, direction_deg, timing_phase_
                 break
 
     recovered = trigger_fired and (not fell) and (not no_natural_fall)
-    mean_tracking_error_rad = (
-        tracking_error_sum / tracking_error_samples
-        if tracking_error_samples else 0.0
-    )
 
     return TrialResult(
         peak_force_pelvis=peak["pelvis"], peak_force_head=peak["head"],
         peak_force_other=peak["other"],
-        transition_time_s=transition_time_s, transition_complete=transition_complete,
-        max_tracking_error_rad=max_tracking_error_rad,
-        mean_tracking_error_rad=mean_tracking_error_rad,
-        com_height_at_impact_m=com_height_at_impact_m,
-        standing_com_height_m=standing_com_height_m,
+        peak_tracking_error_rad=peak_tracking_error_rad,
+        final_tracking_error_rad=final_tracking_error_rad,
         time_to_impact_s=t_impact if t_impact is not None else -1.0, fell=fell,
-        no_natural_fall=no_natural_fall, recovered=recovered,
+        no_natural_fall=no_natural_fall, triggered=trigger_fired, recovered=recovered,
         velocity_at_trigger_mps=velocity_at_trigger_mps,
     )
 
@@ -612,31 +694,63 @@ def score_pose(model, scenario, pose_ctrl, conditions, impact_ids, lead_time_s, 
         r = run_protected_trial(model, scenario, mag, direction, timing,
                                  pose_ctrl, lead_time_s, impact_ids, snapshot, p1)
         diagnostics.append(r)
-        if r.no_natural_fall:
-            # Excluded from the average rather than defaulted to 0 -- see
-            # the reward-hacking history in the module docstring.
+        if r.no_natural_fall or not r.triggered:
+            # Excluded from the average rather than defaulted to 0 -- see the
+            # reward-hacking history in the module docstring for the
+            # no_natural_fall case. `not r.triggered` (with no_natural_fall
+            # False) is the second, subtler case: _find_time_to_impact found
+            # a fall further out in time than run_protected_trial's own
+            # pre-trigger stability check ever let this trial run to -- the
+            # pose was never actually commanded, so there is nothing to
+            # score here, and it must not be treated as a failed transition
+            # (see TrialResult.triggered for the full explanation).
             continue
         s = (W_HEAD * r.peak_force_head + W_PELVIS * r.peak_force_pelvis
              + W_OTHER * r.peak_force_other)
-        # With minimum-jerk control, arrival time is fixed by the 300 ms
-        # trajectory. Penalize actual tracking error instead.
-        tracking_excess = max(0.0, r.max_tracking_error_rad - T_TRACKING_TOL_RAD)
-        s += TRACKING_ERROR_PENALTY_PER_RAD * tracking_excess
-
-        if not r.recovered and not r.transition_complete:
-            s += INCOMPLETE_TRANSITION_PENALTY
-
+        # Tracking-error penalty: a SEPARATE injury channel from ground
+        # impact (joint/actuator torque spikes from failing to follow the
+        # planned minimum-jerk path under the disturbance's load) that can
+        # occur whether or not the fall itself is prevented -- applies to
+        # every triggered trial, recovered included, unlike the
+        # ground-impact force terms above (which are correctly 0 exactly
+        # when no contact happened).
+        tracking_overrun = max(0.0, r.peak_tracking_error_rad - TRACKING_ERROR_TOL_RAD)
+        s += TRACKING_ERROR_PENALTY_PER_RAD * tracking_overrun
+        if not r.recovered:
+            # r.fell is True here (the only remaining possibility once
+            # no_natural_fall/not-triggered are excluded and recovered is
+            # False). FALL_OCCURRENCE_PENALTY is what makes "prevent the
+            # fall" dominate over "reduce force a bit among falls that still
+            # happen" -- without a flat cost tied to fell itself, CMA-ES only
+            # ever sees force-magnitude gradients, and a pose that shaves a
+            # few hundred N off every trial can score just as well as one
+            # that fully prevents some of them outright, which is backwards
+            # for a system whose primary job is fall prevention with impact
+            # mitigation as the fallback, not the other way around.
+            s += FALL_OCCURRENCE_PENALTY
         total += s
         counted += 1
     if counted == 0:
         # Nothing for this pose search to optimize at this magnitude --
         # surface loudly (NaN) rather than a deceptively perfect 0.
-        return float("nan"), diagnostics
-    return total / counted, diagnostics
+        return float("nan"), diagnostics,None
+    recovered_count = sum(1 for r in diagnostics if r.recovered)
+    recovery_rate = recovered_count / counted
+    return total / counted, diagnostics, recovery_rate
+
+
+RESTART_SIGMA_GROWTH = 1.7   # each successive restart's sigma0 multiplied by this --
+                              # a cheap IPOP-style heuristic: if earlier, tighter
+                              # restarts converge to a failing local optimum, later
+                              # restarts search more broadly rather than repeating
+                              # the same narrow search around a new random point.
+RESTART_START_SPREAD_BASE = 0.5   # stddev (rad) of the random perturbation from
+                                  # 'stand' used to pick restart>0's starting pose;
+                                  # grows with restart index (see below)
 
 
 def optimize_pose_for_bin(model, scenario, magnitude, lead_time_s, popsize, maxiter,
-                           snapshot, p1, seed=0, pool=None):
+                           snapshot, p1, seed=0, pool=None, n_restarts=1):
     """Optimize one pose for one (scenario, magnitude) velocity bin.
     Returns a dict including the MEASURED velocity_mps for this bin (mean
     ||base linear velocity|| at trigger time across the best pose's
@@ -644,12 +758,26 @@ def optimize_pose_for_bin(model, scenario, magnitude, lead_time_s, popsize, maxi
     scenario's velocity -> pose interpolation curve.
 
     `pool`: an optional multiprocessing.Pool. When given, every candidate in
-    a CMA-ES generation is scored in parallel across worker processes."""
+    a CMA-ES generation is scored in parallel across worker processes.
+
+    `n_restarts`: run this many INDEPENDENT CMA-ES searches and keep the
+    global best, rather than a single search from 'stand'. This exists
+    because a single local search can converge cleanly to a real local
+    force-minimum that still falls every time, without ever sampling into a
+    qualitatively different, possibly fall-preventing region of pose space
+    (e.g. a wide crouch reachable only by a path that looks worse than
+    'stand' along the way, not by descending the force gradient smoothly).
+    Restart 0 always starts at 'stand' (matches prior single-run behavior
+    exactly when n_restarts=1); restarts >0 start from a randomized
+    perturbation of 'stand' with growing spread and sigma0, so later
+    restarts explore more broadly if earlier ones plateau on the same kind
+    of failing optimum. This multiplies wall-clock cost by roughly
+    n_restarts (restarts run sequentially; each restart's own population is
+    still parallelized across `pool` as before)."""
     import cma
     scen_id, category, fn_name, nominal_dir = scenario
     lo, hi = actuator_bounds(model)
-    x0 = model.key_ctrl[0].copy()   # start the search at the 'stand' pose
-    sigma0 = 0.3
+    stand = model.key_ctrl[0].copy()
     conditions = build_conditions(scenario, magnitude)
     impact_ids = impact_body_ids(model)
 
@@ -657,39 +785,57 @@ def optimize_pose_for_bin(model, scenario, magnitude, lead_time_s, popsize, maxi
     # condition at this magnitude, no candidate pose can ever produce a real
     # score. Check up front with the cheap 'stand' pose rather than burning
     # the whole CMA-ES budget on a search that cannot possibly succeed.
-    probe_score, probe_diag = score_pose(model, scenario, x0, conditions, impact_ids,
-                                          lead_time_s, snapshot, p1)
+    probe_score, probe_diag, probe_recovery = score_pose(model, scenario, stand, conditions, impact_ids,
+                                                          lead_time_s, snapshot, p1)
     if probe_score != probe_score:  # NaN check without importing math
         return {
             "scenario_id": scen_id, "scenario_fn": fn_name, "category": category,
-            "magnitude_used": magnitude, "pose": x0.tolist(), "score": float("nan"),
-            "velocity_mps": None, "valid": False,
-            "diagnostics": [asdict(d) for d in probe_diag],
+            "magnitude_used": magnitude, "pose": stand.tolist(), "score": float("nan"),
+            "velocity_mps": None, "valid": False, "recovery_rate": None,
+            "winning_restart": None, "diagnostics": [asdict(d) for d in probe_diag],
         }
 
-    es = cma.CMAEvolutionStrategy(
-        x0, sigma0,
-        {"bounds": [lo.tolist(), hi.tolist()], "popsize": popsize,
-         "maxiter": maxiter, "seed": seed, "verbose": -9},
-    )
-    best_score, best_diag, best_x = probe_score, probe_diag, x0
-    while not es.stop():
-        candidates = es.ask()
-        if pool is not None:
-            tasks = [(scenario, np.array(x), conditions, lead_time_s) for x in candidates]
-            results = pool.map(_worker_score_task, tasks)
+    # Track (score, diag, recovery_rate, restart_idx) for the best candidate
+    # across ALL restarts. -1 = the 'stand' probe itself never beaten by any
+    # restart (should be rare, but possible on a very easy bin). Selection is
+    # still purely by `score` (recovery_rate is a derived reporting metric,
+    # not a second optimization objective) -- FALL_OCCURRENCE_PENALTY inside
+    # score_pose is what actually makes recovery rate move the score.
+    best_score, best_diag, best_x, best_recovery, best_restart = (
+        probe_score, probe_diag, stand, probe_recovery, -1)
+    rng = np.random.default_rng(seed)
+
+    for restart_idx in range(n_restarts):
+        if restart_idx == 0:
+            x0, sigma0 = stand.copy(), 0.3
         else:
-            results = [score_pose(model, scenario, np.array(x), conditions, impact_ids,
-                                   lead_time_s, snapshot, p1) for x in candidates]
-        fitnesses = []
-        for x, (s, diag) in zip(candidates, results):
-            # NaN candidates must not be handed to CMA-ES as fitness --
-            # replace with a large-but-finite penalty so the search steers
-            # away from them instead of crashing or being silently ignored.
-            fitnesses.append(s if s == s else 1e6)
-            if s == s and s < best_score:
-                best_score, best_diag, best_x = s, diag, np.array(x)
-        es.tell(candidates, fitnesses)
+            spread = RESTART_START_SPREAD_BASE * (1.0 + 0.6 * restart_idx)
+            x0 = np.clip(stand + rng.normal(0.0, spread, size=stand.shape), lo, hi)
+            sigma0 = 0.3 * (RESTART_SIGMA_GROWTH ** restart_idx)
+
+        es = cma.CMAEvolutionStrategy(
+            x0, sigma0,
+            {"bounds": [lo.tolist(), hi.tolist()], "popsize": popsize,
+             "maxiter": maxiter, "seed": seed + restart_idx, "verbose": -9},
+        )
+        while not es.stop():
+            candidates = es.ask()
+            if pool is not None:
+                tasks = [(scenario, np.array(x), conditions, lead_time_s) for x in candidates]
+                results = pool.map(_worker_score_task, tasks)
+            else:
+                results = [score_pose(model, scenario, np.array(x), conditions, impact_ids,
+                                       lead_time_s, snapshot, p1) for x in candidates]
+            fitnesses = []
+            for x, (s, diag, recovery_rate) in zip(candidates, results):
+                # NaN candidates must not be handed to CMA-ES as fitness --
+                # replace with a large-but-finite penalty so the search steers
+                # away from them instead of crashing or being silently ignored.
+                fitnesses.append(s if s == s else 1e6)
+                if s == s and s < best_score:
+                    best_score, best_diag, best_x, best_recovery, best_restart = (
+                        s, diag, np.array(x), recovery_rate, restart_idx)
+            es.tell(candidates, fitnesses)
 
     valid_vels = [dd.velocity_at_trigger_mps for dd in best_diag
                   if not dd.no_natural_fall and dd.velocity_at_trigger_mps >= 0]
@@ -698,13 +844,13 @@ def optimize_pose_for_bin(model, scenario, magnitude, lead_time_s, popsize, maxi
     return {
         "scenario_id": scen_id, "scenario_fn": fn_name, "category": category,
         "magnitude_used": magnitude, "pose": best_x.tolist(), "score": float(best_score),
-        "velocity_mps": velocity_mps, "valid": True,
-        "diagnostics": [asdict(d) for d in best_diag],
+        "velocity_mps": velocity_mps, "valid": True, "recovery_rate": best_recovery,
+        "winning_restart": best_restart, "diagnostics": [asdict(d) for d in best_diag],
     }
 
 
 def run_scenario_all_bins(model, scenario, quantiles, lead_time_s, popsize, maxiter,
-                           snapshot, p1, pool=None):
+                           snapshot, p1, pool=None, n_restarts=1):
     """Optimize every velocity bin for one scenario. Returns bins sorted
     ascending by MEASURED velocity (not by quantile order -- stochastic
     contact dynamics mean quantile order and measured-velocity order can
@@ -715,7 +861,8 @@ def run_scenario_all_bins(model, scenario, quantiles, lead_time_s, popsize, maxi
     for q in quantiles:
         magnitude = fall_magnitude(fn_name, q, p1)
         res = optimize_pose_for_bin(model, scenario, magnitude, lead_time_s, popsize,
-                                     maxiter, snapshot, p1, seed=int(q * 1000), pool=pool)
+                                     maxiter, snapshot, p1, seed=int(q * 1000), pool=pool,
+                                     n_restarts=n_restarts)
         res["quantile"] = q
         bins.append(res)
     valid_bins = [b for b in bins if b["valid"]]
@@ -750,7 +897,7 @@ def cross_evaluate(model, scenarios, reference_results, lead_time_s, snapshot, p
                    for i, j in cells]
 
     matrix = np.zeros((n, n))
-    for (i, j), (s, _) in zip(cells, results):
+    for (i, j), (s, _, _rec) in zip(cells, results):
         matrix[i, j] = s
     return matrix
 
@@ -971,6 +1118,16 @@ def main():
                      help="Directory where pose_library.json is written.")
     ap.add_argument("--popsize", type=int, default=16)
     ap.add_argument("--maxiter", type=int, default=60)
+    ap.add_argument("--restarts", type=int, default=1,
+                     help="Independent CMA-ES restarts per (scenario, velocity bin), "
+                          "keeping the global best. Restart 0 always starts at 'stand'; "
+                          "restarts >0 start from a randomized, increasingly wide "
+                          "perturbation of 'stand' with growing sigma0 (IPOP-style), "
+                          "so the search can find fall-preventing poses that aren't "
+                          "reachable by descending the force gradient smoothly from "
+                          "'stand'. Multiplies wall-clock cost by roughly this factor "
+                          "-- each restart still parallelizes its own population "
+                          "across --workers as before.")
     ap.add_argument("--lead-time", type=float, default=LEAD_TIME_S)
     ap.add_argument("--velocity-quantiles", type=str,
                      default=",".join(str(q) for q in VELOCITY_QUANTILES),
@@ -1022,6 +1179,7 @@ def main():
         quantiles = quantiles[-1:]
     popsize = 4 if args.quick else args.popsize
     maxiter = 2 if args.quick else args.maxiter
+    n_restarts = 1 if args.quick else args.restarts
 
     pool = None
     if args.workers > 1:
@@ -1031,7 +1189,8 @@ def main():
         print(f"Started a pool of {args.workers} worker processes (CPU-parallel).")
 
     print(f"\nOptimizing {len(scenarios)} scenario(s) x {len(quantiles)} velocity bin(s) "
-          f"(popsize={popsize}, maxiter={maxiter}, lead_time={args.lead_time}s)...")
+          f"(popsize={popsize}, maxiter={maxiter}, restarts={n_restarts}, "
+          f"lead_time={args.lead_time}s)...")
 
     bins_by_scenario = {}   # scenario index -> list of valid bin result dicts
     excluded = []
@@ -1039,7 +1198,8 @@ def main():
         for idx, scenario in enumerate(scenarios):
             t0 = time.time()
             valid_bins, invalid_quantiles = run_scenario_all_bins(
-                model, scenario, quantiles, args.lead_time, popsize, maxiter, snapshot, p1, pool=pool)
+                model, scenario, quantiles, args.lead_time, popsize, maxiter, snapshot, p1,
+                pool=pool, n_restarts=n_restarts)
             scen_id, category, fn_name, nominal_dir = scenario
             if not valid_bins:
                 print(f"  scenario {scen_id:>2} ({fn_name:<18}) [WARN] no quantile in "
@@ -1050,7 +1210,8 @@ def main():
                                   "quantiles_tried": quantiles})
                 continue
             bins_by_scenario[idx] = valid_bins
-            vel_str = ", ".join(f"{b['velocity_mps']:.2f}m/s->{b['score']:.0f}" for b in valid_bins)
+            vel_str = ", ".join(f"{b['velocity_mps']:.2f}m/s->{b['score']:.0f}"
+                                 f"(rec {b['recovery_rate']*100:.0f}%)" for b in valid_bins)
             warn = f" [WARN: quantiles {invalid_quantiles} never fell]" if invalid_quantiles else ""
             print(f"  scenario {scen_id:>2} ({fn_name:<18}) bins=[{vel_str}]{warn} "
                   f"[{time.time()-t0:.1f}s]")
@@ -1093,6 +1254,8 @@ def main():
                 "quantile": b["quantile"],
                 "pose": b["pose"],
                 "score": b["score"],
+                "recovery_rate": b["recovery_rate"],
+                "winning_restart": b["winning_restart"],
                 "diagnostics": b["diagnostics"],
             }
             for b in rep_bins
@@ -1105,6 +1268,7 @@ def main():
             "fall_directions": directions,
             "reference_bin_score": reference_results[pose_id]["score"],
             "reference_bin_velocity_mps": reference_results[pose_id]["velocity_mps"],
+            "reference_bin_recovery_rate": reference_results[pose_id]["recovery_rate"],
             "velocity_control_points": velocity_control_points,
         })
         for k in covered:
@@ -1120,13 +1284,33 @@ def main():
         json.dump({
             "lead_time_s_used_for_design": args.lead_time,
             "pose_transition_budget_s": POSE_TRANSITION_BUDGET_S,
-            "trajectory": {
-                "type": "minimum_jerk",
-                "transition_time_s": POSE_TRANSITION_BUDGET_S,
-                "tracking_tolerance_rad": T_TRACKING_TOL_RAD,
-                "tracking_penalty_per_rad": TRACKING_ERROR_PENALTY_PER_RAD,
-            },
             "velocity_quantiles_sampled": quantiles,
+            "scoring_weights": {
+                "w_head": W_HEAD, "w_pelvis": W_PELVIS, "w_other": W_OTHER,
+                "fall_occurrence_penalty": FALL_OCCURRENCE_PENALTY,
+                "tracking_error_tol_rad": TRACKING_ERROR_TOL_RAD,
+                "tracking_error_penalty_per_rad": TRACKING_ERROR_PENALTY_PER_RAD,
+                "note": (
+                    "fall_occurrence_penalty is added to every trial that falls at "
+                    "all, on top of the weighted force terms -- this is what makes "
+                    "fall PREVENTION the dominant objective, with impact mitigation "
+                    "as the secondary objective among trials that still fall. "
+                    "tracking_error_penalty_per_rad is a SEPARATE injury channel: "
+                    "poses are commanded via a minimum-jerk trajectory (reference "
+                    "doc section 8.2), not a direct step command, and this "
+                    "penalizes the real joints falling far behind that planned "
+                    "smooth path under load -- applied to every triggered trial, "
+                    "recovered included, since a torque-spike risk from bad "
+                    "tracking is independent of whether the fall itself is "
+                    "avoided. Each control point's recovery_rate (below) is the "
+                    "fraction of tested conditions where the pose prevented the "
+                    "fall entirely; use it, not just score, to judge whether a "
+                    "pose is fit for the hardware demo -- a low score with a low "
+                    "recovery_rate can still mean 'falls softly every time' "
+                    "rather than 'usually doesn't fall'. Tune these directly to "
+                    "shift the prevention-vs-impact-vs-tracking trade-off."
+                ),
+            },
             "velocity_estimate_source": (
                 "base linear velocity magnitude (||qvel[0:3]||) measured at the "
                 "instant the pose is triggered -- proxy for the Phase-2 TCN's "
