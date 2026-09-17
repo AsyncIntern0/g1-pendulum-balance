@@ -1,0 +1,29 @@
+{
+  "threshold": 0.76,
+  "window_level": {
+    "detect_acc": 0.987651302115173,
+    "fpr": 0.009654178674351584,
+    "recall": 0.9725585149313963,
+    "class_acc": 0.8434221146085553,
+    "tp": 1205,
+    "tn": 6873,
+    "fp": 67,
+    "fn": 34,
+    "velocity_mae_mps": 0.06651122626473434,
+    "velocity_rmse_mps": 0.08817706169599082
+  },
+  "lead_time": {
+    "n_fall_trials": 101,
+    "detected_recall": 1.0,
+    "mean_lead_ms": 389.1089172363281,
+    "median_lead_ms": 400.0,
+    "n_stable_trials": 124,
+    "per_trial_false_alarm_rate": 0.12096774193548387,
+    "velocity_mae_at_fire_mps": 0.07487773987473828,
+    "velocity_bias_at_fire_mps": 0.061189061971289094
+  },
+  "in_channels": 34,
+  "num_train_trials": 1049,
+  "num_val_trials": 226,
+  "num_test_trials": 225
+}
