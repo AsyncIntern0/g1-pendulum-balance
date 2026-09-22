@@ -1877,7 +1877,7 @@
               "peak_tracking_error_rad": 0.14179921171683701,
               "final_tracking_error_rad": 0.08651414313397532,
               "time_to_impact_s": 0.26,
-              "fell": false,
+              "fell": false, 
               "no_natural_fall": false,
               "triggered": true,
               "recovered": true,

@@ -59,6 +59,7 @@ original_z = data.qpos[qadr + 2]
 # Move down by 1.10 m
 data.qpos[qadr + 2] = original_z - 1.10
 
+
 mujoco.mj_forward(model, data)
 # ---------------------------------------------------------
 # TEST 8: DIRECT GEOMETRIC DISTANCE

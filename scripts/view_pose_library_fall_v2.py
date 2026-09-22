@@ -118,8 +118,17 @@ def make_disturbance(p1, model, fn_name, magnitude, direction, timing):
 
 def apply_standing_control(p1, model, data):
     """
-    Phase-1 commonly provides standing control. If present, use it exactly.
-    Otherwise leave controls at zero.
+    DEPRECATED / DO NOT USE AS THE ONLY STANDING-HOLD MECHANISM.
+
+    generate_fall_dataset_final.py defines NEITHER `apply_standing_control`
+    NOR `stand_control` -- both getattr() lookups below always miss, so this
+    function has always silently done nothing. Every other script in this
+    pipeline (generate_fall_dataset_final.py, phase3_pose_jerk_v7.py) holds
+    the stand pose explicitly with `data.ctrl[:] = model.key_ctrl[0].copy()`
+    every step instead of going through any p1 API. Kept here (now a no-op
+    by design, not by accident) only so an old call site doesn't crash;
+    every call site below now sets ctrl explicitly and no longer depends on
+    this function doing anything.
     """
     fn = getattr(p1, "apply_standing_control", None)
     if callable(fn):
@@ -138,8 +147,24 @@ def apply_standing_control(p1, model, data):
 
 
 def reset_data(model):
+    """Reset to the STANDING keyframe (index 0), matching
+    generate_fall_dataset_final.py / phase3_pose_jerk_v7.py exactly.
+
+    The previous version called mj_resetData(), which zeroes qpos/qvel
+    entirely -- NOT the standing pose. Combined with apply_standing_control()
+    silently no-oping (see above), this meant every "unprotected" run in
+    this viewer, and both passes of natural_impact_and_trigger() that
+    compute trigger_time/velocity_at_trigger, were simulated from a
+    non-standing zero pose with ZERO commanded torque throughout -- not a
+    real "no protection" baseline, and not comparable to anything Phase 1
+    or Phase 3 produces. That silent mismatch, not the pose library or the
+    pendulum physics, is what made "unprotected" register 0 force while
+    "protected" (the only condition where ctrl was ever actually set)
+    looked like it was causing the fall."""
     data = mujoco.MjData(model)
-    mujoco.mj_resetData(model, data)
+    mujoco.mj_resetDataKeyframe(model, data, 0)
+    print("RESET ERROR:",
+      np.abs(data.qpos - model.key_qpos[0]).max())
     mujoco.mj_forward(model, data)
     return data
 
@@ -251,6 +276,11 @@ def natural_impact_and_trigger(
     scen_id, category, fn_name, _ = scenario
 
     data = reset_data(model)
+    print("RESET ERROR:",
+      np.abs(data.qpos - model.key_qpos[0]).max())
+    stand_ctrl = model.key_ctrl[0].copy()
+    print("CTRL ERROR:",
+      np.abs(data.ctrl - model.key_ctrl[0]).max())
     disturb_fn = make_disturbance(
         p1, model, fn_name, magnitude, direction, timing
     )
@@ -266,12 +296,13 @@ def natural_impact_and_trigger(
     for _ in range(int(MAX_SIM_TIME_S / dt)):
         t_rel = float(data.time)
 
-        apply_standing_control(p1, model, data)
+        data.ctrl[:] = stand_ctrl
 
         # Same returned Phase-1 disturbance function used at every step.
         disturb_fn(model, data, t_rel)
 
         mujoco.mj_step(model, data)
+
 
         _, active = measure_ground_contacts(
             model, data, ground_id, foot_ids
@@ -297,11 +328,13 @@ def natural_impact_and_trigger(
 
     while data.time < trigger_time:
         t_rel = float(data.time)
-        apply_standing_control(p1, model, data)
+        data.ctrl[:] = stand_ctrl
         disturb_fn(model, data, t_rel)
 
         step_before = float(data.time)
         mujoco.mj_step(model, data)
+ 
+                
 
         if data.time == step_before:
             break
@@ -395,6 +428,7 @@ def run_viewer(
     scen_id, category, fn_name, _ = scenario_parts(scenario)
 
     data = reset_data(model)
+    stand_ctrl = model.key_ctrl[0].copy()
     disturb_fn = make_disturbance(
         p1, model, fn_name, magnitude, direction, timing
     )
@@ -441,7 +475,7 @@ def run_viewer(
                 time.sleep(min(remaining, 0.004))
 
             # Keep standing/PD control exactly as Phase-1 normally does.
-            apply_standing_control(p1, model, data)
+            data.ctrl[:] = stand_ctrl
 
             # The SAME disturbance mechanism as Phase-1.
             disturb_fn(model, data, sim_t)
@@ -465,6 +499,7 @@ def run_viewer(
                 data.ctrl[:model.nu] = q_cmd
 
             mujoco.mj_step(model, data)
+
 
             forces, active = measure_ground_contacts(
                 model, data, ground_id, foot_ids
@@ -519,7 +554,7 @@ def main():
     ap.add_argument(
         "--library",
         default=r"C:\Users\Asyncronix\Downloads\Asyncronix_Intern"
-                r"\g1-pendulum-balance\phase3_out_v5\pose_library_v5.json",
+                r"\g1-pendulum-balance\phase3_out_v6\pose_library_v6.json",
     )
 
     ap.add_argument(
@@ -529,13 +564,13 @@ def main():
 
     ap.add_argument(
         "--p3-module",
-        default="phase3_pose_jerk_v5",
+        default="phase3_pose_jerk_v7",
     )
 
     ap.add_argument(
         "--scenario",
         type=int,
-        default=2,
+        default=9,
     )
 
     ap.add_argument(
