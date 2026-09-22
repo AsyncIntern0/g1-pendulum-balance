@@ -527,7 +527,7 @@ class TrialResult:
 
 
 def run_protected_trial(model, scenario, magnitude, direction_deg, timing_phase_s,
-                         pose_ctrl, trigger_lead_s, impact_ids, snapshot, p1):
+                         pose_ctrl, trigger_lead_s, impact_ids, snapshot, p1,contact_tracker=None):
     """Re-run the same disturbance mechanism as Phase 1, but from
     (t_impact_estimate - trigger_lead_s) onward, command `pose_ctrl` instead
     of holding `stand`. `model` must already be mj.MjModel instrumented via
@@ -627,6 +627,8 @@ def run_protected_trial(model, scenario, magnitude, direction_deg, timing_phase_
         step += 1
 
         forces = contact_peak_forces(model, d, ground_id, impact_ids, foot_ids)
+        if contact_tracker is not None:
+            contact_tracker.update(d)
         peak["pelvis"] = max(peak["pelvis"], forces["pelvis"])
         peak["head"] = max(peak["head"], forces["head"])
         peak["other"] = max(peak["other"], forces["other"])
