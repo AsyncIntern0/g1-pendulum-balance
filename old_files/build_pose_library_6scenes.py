@@ -66,22 +66,30 @@ VELOCITY_BINS = ("low", "mid", "high")  # match these to your existing bin edges
 
 def run_one_trial_MOCK(spec: ValiditySpec, ctrl: np.ndarray, scenario: str,
                        condition: dict, passive_pendulum: bool = False) -> TrialResult:
-    """Stand-in physics for exercising the CMA-ES + gate wiring only -- NOT
-    real dynamics. Each condition carries a fixed 'hazard' (how likely this
-    disturbance is to cause a fall on its own); deeper knee flexion reduces
-    both the fall probability and, if it still falls, the peak force. This
-    ensures unprotected (depth=0) genuinely falls some of the time -- needed
-    for the genuine_fall_pairs gate check to have anything to evaluate."""
+    """Stand-in physics: deeper knee flexion -> lower force but small chance of
+    an induced fall if depth is extreme, JUST so the CMA-ES + gate wiring below
+    is exercised end-to-end. Delete this once run_one_trial is adapted."""
     rng = np.random.default_rng(condition.get("seed", 0))
-    hazard = condition.get("hazard", 0.5)
     knee_depth = float(np.clip((ctrl[3] - spec.stand_ctrl[3]) / max(1e-6, (
         TEMPLATES["lower_squat"].params[0].hi)), 0, 1)) if ctrl.size > 3 else 0.0
-    fell = rng.random() < hazard * (1.0 - 0.6 * knee_depth)
     base = 3000.0 * (1.0 - 0.55 * knee_depth) + rng.normal(0, 150)
-    other = max(0.0, base) if fell else 0.0
+    induced_fall = knee_depth > 0.9 and rng.random() < 0.15
+    fell = induced_fall
+    other = max(0.0, base) if not fell else max(0.0, base * 1.3)
     return TrialResult(fell=fell, peaks={"head": 0.0, "pelvis": 0.0, "other": other,
                                          "knee_shank": other * 0.3, "thigh_hip": 0.0, "foot": 50.0},
                        first_contact_class="other", tracking_err_rad=0.02 + 0.05 * knee_depth)
+
+def iter_tuning_conditions_MOCK(scenario: str, bin_name: str) -> List[dict]:
+    return [{"seed": i} for i in range(6)]
+
+
+def iter_holdout_conditions_MOCK(scenario: str, bin_name: str) -> List[dict]:
+    return [{"seed": 100 + i} for i in range(14)]
+
+
+def iter_nofall_conditions_MOCK(scenario: str, bin_name: str) -> List[dict]:
+    return [{"seed": 200 + i} for i in range(10)]
 
 
 def run_one_trial_ADAPT(spec: ValiditySpec, ctrl: np.ndarray, scenario: str,
@@ -100,20 +108,22 @@ def run_one_trial_ADAPT(spec: ValiditySpec, ctrl: np.ndarray, scenario: str,
 # scenario_registry dict as before -- nothing else changes.
 
 
-def make_run_trial(model, p1, impact_ids, snapshot, trigger_lead_s: float = 0.3) -> Callable:
+def make_run_trial(model, p1, impact_ids, snapshot, scenario_registry: Dict[str, tuple],
+                   trigger_lead_s: float = 0.3) -> Callable:
     """Binds the per-run-fixed arguments (model, p1, impact_ids, snapshot,
     trigger_lead_s) once, and returns a run_trial(spec, ctrl, scenario,
-    condition) closure. `condition` must carry 'scenario_tuple' (the actual
-    p1.SCENARIOS entry for THIS draw -- see make_condition_iters, which picks
-    one at random from every scenario mapped to the group via
-    SCENARIO_TO_GROUP) plus the per-condition magnitude/direction_deg/
-    timing_phase_s values.
+    condition) closure matching what tune_pose/gate_pose expect. `condition`
+    dicts only need to carry the PER-CONDITION values: magnitude,
+    direction_deg, timing_phase_s (i.e. exactly what your existing
+    COND_TIMINGS/COND_JITTERS already vary per trial).
 
     Requires run_protected_trial to accept an optional `contact_tracker=None`
     kwarg and call `contact_tracker.update(d)` once per step (2-line addition,
     see build_pose_library.py's module docstring for the exact diff). Falls
     back to the old flat pelvis/head/other split with a one-time warning if
-    that param isn't present yet.
+    that param isn't present yet, so this still runs before you've patched it
+    -- but the gate's fragile-first-contact check won't be meaningful until
+    you have.
     """
     from validity_spec import ContactTracker
     _warned = {"once": False}
@@ -121,10 +131,9 @@ def make_run_trial(model, p1, impact_ids, snapshot, trigger_lead_s: float = 0.3)
     def run_trial(spec: ValiditySpec, ctrl: np.ndarray, scenario: str, condition: dict) -> TrialResult:
         from phase3_pose_jerk_v7 import run_protected_trial  # local import: only needed in live mode
 
-        scen_tuple = condition.get("scenario_tuple")
+        scen_tuple = scenario_registry.get(scenario)
         if scen_tuple is None:
-            raise KeyError("condition dict is missing 'scenario_tuple' -- use make_condition_iters, "
-                           "which fills this in per-draw (a group may map to several scenarios)")
+            raise KeyError(f"SCENARIO_REGISTRY['{scenario}'] is not filled in -- see TODO ADAPT above")
 
         ct = ContactTracker(model)
         kwargs = dict(
@@ -159,18 +168,6 @@ def make_run_trial(model, p1, impact_ids, snapshot, trigger_lead_s: float = 0.3)
 # ADAPT #2 / #3: condition iterators
 # =============================================================================
 
-def iter_tuning_conditions_MOCK(scenario: str, bin_name: str) -> List[dict]:
-    return [{"seed": i, "hazard": 0.95} for i in range(6)]
-
-
-def iter_holdout_conditions_MOCK(scenario: str, bin_name: str) -> List[dict]:
-    return [{"seed": 100 + i, "hazard": 0.95} for i in range(14)]
-
-
-def iter_nofall_conditions_MOCK(scenario: str, bin_name: str) -> List[dict]:
-    return [{"seed": 200 + i, "hazard": 0.0} for i in range(10)]
-
-
 # =============================================================================
 # Real condition generators, built from generate_fall_dataset_final.py
 # (pasted 2026-09): SCENARIOS list, MAGNITUDE_RANGES, and the timing/jitter
@@ -178,57 +175,16 @@ def iter_nofall_conditions_MOCK(scenario: str, bin_name: str) -> List[dict]:
 # [-30,-15,15,30] deg for directional scenarios).
 # =============================================================================
 
-# Every one of the 15 Phase-1 scenarios mapped to exactly one of the 7 PLAN
-# groups (6 directional + 'unknown' generic fallback). This is deliberately
-# many-to-one: several scenarios share a group either because they're
-# physically similar (floor_tilt_pitch + floor_tilt_roll both call for a
-# wider base) or because their actual fall direction isn't knowable ahead of
-# time (actuator faults, a slip) -- those go to 'unknown' rather than an
-# arbitrary directional guess. See chat 2026-09 for the full reasoning.
-#   id  category   fn_name            nominal_dir -> group
-SCENARIO_TO_GROUP: Dict[int, str] = {
-    1: "forward",       # push 0deg
-    2: "backward",      # push 180deg
-    3: "left",          # push 90deg
-    4: "right",         # push 270deg
-    5: "left",       # push 45deg -- equidistant forward/left, no good single pick
-    6: "right",       # push 315deg -- equidistant forward/right
-    7: "floor_tilt",    # floor_tilt_pitch
-    8: "floor_tilt",    # floor_tilt_roll
-    9: "sudden_load",   # floor_drop -- sudden loss of support, same character
-    10: "unknown",      # low_friction -- slip direction not predictable ahead of time
-    11: "unknown",      # actuator_fault -- direction depends on which joint faults
-    12: "unknown",      # actuator_stuck
-    13: "unknown",      # asymmetric_gain
-    14: "forward",      # trip -- pitches the body forward
-    15: "sudden_load",  # sudden_load (exact name match)
+# index into p1.SCENARIOS for each PLAN group. p1.SCENARIOS[i] =
+#   1 forward push(0deg) | 2 backward push(180) | 3 left push(90) | 4 right push(270)
+#   8 floor_tilt_roll (surface)  | 15 sudden_load (trip)
+# picked floor_tilt_roll (not _pitch, index 6) to match the pose-12 anomaly
+# bin already on file in technical-learnings; swap to index 6 if you'd rather
+# tune against floor_tilt_pitch instead (or add both as separate PLAN rows).
+SCENARIO_INDEX_MAP: Dict[str, int] = {
+    "forward": 0, "backward": 1, "left": 2, "right": 3,
+    "sudden_load": 14, "floor_tilt": 7,
 }
-
-
-def group_scenario_ids(p1) -> Dict[str, List[int]]:
-    """group label -> list of p1.SCENARIOS ids that map to it."""
-    out: Dict[str, List[int]] = {}
-    for sid, group in SCENARIO_TO_GROUP.items():
-        out.setdefault(group, []).append(sid)
-    return out
-
-
-def pose_lookup(library: dict, group: str, bin_name: str) -> np.ndarray:
-    """Runtime helper: given the TCN's estimated cause (already resolved to
-    a PLAN group -- see SCENARIO_TO_GROUP for how a raw (category, fn_name,
-    direction) reading maps to one) and velocity bin, return the pose_ctrl to
-    command. ALWAYS returns a valid ctrl vector -- falls back to the 'stand'
-    baseline (never an exception, never an undefined lookup) whenever: the
-    group/bin combination isn't in the library, or it is but the entry's
-    'kind' is 'stand' (failed the gate at build time -- see decide() in
-    validity_spec.py). This is the single place inference code should call
-    into; it must never index `library` directly."""
-    entry = library.get(f"{group}/{bin_name}")
-    if entry is None:
-        entry = library.get(f"unknown/{bin_name}")  # group itself unmapped -- generic fallback
-    if entry is None or entry["kind"] != "pose":
-        return None  # caller: command stand_ctrl (no library entry qualifies)
-    return np.array(entry["pose_ctrl"])
 # Must match the inline jitters list inside p1.build_trial_plan -- it isn't
 # exported as a module-level name there, so keep this in sync by hand if that
 # list ever changes.
@@ -242,61 +198,43 @@ BIN_MAGNITUDE_FRACTIONS = {"low": (0.0, 0.33), "mid": (0.33, 0.66), "high": (0.6
 
 def make_condition_iters(p1, scenario_registry: Dict[str, tuple]) -> Tuple[Callable, Callable, Callable]:
     """Returns (iter_tuning, iter_holdout, iter_nofall) closures bound to the
-    real p1 module. `scenario_registry` here maps group label -> LIST of
-    p1.SCENARIOS tuples (all ids from SCENARIO_TO_GROUP that map to that
-    group) -- each condition draws a random one from the list, so e.g. the
-    'unknown' group's holdout set genuinely spans push/45, push/315,
-    low_friction, and the actuator faults, not just one stand-in."""
+    real p1 module and a filled scenario_registry (see SCENARIO_INDEX_MAP)."""
 
     def _sample(scenario: str, bin_name: str, n: int, seed_tag: str, nofall: bool = False) -> List[dict]:
-        candidates = scenario_registry[scenario]
+        scen_id, category, fn_name, nominal_dir = scenario_registry[scenario]
+        lo, hi = p1.MAGNITUDE_RANGES[fn_name]
         rng = np.random.default_rng(abs(hash((scenario, bin_name, seed_tag))) % (2**32))
-        conds: List[dict] = []
         if nofall:
-            scen_id, category, fn_name, nominal_dir = candidates[0]
-            conds.append({"scenario_tuple": candidates[0], "magnitude": 0.0,
-                         "direction_deg": float(nominal_dir or 0.0), "timing_phase_s": 0.3})
+            # sub-threshold: below the calibrated ~onset magnitude `lo` (recall
+            # calibrate_magnitude sets lo ~= crossover*0.5, i.e. already a
+            # below-the-fall-rate-target point) plus one true standing case.
+            mag_lo, mag_hi = 0.0, 0.5 * lo
+            conds = [{"magnitude": 0.0, "direction_deg": float(nominal_dir or 0.0), "timing_phase_s": 0.3}]
             n -= 1
+        else:
+            f0, f1 = BIN_MAGNITUDE_FRACTIONS[bin_name]
+            mag_lo, mag_hi = lo + f0 * (hi - lo), lo + f1 * (hi - lo)
+            conds = []
         for _ in range(n):
-            scen_tuple = candidates[int(rng.integers(len(candidates)))]
-            scen_id, category, fn_name, nominal_dir = scen_tuple
-            lo, hi = p1.MAGNITUDE_RANGES[fn_name]
-            if nofall:
-                mag = float(rng.uniform(0.0, 0.5 * lo))
-            else:
-                f0, f1 = BIN_MAGNITUDE_FRACTIONS[bin_name]
-                mag = float(rng.uniform(lo + f0 * (hi - lo), lo + f1 * (hi - lo)))
+            mag = float(rng.uniform(mag_lo, mag_hi))
             timing = float(rng.uniform(0.0, 0.8))
-            direction = float((nominal_dir + rng.choice(JITTERS_DEG)) % 360) if nominal_dir is not None else 0.0
-            conds.append({"scenario_tuple": scen_tuple, "magnitude": mag,
-                         "direction_deg": direction, "timing_phase_s": timing})
+            if nominal_dir is not None:
+                direction = float((nominal_dir + rng.choice(JITTERS_DEG)) % 360)
+            else:
+                direction = 0.0
+            conds.append({"magnitude": mag, "direction_deg": direction, "timing_phase_s": timing})
         return conds
 
     def iter_tuning(scenario: str, bin_name: str) -> List[dict]:
         return _sample(scenario, bin_name, 6, "tune")
 
     def iter_holdout(scenario: str, bin_name: str) -> List[dict]:
-        return _sample(scenario, bin_name, 24, "holdout")  # was 14 -- more raw draws so even a low
-                                                            # genuine-fall rate still yields enough evidence
+        return _sample(scenario, bin_name, 14, "holdout")
 
     def iter_nofall(scenario: str, bin_name: str) -> List[dict]:
         return _sample(scenario, bin_name, 10, "nofall", nofall=True)
 
     return iter_tuning, iter_holdout, iter_nofall
-
-
-# Per-bin gate configs. 'low' severity is, by construction, BELOW your own
-# calibrate_magnitude()'s 50%-fall crossover (calibrated_lo = crossover*0.5)
-# -- genuine falls are inherently rarer there, so demanding the same evidence
-# count as 'high' just produces spurious "insufficient evidence" -> stand
-# results for a bin where stand is often the physically correct answer
-# anyway. 'mid'/'high' keep the strict default -- that's where a pose
-# actually needs to prove itself.                                  [CONFIRM]
-GATE_CONFIG_BY_BIN: Dict[str, GateConfig] = {
-    "low": GateConfig(min_fall_trials=6),
-    "mid": GateConfig(min_fall_trials=10),
-    "high": GateConfig(),  # default min_fall_trials=12
-}
 
 
 # =============================================================================
@@ -306,15 +244,6 @@ GATE_CONFIG_BY_BIN: Dict[str, GateConfig] = {
 def make_objective(spec: ValiditySpec, tmpl: Template, side: str, scenario: str, bin_name: str,
                    run_trial: Callable, iter_tuning: Callable) -> Callable[[np.ndarray], float]:
     conditions = iter_tuning(scenario, bin_name)
-    # Pre-check which sampled conditions actually produce a natural fall when
-    # unprotected (ctrl=stand). Scoring against conditions that never fall
-    # rewards depth~=0 trivially (see validity_spec.evaluate_gate's docstring
-    # for the same failure mode found live in the "low" velocity bins). If
-    # NONE of the sampled conditions naturally fall, this bin's magnitude
-    # range is too low for this scenario -- fall back to scoring all of them
-    # (better than crashing) but this is a strong signal to widen the bin.
-    falling = [c for c in conditions if run_trial(spec, spec.stand_ctrl, scenario, c).fell]
-    use_conditions = falling if falling else conditions
 
     def objective(x: np.ndarray) -> float:
         ctrl = params_to_ctrl(spec, tmpl, x, side)
@@ -322,7 +251,7 @@ def make_objective(spec: ValiditySpec, tmpl: Template, side: str, scenario: str,
         if v:
             return 1e6  # should never trigger given clamped templates; safety net only
         scores = []
-        for cond in use_conditions:
+        for cond in conditions:
             r = run_trial(spec, ctrl, scenario, cond)
             scores.append(weighted_force(r.peaks))
         return float(np.mean(scores))
@@ -383,18 +312,17 @@ def gate_pose(spec: ValiditySpec, tmpl: Template, side: str, x: np.ndarray, scen
 
 def build_library(spec: ValiditySpec, run_trial: Callable, iter_tuning: Callable,
                   iter_holdout: Callable, iter_nofall: Callable,
-                  popsize: int, maxiter: int, cfg: Optional[GateConfig] = None) -> dict:
+                  popsize: int, maxiter: int, cfg: GateConfig) -> dict:
     library: Dict[str, dict] = {}
     for scenario, tmpl_name, side in PLAN:
         tmpl = TEMPLATES[tmpl_name]
         for bin_name in VELOCITY_BINS:
             key = f"{scenario}/{bin_name}"
-            bin_cfg = cfg if cfg is not None else GATE_CONFIG_BY_BIN[bin_name]
             t0 = time.time()
             x = tune_pose(spec, tmpl, side, scenario, bin_name, run_trial, iter_tuning,
                          popsize=popsize, maxiter=maxiter)
             report, ctrl = gate_pose(spec, tmpl, side, x, scenario, bin_name,
-                                     run_trial, iter_holdout, iter_nofall, bin_cfg)
+                                     run_trial, iter_holdout, iter_nofall, cfg)
             static_v = check_pose_ctrl(spec, ctrl)
             kind, final_ctrl = decide(ctrl, static_v, report, spec.stand_ctrl)
             library[key] = {
@@ -422,8 +350,8 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--model", required=True)
     ap.add_argument("--out", default="pose_library.json")
-    ap.add_argument("--popsize", type=int, default=12)
-    ap.add_argument("--maxiter", type=int, default=40)
+    ap.add_argument("--popsize", type=int, default=8)
+    ap.add_argument("--maxiter", type=int, default=25)
     ap.add_argument("--mock", action="store_true", help="use the built-in mock trial fn to test the pipeline")
     ap.add_argument("--live", action="store_true", help="use the real harness via make_run_trial (see SCENARIO_REGISTRY)")
     args = ap.parse_args(argv)
@@ -436,34 +364,41 @@ def main(argv=None) -> int:
                                   iter_holdout_conditions_MOCK, iter_nofall_conditions_MOCK)
         print("*** MOCK MODE: physics is fake, this only exercises CMA-ES + gate wiring ***\n")
     elif args.live:
-        import generate_fall_dataset_final as p1
-        from phase3_pose_jerk_v7 import (
-            snapshot_model_state,
-            load_instrumented_model,
-            impact_body_ids,
-        )
-        id_to_tuple = {t[0]: t for t in p1.SCENARIOS}
-        registry = {group: [id_to_tuple[sid] for sid in ids]
-                   for group, ids in group_scenario_ids(p1).items()}
-        missing_groups = [label for label, _, _ in PLAN if label not in registry]
-        if missing_groups:
-            print(f"SCENARIO_TO_GROUP has no scenarios mapped to: {missing_groups} -- "
-                 "every PLAN group needs at least one entry. Exiting.")
-            return 1
-        model = load_instrumented_model(args.model)
+            import generate_fall_dataset_final as p1
+            from phase3_pose_jerk_v7 import (
+                snapshot_model_state,
+                load_instrumented_model,
+                impact_body_ids,
+            )
 
-        impact_ids = impact_body_ids(model)
-        snapshot = snapshot_model_state(model)
-        run_trial = make_run_trial(model, p1, impact_ids, snapshot)
-        it, ih, inf = make_condition_iters(p1, registry)
-        print("*** LIVE MODE *** -- verify SCENARIO_TO_GROUP's assignments match your intent "
-             "(esp. the 'unknown' catch-all group) before trusting output.\n")
+            model = load_instrumented_model(args.model)
+
+            registry = {
+                label: p1.SCENARIOS[idx]
+                for label, idx in SCENARIO_INDEX_MAP.items()
+            }
+
+            impact_ids = impact_body_ids(model)
+            snapshot = snapshot_model_state(model)
+
+            run_trial = make_run_trial(
+                model, p1, impact_ids, snapshot, registry
+            )
+
+            it, ih, inf = make_condition_iters(p1, registry)
+
+            print(
+                "*** LIVE MODE *** -- verify SCENARIO_INDEX_MAP picks the scenarios "
+                "you intend (esp. 'floor_tilt' -> floor_tilt_roll, not _pitch) "
+                "before trusting output.\n"
+            )
     else:
         print("Pass --mock to test the pipeline, or --live to run against your real harness "
              "(after filling in SCENARIO_REGISTRY and the condition iterators). Exiting.")
         return 1
 
-    library = build_library(spec, run_trial, it, ih, inf, args.popsize, args.maxiter, cfg=None)
+    cfg = GateConfig()
+    library = build_library(spec, run_trial, it, ih, inf, args.popsize, args.maxiter, cfg)
 
     n_pose = sum(1 for v in library.values() if v["kind"] == "pose")
     print(f"\n{n_pose}/{len(library)} bins produced a pose; {len(library)-n_pose} fell back to 'stand'.")

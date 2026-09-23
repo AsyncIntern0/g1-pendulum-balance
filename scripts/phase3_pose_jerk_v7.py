@@ -1320,7 +1320,7 @@ def main():
         import importlib
         p1 = importlib.import_module(args.p1_module)
     except ImportError:
-        import generate_fall_dataset as p1
+        import generate_fall_dataset_final as p1
         args.p1_module = "generate_fall_dataset"
 
     required_p1 = ("SCENARIOS", "MAGNITUDE_RANGES", "SCENARIO_BUILDERS",

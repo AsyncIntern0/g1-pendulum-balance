@@ -192,13 +192,6 @@ PLAN: List[Tuple[str, str, str]] = [
     ("floor_tilt", "widen_crouch", "both"),
     ("left", "step_recover", "left"),
     ("right", "step_recover", "right"),
-    # Generic fallback for any TCN-predicted cause that doesn't map cleanly
-    # to one of the 6 directional groups above (ambiguous direction, or
-    # direction genuinely unknowable ahead of time -- see SCENARIO_TO_GROUP
-    # in build_pose_library.py). lower_squat is direction-agnostic: knee
-    # flexion helps regardless of which way the fall is going, even if it
-    # helps less than a direction-matched pose would.
-    ("unknown", "lower_squat", "both"),
 ]
 
 

@@ -63,16 +63,6 @@ ENVELOPE_DEG: Dict[str, Dict[str, object]] = {
 STAND_MARGIN_DEG = 5.0
 
 # Transition (minimum-jerk, Flash & Hogan): peak speed = 1.875 * delta / T.
-# MUST match phase3_pose_jerk_v7.py's POSE_TRANSITION_BUDGET_S exactly -- this
-# constant only checks the trajectory's SPEED requirement; the actual
-# trajectory shape/timing used during simulation comes from that other
-# constant. If they diverge, this check validates against a transition time
-# that isn't the one actually commanded on the robot, and every tracking-
-# error / speed-limit result becomes meaningless. If several bins are
-# failing tracking_error narrowly (0.15-0.25 rad vs the 0.15 limit) at HIGH
-# velocity specifically, consider raising both constants together (e.g. to
-# 0.35-0.40s) rather than one alone -- but confirm with your mentor first,
-# since this is a real patient-facing timing change, not just a code knob.
 T_TRANSITION_S = 0.30
 # Confirmed max SAFE COMMANDED velocity while bearing a patient's leg (2026-09).
 # NOTE: a much larger figure (~100-300 rad/s) was separately proposed; do not
@@ -450,29 +440,14 @@ class GateReport:
 def evaluate_gate(fall_pairs: List[Tuple[TrialResult, TrialResult]],
                   nofall_pairs: List[Tuple[TrialResult, TrialResult]],
                   cfg: GateConfig = GateConfig()) -> GateReport:
-    """fall_pairs   : (unprotected, protected) for HELD-OUT conditions meant to
-                      contain natural falls -- but a bin's magnitude range may
-                      still sample some conditions where the unprotected robot
-                      doesn't actually fall. Only the subset where u.fell is
-                      True is used below ("genuine" fall pairs): scoring a
-                      reduction as 1 - p.score/u.score against a near-zero
-                      u.score (no real fall) trivially reports ~100%
-                      "reduction" for a pose that did nothing, which is
-                      exactly the failure mode found in practice (2026-09) --
-                      several low-velocity bins picked depth~=0 and passed
-                      with "0 N vs 0 N" on every force check. That is a
-                      vacuous pass, not a validated pose.
-       nofall_pairs : (unprotected, protected) for standing / sub-threshold
-                      conditions where the unprotected robot does NOT fall
-                      (this is the false-alarm / do-no-harm set)."""
+    """fall_pairs   : (unprotected, protected) for HELD-OUT conditions where a natural fall occurs.
+       nofall_pairs : (unprotected, protected) for standing / sub-threshold conditions where the
+                      unprotected robot does NOT fall (this is the false-alarm / do-no-harm set)."""
     checks: Dict[str, Tuple[bool, str]] = {}
 
-    genuine_fall_pairs = [(u, p) for u, p in fall_pairs if u.fell]
-    n_f, n_n = len(genuine_fall_pairs), len(nofall_pairs)
+    n_f, n_n = len(fall_pairs), len(nofall_pairs)
     checks["evidence"] = (n_f >= cfg.min_fall_trials and n_n >= cfg.min_nofall_trials,
-                          f"{n_f}/{len(fall_pairs)} held-out conditions produced a genuine "
-                          f"unprotected fall (need >= {cfg.min_fall_trials}), {n_n} no-fall pairs "
-                          f"(need {cfg.min_nofall_trials})")
+                          f"{n_f} fall pairs (need {cfg.min_fall_trials}), {n_n} no-fall pairs (need {cfg.min_nofall_trials})")
 
     if n_n:
         new_falls = sum(1 for u, p in nofall_pairs if p.fell and not u.fell)
@@ -480,24 +455,24 @@ def evaluate_gate(fall_pairs: List[Tuple[TrialResult, TrialResult]],
         checks["do_no_harm"] = (rate <= cfg.max_new_fall_rate,
                                 f"pose caused a fall in {new_falls}/{n_n} cases the robot would have survived (limit {cfg.max_new_fall_rate:.0%})")
     if n_f:
-        red = np.array([1.0 - p.score / max(u.score, 1e-6) for u, p in genuine_fall_pairs])
+        red = np.array([1.0 - p.score / max(u.score, 1e-6) for u, p in fall_pairs])
         med = float(np.median(red))
         checks["median_reduction"] = (med >= cfg.min_median_reduction,
-                                      f"median weighted-force reduction {med:.1%} (need >= {cfg.min_median_reduction:.0%}, over {n_f} genuine falls)")
-        reg = float(np.mean([p.score > u.score * (1 + cfg.regression_tol) for u, p in genuine_fall_pairs]))
+                                      f"median weighted-force reduction {med:.1%} (need >= {cfg.min_median_reduction:.0%})")
+        reg = float(np.mean([p.score > u.score * (1 + cfg.regression_tol) for u, p in fall_pairs]))
         checks["regressions"] = (reg <= cfg.max_regression_frac,
                                  f"{reg:.0%} of conditions worse than unprotected (limit {cfg.max_regression_frac:.0%})")
-        hu = float(np.median([u.peaks.get("head", 0.0) for u, _ in genuine_fall_pairs]))
-        hp = float(np.median([p.peaks.get("head", 0.0) for _, p in genuine_fall_pairs]))
+        hu = float(np.median([u.peaks.get("head", 0.0) for u, _ in fall_pairs]))
+        hp = float(np.median([p.peaks.get("head", 0.0) for _, p in fall_pairs]))
         checks["head_not_worse"] = (hp <= hu * (1 + cfg.head_tol_frac) + cfg.head_slack_n,
                                     f"median head force {hp:.0f} N vs unprotected {hu:.0f} N")
-        prot_fell = [p for _, p in genuine_fall_pairs if p.fell]
+        prot_fell = [p for _, p in fall_pairs if p.fell]
         if prot_fell:
             fr = float(np.mean([p.first_contact_class == "knee_shank" for p in prot_fell]))
             checks["fragile_first_contact"] = (fr <= cfg.max_fragile_first_contact_frac,
                                                f"knee/shank hits the floor first in {fr:.0%} of protected falls "
                                                f"(limit {cfg.max_fragile_first_contact_frac:.0%})")
-        te = float(np.median([p.tracking_err_rad for _, p in genuine_fall_pairs]))
+        te = float(np.median([p.tracking_err_rad for _, p in fall_pairs]))
         checks["tracking_error"] = (te <= cfg.max_median_tracking_err_rad,
                                     f"median peak tracking error {te:.3f} rad (limit {cfg.max_median_tracking_err_rad:.2f})")
 

@@ -28,35 +28,15 @@
     "gate_checks": {
       "evidence": {
         "ok": false,
-        "msg": "2/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "0/24 held-out conditions produced a genuine unprotected fall (need >= 6), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
         "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
-      },
-      "median_reduction": {
-        "ok": false,
-        "msg": "median weighted-force reduction 0.0% (need >= 15%, over 2 genuine falls)"
-      },
-      "regressions": {
-        "ok": true,
-        "msg": "0% of conditions worse than unprotected (limit 20%)"
-      },
-      "head_not_worse": {
-        "ok": true,
-        "msg": "median head force 2481 N vs unprotected 2481 N"
-      },
-      "fragile_first_contact": {
-        "ok": true,
-        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
-      },
-      "tracking_error": {
-        "ok": true,
-        "msg": "median peak tracking error 0.028 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 10.0
+    "tuning_seconds": 16.4
   },
   "forward/mid": {
     "scenario": "forward",
@@ -64,38 +44,38 @@
     "template": "lower_squat",
     "side": "both",
     "params": {
-      "depth": 0.13333333333333333
+      "depth": 0.16129032258064516
     },
     "pose_ctrl": [
       0.0,
       0.0,
+      0.021112853854770113,
       0.0,
       0.0,
+      0.36537568580553703,
+      -0.002935582613040423,
       0.0,
-      0.1,
-      -0.05,
+      0.021112853854770113,
       0.0,
       0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
+      0.36537568580553703,
+      -0.002935582613040423,
       0.0
     ],
-    "kind": "stand",
-    "gate_passed": false,
+    "kind": "pose",
+    "gate_passed": true,
     "gate_checks": {
       "evidence": {
-        "ok": false,
-        "msg": "11/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "ok": true,
+        "msg": "14/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
         "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
       },
       "median_reduction": {
-        "ok": false,
-        "msg": "median weighted-force reduction 13.3% (need >= 15%, over 11 genuine falls)"
+        "ok": true,
+        "msg": "median weighted-force reduction 15.2% (need >= 15%, over 14 genuine falls)"
       },
       "regressions": {
         "ok": true,
@@ -103,7 +83,7 @@
       },
       "head_not_worse": {
         "ok": true,
-        "msg": "median head force 2228 N vs unprotected 2587 N"
+        "msg": "median head force 2265 N vs unprotected 2591 N"
       },
       "fragile_first_contact": {
         "ok": true,
@@ -111,11 +91,11 @@
       },
       "tracking_error": {
         "ok": true,
-        "msg": "median peak tracking error 0.052 rad (limit 0.15)"
+        "msg": "median peak tracking error 0.065 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 9.0
+    "tuning_seconds": 14.9
   },
   "forward/high": {
     "scenario": "forward",
@@ -123,7 +103,7 @@
     "template": "lower_squat",
     "side": "both",
     "params": {
-      "depth": 0.13333333333333333
+      "depth": 0.12903225806451613
     },
     "pose_ctrl": [
       0.0,
@@ -146,7 +126,7 @@
     "gate_checks": {
       "evidence": {
         "ok": true,
-        "msg": "14/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "23/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
@@ -154,27 +134,27 @@
       },
       "median_reduction": {
         "ok": false,
-        "msg": "median weighted-force reduction 12.8% (need >= 15%, over 14 genuine falls)"
+        "msg": "median weighted-force reduction 11.9% (need >= 15%, over 23 genuine falls)"
       },
       "regressions": {
         "ok": true,
-        "msg": "0% of conditions worse than unprotected (limit 20%)"
+        "msg": "4% of conditions worse than unprotected (limit 20%)"
       },
       "head_not_worse": {
         "ok": true,
-        "msg": "median head force 2296 N vs unprotected 2610 N"
+        "msg": "median head force 2358 N vs unprotected 2609 N"
       },
       "fragile_first_contact": {
         "ok": false,
-        "msg": "knee/shank hits the floor first in 7% of protected falls (limit 5%)"
+        "msg": "knee/shank hits the floor first in 9% of protected falls (limit 5%)"
       },
       "tracking_error": {
         "ok": true,
-        "msg": "median peak tracking error 0.052 rad (limit 0.15)"
+        "msg": "median peak tracking error 0.068 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 10.5
+    "tuning_seconds": 19.9
   },
   "backward/low": {
     "scenario": "backward",
@@ -182,7 +162,7 @@
     "template": "lower_squat",
     "side": "both",
     "params": {
-      "depth": 0.26666666666666666
+      "depth": 0.3548387096774194
     },
     "pose_ctrl": [
       0.0,
@@ -204,8 +184,8 @@
     "gate_passed": false,
     "gate_checks": {
       "evidence": {
-        "ok": false,
-        "msg": "8/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "ok": true,
+        "msg": "14/24 held-out conditions produced a genuine unprotected fall (need >= 6), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
@@ -213,7 +193,7 @@
       },
       "median_reduction": {
         "ok": false,
-        "msg": "median weighted-force reduction 10.8% (need >= 15%, over 8 genuine falls)"
+        "msg": "median weighted-force reduction 9.5% (need >= 15%, over 14 genuine falls)"
       },
       "regressions": {
         "ok": true,
@@ -221,19 +201,19 @@
       },
       "head_not_worse": {
         "ok": false,
-        "msg": "median head force 4067 N vs unprotected 3116 N"
+        "msg": "median head force 4124 N vs unprotected 3111 N"
       },
       "fragile_first_contact": {
         "ok": true,
         "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
       },
       "tracking_error": {
-        "ok": true,
-        "msg": "median peak tracking error 0.126 rad (limit 0.15)"
+        "ok": false,
+        "msg": "median peak tracking error 0.164 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 7.9
+    "tuning_seconds": 10.7
   },
   "backward/mid": {
     "scenario": "backward",
@@ -241,7 +221,7 @@
     "template": "lower_squat",
     "side": "both",
     "params": {
-      "depth": 0.26666666666666666
+      "depth": 0.25806451612903225
     },
     "pose_ctrl": [
       0.0,
@@ -264,7 +244,7 @@
     "gate_checks": {
       "evidence": {
         "ok": true,
-        "msg": "14/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
@@ -272,7 +252,7 @@
       },
       "median_reduction": {
         "ok": false,
-        "msg": "median weighted-force reduction 9.3% (need >= 15%, over 14 genuine falls)"
+        "msg": "median weighted-force reduction 10.3% (need >= 15%, over 24 genuine falls)"
       },
       "regressions": {
         "ok": true,
@@ -280,406 +260,7 @@
       },
       "head_not_worse": {
         "ok": false,
-        "msg": "median head force 4147 N vs unprotected 3152 N"
-      },
-      "fragile_first_contact": {
-        "ok": true,
-        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
-      },
-      "tracking_error": {
-        "ok": true,
-        "msg": "median peak tracking error 0.126 rad (limit 0.15)"
-      }
-    },
-    "static_violations": [],
-    "tuning_seconds": 11.9
-  },
-  "backward/high": {
-    "scenario": "backward",
-    "velocity_bin": "high",
-    "template": "lower_squat",
-    "side": "both",
-    "params": {
-      "depth": 0.4666666666666667
-    },
-    "pose_ctrl": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0
-    ],
-    "kind": "stand",
-    "gate_passed": false,
-    "gate_checks": {
-      "evidence": {
-        "ok": true,
-        "msg": "14/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
-      },
-      "do_no_harm": {
-        "ok": true,
-        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
-      },
-      "median_reduction": {
-        "ok": false,
-        "msg": "median weighted-force reduction 5.2% (need >= 15%, over 14 genuine falls)"
-      },
-      "regressions": {
-        "ok": true,
-        "msg": "0% of conditions worse than unprotected (limit 20%)"
-      },
-      "head_not_worse": {
-        "ok": false,
-        "msg": "median head force 4344 N vs unprotected 3174 N"
-      },
-      "fragile_first_contact": {
-        "ok": true,
-        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
-      },
-      "tracking_error": {
-        "ok": false,
-        "msg": "median peak tracking error 0.210 rad (limit 0.15)"
-      }
-    },
-    "static_violations": [],
-    "tuning_seconds": 11.0
-  },
-  "sudden_load/low": {
-    "scenario": "sudden_load",
-    "velocity_bin": "low",
-    "template": "widen_crouch",
-    "side": "both",
-    "params": {
-      "depth": 0.48084323500814896,
-      "width": 0.41898578445796153
-    },
-    "pose_ctrl": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0
-    ],
-    "kind": "stand",
-    "gate_passed": false,
-    "gate_checks": {
-      "evidence": {
-        "ok": false,
-        "msg": "1/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
-      },
-      "do_no_harm": {
-        "ok": true,
-        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
-      },
-      "median_reduction": {
-        "ok": false,
-        "msg": "median weighted-force reduction 4.7% (need >= 15%, over 1 genuine falls)"
-      },
-      "regressions": {
-        "ok": true,
-        "msg": "0% of conditions worse than unprotected (limit 20%)"
-      },
-      "head_not_worse": {
-        "ok": false,
-        "msg": "median head force 6476 N vs unprotected 5714 N"
-      },
-      "fragile_first_contact": {
-        "ok": true,
-        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
-      },
-      "tracking_error": {
-        "ok": false,
-        "msg": "median peak tracking error 0.173 rad (limit 0.15)"
-      }
-    },
-    "static_violations": [],
-    "tuning_seconds": 9.8
-  },
-  "sudden_load/mid": {
-    "scenario": "sudden_load",
-    "velocity_bin": "mid",
-    "template": "widen_crouch",
-    "side": "both",
-    "params": {
-      "depth": 0.15653885599880937,
-      "width": 0.992006865168291
-    },
-    "pose_ctrl": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0
-    ],
-    "kind": "stand",
-    "gate_passed": false,
-    "gate_checks": {
-      "evidence": {
-        "ok": false,
-        "msg": "3/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
-      },
-      "do_no_harm": {
-        "ok": true,
-        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
-      },
-      "median_reduction": {
-        "ok": false,
-        "msg": "median weighted-force reduction 4.2% (need >= 15%, over 3 genuine falls)"
-      },
-      "regressions": {
-        "ok": true,
-        "msg": "0% of conditions worse than unprotected (limit 20%)"
-      },
-      "head_not_worse": {
-        "ok": false,
-        "msg": "median head force 3815 N vs unprotected 1764 N"
-      },
-      "fragile_first_contact": {
-        "ok": true,
-        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
-      },
-      "tracking_error": {
-        "ok": false,
-        "msg": "median peak tracking error 0.383 rad (limit 0.15)"
-      }
-    },
-    "static_violations": [],
-    "tuning_seconds": 46.3
-  },
-  "sudden_load/high": {
-    "scenario": "sudden_load",
-    "velocity_bin": "high",
-    "template": "widen_crouch",
-    "side": "both",
-    "params": {
-      "depth": 0.021708452128030013,
-      "width": 0.9149610119940883
-    },
-    "pose_ctrl": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0
-    ],
-    "kind": "stand",
-    "gate_passed": false,
-    "gate_checks": {
-      "evidence": {
-        "ok": true,
-        "msg": "14/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
-      },
-      "do_no_harm": {
-        "ok": true,
-        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
-      },
-      "median_reduction": {
-        "ok": false,
-        "msg": "median weighted-force reduction 4.7% (need >= 15%, over 14 genuine falls)"
-      },
-      "regressions": {
-        "ok": true,
-        "msg": "0% of conditions worse than unprotected (limit 20%)"
-      },
-      "head_not_worse": {
-        "ok": true,
-        "msg": "median head force 7020 N vs unprotected 7040 N"
-      },
-      "fragile_first_contact": {
-        "ok": true,
-        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
-      },
-      "tracking_error": {
-        "ok": false,
-        "msg": "median peak tracking error 0.246 rad (limit 0.15)"
-      }
-    },
-    "static_violations": [],
-    "tuning_seconds": 77.3
-  },
-  "floor_tilt/low": {
-    "scenario": "floor_tilt",
-    "velocity_bin": "low",
-    "template": "widen_crouch",
-    "side": "both",
-    "params": {
-      "depth": 0.5370113687443046,
-      "width": 0.8086312375893214
-    },
-    "pose_ctrl": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0
-    ],
-    "kind": "stand",
-    "gate_passed": false,
-    "gate_checks": {
-      "evidence": {
-        "ok": false,
-        "msg": "0/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
-      },
-      "do_no_harm": {
-        "ok": true,
-        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
-      }
-    },
-    "static_violations": [],
-    "tuning_seconds": 6.6
-  },
-  "floor_tilt/mid": {
-    "scenario": "floor_tilt",
-    "velocity_bin": "mid",
-    "template": "widen_crouch",
-    "side": "both",
-    "params": {
-      "depth": 0.2556046539424536,
-      "width": 0.015585756889838206
-    },
-    "pose_ctrl": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0
-    ],
-    "kind": "stand",
-    "gate_passed": false,
-    "gate_checks": {
-      "evidence": {
-        "ok": false,
-        "msg": "6/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
-      },
-      "do_no_harm": {
-        "ok": true,
-        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
-      },
-      "median_reduction": {
-        "ok": false,
-        "msg": "median weighted-force reduction 9.6% (need >= 15%, over 6 genuine falls)"
-      },
-      "regressions": {
-        "ok": true,
-        "msg": "0% of conditions worse than unprotected (limit 20%)"
-      },
-      "head_not_worse": {
-        "ok": true,
-        "msg": "median head force 2296 N vs unprotected 2170 N"
-      },
-      "fragile_first_contact": {
-        "ok": true,
-        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
-      },
-      "tracking_error": {
-        "ok": true,
-        "msg": "median peak tracking error 0.125 rad (limit 0.15)"
-      }
-    },
-    "static_violations": [],
-    "tuning_seconds": 34.7
-  },
-  "floor_tilt/high": {
-    "scenario": "floor_tilt",
-    "velocity_bin": "high",
-    "template": "widen_crouch",
-    "side": "both",
-    "params": {
-      "depth": 0.25660162453224045,
-      "width": 0.0004618644843384507
-    },
-    "pose_ctrl": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.1,
-      -0.05,
-      0.0
-    ],
-    "kind": "stand",
-    "gate_passed": false,
-    "gate_checks": {
-      "evidence": {
-        "ok": true,
-        "msg": "13/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
-      },
-      "do_no_harm": {
-        "ok": true,
-        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
-      },
-      "median_reduction": {
-        "ok": false,
-        "msg": "median weighted-force reduction 8.7% (need >= 15%, over 13 genuine falls)"
-      },
-      "regressions": {
-        "ok": true,
-        "msg": "0% of conditions worse than unprotected (limit 20%)"
-      },
-      "head_not_worse": {
-        "ok": true,
-        "msg": "median head force 2426 N vs unprotected 2365 N"
+        "msg": "median head force 4094 N vs unprotected 3136 N"
       },
       "fragile_first_contact": {
         "ok": true,
@@ -691,7 +272,386 @@
       }
     },
     "static_violations": [],
-    "tuning_seconds": 93.9
+    "tuning_seconds": 21.2
+  },
+  "backward/high": {
+    "scenario": "backward",
+    "velocity_bin": "high",
+    "template": "lower_squat",
+    "side": "both",
+    "params": {
+      "depth": 0.25806451612903225
+    },
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "kind": "stand",
+    "gate_passed": false,
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": false,
+        "msg": "median weighted-force reduction 10.6% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": false,
+        "msg": "median head force 4194 N vs unprotected 3214 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.122 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "tuning_seconds": 19.4
+  },
+  "sudden_load/low": {
+    "scenario": "sudden_load",
+    "velocity_bin": "low",
+    "template": "widen_crouch",
+    "side": "both",
+    "params": {
+      "depth": 0.8080128410226951,
+      "width": 0.5407597587122741
+    },
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "kind": "stand",
+    "gate_passed": false,
+    "gate_checks": {
+      "evidence": {
+        "ok": false,
+        "msg": "0/24 held-out conditions produced a genuine unprotected fall (need >= 6), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      }
+    },
+    "static_violations": [],
+    "tuning_seconds": 11.5
+  },
+  "sudden_load/mid": {
+    "scenario": "sudden_load",
+    "velocity_bin": "mid",
+    "template": "widen_crouch",
+    "side": "both",
+    "params": {
+      "depth": 0.01300271505450903,
+      "width": 0.42637148356804805
+    },
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "kind": "stand",
+    "gate_passed": false,
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "14/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": false,
+        "msg": "median weighted-force reduction 3.8% (need >= 15%, over 14 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 6371 N vs unprotected 6354 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.114 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "tuning_seconds": 142.8
+  },
+  "sudden_load/high": {
+    "scenario": "sudden_load",
+    "velocity_bin": "high",
+    "template": "widen_crouch",
+    "side": "both",
+    "params": {
+      "depth": 0.18684671690899074,
+      "width": 0.7049832595889914
+    },
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "kind": "stand",
+    "gate_passed": false,
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": false,
+        "msg": "median weighted-force reduction 4.9% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "12% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 7351 N vs unprotected 7269 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": false,
+        "msg": "median peak tracking error 0.191 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "tuning_seconds": 166.0
+  },
+  "floor_tilt/low": {
+    "scenario": "floor_tilt",
+    "velocity_bin": "low",
+    "template": "widen_crouch",
+    "side": "both",
+    "params": {
+      "depth": 0.7176530974727747,
+      "width": 0.44641543909502307
+    },
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "kind": "stand",
+    "gate_passed": false,
+    "gate_checks": {
+      "evidence": {
+        "ok": false,
+        "msg": "0/24 held-out conditions produced a genuine unprotected fall (need >= 6), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      }
+    },
+    "static_violations": [],
+    "tuning_seconds": 10.6
+  },
+  "floor_tilt/mid": {
+    "scenario": "floor_tilt",
+    "velocity_bin": "mid",
+    "template": "widen_crouch",
+    "side": "both",
+    "params": {
+      "depth": 0.2861281918869818,
+      "width": 0.026901749100656795
+    },
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "kind": "stand",
+    "gate_passed": false,
+    "gate_checks": {
+      "evidence": {
+        "ok": false,
+        "msg": "8/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": false,
+        "msg": "median weighted-force reduction 8.8% (need >= 15%, over 8 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": false,
+        "msg": "median head force 2349 N vs unprotected 2172 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.137 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "tuning_seconds": 150.0
+  },
+  "floor_tilt/high": {
+    "scenario": "floor_tilt",
+    "velocity_bin": "high",
+    "template": "widen_crouch",
+    "side": "both",
+    "params": {
+      "depth": 0.29235367604492124,
+      "width": 0.0005055799867249743
+    },
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "kind": "stand",
+    "gate_passed": false,
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "23/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": false,
+        "msg": "median weighted-force reduction 8.8% (need >= 15%, over 23 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 2453 N vs unprotected 2350 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.137 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "tuning_seconds": 239.0
   },
   "left/low": {
     "scenario": "left",
@@ -699,8 +659,8 @@
     "template": "step_recover",
     "side": "left",
     "params": {
-      "depth": 0.3288056494745213,
-      "step": 0.20090316972055697
+      "depth": 0.45101276130827195,
+      "step": 0.44507547450494217
     },
     "pose_ctrl": [
       0.0,
@@ -723,15 +683,35 @@
     "gate_checks": {
       "evidence": {
         "ok": false,
-        "msg": "0/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "1/24 held-out conditions produced a genuine unprotected fall (need >= 6), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
         "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": false,
+        "msg": "median weighted-force reduction -6.8% (need >= 15%, over 1 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": false,
+        "msg": "median head force 2860 N vs unprotected 2567 N"
+      },
+      "fragile_first_contact": {
+        "ok": false,
+        "msg": "knee/shank hits the floor first in 100% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": false,
+        "msg": "median peak tracking error 0.180 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 7.3
+    "tuning_seconds": 12.3
   },
   "left/mid": {
     "scenario": "left",
@@ -739,8 +719,8 @@
     "template": "step_recover",
     "side": "left",
     "params": {
-      "depth": 0.1777495421654077,
-      "step": 0.5590441470809981
+      "depth": 0.061297993287117575,
+      "step": 0.3693480872353522
     },
     "pose_ctrl": [
       0.0,
@@ -763,35 +743,35 @@
     "gate_checks": {
       "evidence": {
         "ok": false,
-        "msg": "2/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "7/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
         "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
       },
       "median_reduction": {
-        "ok": false,
-        "msg": "median weighted-force reduction 11.9% (need >= 15%, over 2 genuine falls)"
+        "ok": true,
+        "msg": "median weighted-force reduction 23.0% (need >= 15%, over 7 genuine falls)"
       },
       "regressions": {
         "ok": true,
         "msg": "0% of conditions worse than unprotected (limit 20%)"
       },
       "head_not_worse": {
-        "ok": false,
-        "msg": "median head force 2879 N vs unprotected 2395 N"
+        "ok": true,
+        "msg": "median head force 2320 N vs unprotected 2586 N"
       },
       "fragile_first_contact": {
-        "ok": true,
-        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+        "ok": false,
+        "msg": "knee/shank hits the floor first in 43% of protected falls (limit 5%)"
       },
       "tracking_error": {
         "ok": true,
-        "msg": "median peak tracking error 0.149 rad (limit 0.15)"
+        "msg": "median peak tracking error 0.081 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 37.1
+    "tuning_seconds": 101.5
   },
   "left/high": {
     "scenario": "left",
@@ -799,8 +779,8 @@
     "template": "step_recover",
     "side": "left",
     "params": {
-      "depth": 0.009617146254534784,
-      "step": 0.8295630604933948
+      "depth": 0.004390159392965885,
+      "step": 0.8177444946346831
     },
     "pose_ctrl": [
       0.0,
@@ -823,7 +803,7 @@
     "gate_checks": {
       "evidence": {
         "ok": true,
-        "msg": "12/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
@@ -831,27 +811,27 @@
       },
       "median_reduction": {
         "ok": true,
-        "msg": "median weighted-force reduction 23.6% (need >= 15%, over 12 genuine falls)"
+        "msg": "median weighted-force reduction 18.0% (need >= 15%, over 24 genuine falls)"
       },
       "regressions": {
         "ok": true,
-        "msg": "8% of conditions worse than unprotected (limit 20%)"
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
       },
       "head_not_worse": {
         "ok": true,
-        "msg": "median head force 1495 N vs unprotected 1820 N"
+        "msg": "median head force 1550 N vs unprotected 1833 N"
       },
       "fragile_first_contact": {
-        "ok": true,
-        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+        "ok": false,
+        "msg": "knee/shank hits the floor first in 17% of protected falls (limit 5%)"
       },
       "tracking_error": {
         "ok": false,
-        "msg": "median peak tracking error 0.162 rad (limit 0.15)"
+        "msg": "median peak tracking error 0.159 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 82.7
+    "tuning_seconds": 213.9
   },
   "right/low": {
     "scenario": "right",
@@ -859,8 +839,8 @@
     "template": "step_recover",
     "side": "right",
     "params": {
-      "depth": 0.27210680365459317,
-      "step": 0.2660194000731999
+      "depth": 0.059395836236224575,
+      "step": 0.41305458719293603
     },
     "pose_ctrl": [
       0.0,
@@ -883,7 +863,7 @@
     "gate_checks": {
       "evidence": {
         "ok": false,
-        "msg": "0/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "0/24 held-out conditions produced a genuine unprotected fall (need >= 6), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
@@ -891,7 +871,7 @@
       }
     },
     "static_violations": [],
-    "tuning_seconds": 6.7
+    "tuning_seconds": 56.2
   },
   "right/mid": {
     "scenario": "right",
@@ -899,8 +879,8 @@
     "template": "step_recover",
     "side": "right",
     "params": {
-      "depth": 0.7024013987473686,
-      "step": 0.19130515205232046
+      "depth": 0.0029089390980917167,
+      "step": 0.6525747157971675
     },
     "pose_ctrl": [
       0.0,
@@ -923,7 +903,7 @@
     "gate_checks": {
       "evidence": {
         "ok": false,
-        "msg": "2/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "7/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
@@ -931,27 +911,27 @@
       },
       "median_reduction": {
         "ok": false,
-        "msg": "median weighted-force reduction 2.5% (need >= 15%, over 2 genuine falls)"
+        "msg": "median weighted-force reduction 14.0% (need >= 15%, over 7 genuine falls)"
       },
       "regressions": {
         "ok": true,
         "msg": "0% of conditions worse than unprotected (limit 20%)"
       },
       "head_not_worse": {
-        "ok": false,
-        "msg": "median head force 3157 N vs unprotected 2425 N"
+        "ok": true,
+        "msg": "median head force 2653 N vs unprotected 2606 N"
       },
       "fragile_first_contact": {
         "ok": false,
-        "msg": "knee/shank hits the floor first in 50% of protected falls (limit 5%)"
+        "msg": "knee/shank hits the floor first in 29% of protected falls (limit 5%)"
       },
       "tracking_error": {
-        "ok": false,
-        "msg": "median peak tracking error 0.306 rad (limit 0.15)"
+        "ok": true,
+        "msg": "median peak tracking error 0.112 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 5.8
+    "tuning_seconds": 168.9
   },
   "right/high": {
     "scenario": "right",
@@ -959,31 +939,31 @@
     "template": "step_recover",
     "side": "right",
     "params": {
-      "depth": 0.0013264977454790167,
-      "step": 0.7218348909610679
+      "depth": 0.021543464772139854,
+      "step": 0.9588509625464507
     },
     "pose_ctrl": [
       0.0,
       0.0,
-      0.00017363814884167924,
-      0.0,
-      0.0,
-      0.10218252554334116,
-      -0.049612928769952276,
       0.0,
       0.0,
       0.0,
-      -0.2519679100608978,
-      0.5763719398093576,
-      -0.049612928769952276,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
       0.0
     ],
-    "kind": "pose",
-    "gate_passed": true,
+    "kind": "stand",
+    "gate_passed": false,
     "gate_checks": {
       "evidence": {
         "ok": true,
-        "msg": "14/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
@@ -991,27 +971,27 @@
       },
       "median_reduction": {
         "ok": true,
-        "msg": "median weighted-force reduction 21.7% (need >= 15%, over 14 genuine falls)"
+        "msg": "median weighted-force reduction 24.5% (need >= 15%, over 24 genuine falls)"
       },
       "regressions": {
         "ok": true,
-        "msg": "7% of conditions worse than unprotected (limit 20%)"
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
       },
       "head_not_worse": {
         "ok": true,
-        "msg": "median head force 1545 N vs unprotected 1815 N"
+        "msg": "median head force 1596 N vs unprotected 1800 N"
       },
       "fragile_first_contact": {
-        "ok": true,
-        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+        "ok": false,
+        "msg": "knee/shank hits the floor first in 12% of protected falls (limit 5%)"
       },
       "tracking_error": {
-        "ok": true,
-        "msg": "median peak tracking error 0.147 rad (limit 0.15)"
+        "ok": false,
+        "msg": "median peak tracking error 0.194 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 82.3
+    "tuning_seconds": 268.7
   },
   "unknown/low": {
     "scenario": "unknown",
@@ -1042,7 +1022,7 @@
     "gate_checks": {
       "evidence": {
         "ok": false,
-        "msg": "0/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "0/24 held-out conditions produced a genuine unprotected fall (need >= 6), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
@@ -1050,7 +1030,7 @@
       }
     },
     "static_violations": [],
-    "tuning_seconds": 10.8
+    "tuning_seconds": 24.4
   },
   "unknown/mid": {
     "scenario": "unknown",
@@ -1058,7 +1038,7 @@
     "template": "lower_squat",
     "side": "both",
     "params": {
-      "depth": 0.0
+      "depth": 0.16129032258064516
     },
     "pose_ctrl": [
       0.0,
@@ -1081,7 +1061,7 @@
     "gate_checks": {
       "evidence": {
         "ok": false,
-        "msg": "4/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "6/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
@@ -1089,27 +1069,27 @@
       },
       "median_reduction": {
         "ok": false,
-        "msg": "median weighted-force reduction 0.0% (need >= 15%, over 4 genuine falls)"
+        "msg": "median weighted-force reduction -1.5% (need >= 15%, over 6 genuine falls)"
       },
       "regressions": {
-        "ok": true,
-        "msg": "0% of conditions worse than unprotected (limit 20%)"
+        "ok": false,
+        "msg": "50% of conditions worse than unprotected (limit 20%)"
       },
       "head_not_worse": {
-        "ok": true,
-        "msg": "median head force 2615 N vs unprotected 2615 N"
+        "ok": false,
+        "msg": "median head force 2571 N vs unprotected 2364 N"
       },
       "fragile_first_contact": {
         "ok": true,
         "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
       },
       "tracking_error": {
-        "ok": true,
-        "msg": "median peak tracking error 0.029 rad (limit 0.15)"
+        "ok": false,
+        "msg": "median peak tracking error 0.208 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 11.0
+    "tuning_seconds": 10.5
   },
   "unknown/high": {
     "scenario": "unknown",
@@ -1117,7 +1097,7 @@
     "template": "lower_squat",
     "side": "both",
     "params": {
-      "depth": 0.13333333333333333
+      "depth": 0.16129032258064516
     },
     "pose_ctrl": [
       0.0,
@@ -1140,7 +1120,7 @@
     "gate_checks": {
       "evidence": {
         "ok": false,
-        "msg": "9/14 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+        "msg": "9/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
       },
       "do_no_harm": {
         "ok": true,
@@ -1148,26 +1128,26 @@
       },
       "median_reduction": {
         "ok": false,
-        "msg": "median weighted-force reduction 12.1% (need >= 15%, over 9 genuine falls)"
+        "msg": "median weighted-force reduction 13.0% (need >= 15%, over 9 genuine falls)"
       },
       "regressions": {
-        "ok": true,
-        "msg": "11% of conditions worse than unprotected (limit 20%)"
+        "ok": false,
+        "msg": "44% of conditions worse than unprotected (limit 20%)"
       },
       "head_not_worse": {
         "ok": true,
-        "msg": "median head force 2225 N vs unprotected 2566 N"
+        "msg": "median head force 2304 N vs unprotected 2589 N"
       },
       "fragile_first_contact": {
-        "ok": false,
-        "msg": "knee/shank hits the floor first in 11% of protected falls (limit 5%)"
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
       },
       "tracking_error": {
         "ok": true,
-        "msg": "median peak tracking error 0.056 rad (limit 0.15)"
+        "msg": "median peak tracking error 0.065 rad (limit 0.15)"
       }
     },
     "static_violations": [],
-    "tuning_seconds": 12.0
+    "tuning_seconds": 20.9
   }
 }
