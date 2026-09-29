@@ -1,0 +1,3952 @@
+{
+  "_meta": {
+    "search_box_source": "oracle: axis pass + 250 random-direction bisections, widest-of-both per joint (cap +/-1.5 rad)",
+    "joints": [
+      "left_hip_pitch",
+      "left_hip_roll",
+      "left_hip_yaw",
+      "left_knee",
+      "left_ankle_pitch",
+      "left_ankle_roll",
+      "right_hip_pitch",
+      "right_hip_roll",
+      "right_hip_yaw",
+      "right_knee",
+      "right_ankle_pitch",
+      "right_ankle_roll"
+    ],
+    "lo": [
+      -0.52,
+      -0.2627993631689607,
+      -0.3500620279421844,
+      0.0,
+      -0.43731692081717394,
+      -0.2627978632577129,
+      -0.52,
+      -0.52459716796875,
+      -0.35006248463036344,
+      0.0,
+      -0.4373254121715834,
+      -0.26279777873800336
+    ],
+    "hi": [
+      0.26279749762984844,
+      0.52459716796875,
+      0.3500604065548757,
+      1.6,
+      0.43724365234375,
+      0.2627974113115181,
+      0.2627989356483389,
+      0.26279031959402127,
+      0.35006429090664687,
+      1.6,
+      0.437289191872929,
+      0.2627980247895354
+    ],
+    "stand_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ]
+  },
+  "s01_push/low": {
+    "unit": "s01_push",
+    "scenario_ids": [
+      1
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 0 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 0 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.5
+  },
+  "s07_floor_tilt_pitch/low": {
+    "unit": "s07_floor_tilt_pitch",
+    "scenario_ids": [
+      7
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 0 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 0 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.7
+  },
+  "s10_low_friction/low": {
+    "unit": "s10_low_friction",
+    "scenario_ids": [
+      10
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 0 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 0 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.7
+  },
+  "s10_low_friction/mid": {
+    "unit": "s10_low_friction",
+    "scenario_ids": [
+      10
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 3,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 2,
+      "winning_restart": 2,
+      "tuning_score_of_winner": 0.6606155045970218,
+      "select_score": 0.6829611276707515,
+      "shortlist_select_scores": [
+        0.6829611276707515,
+        0.6832694214752002,
+        0.6902308419117011,
+        0.7293428511339582
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.6485482358429693,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6532828099435131,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6606155045970218,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6799817582136947,
+        0.6814672972503681,
+        0.6890927447420254,
+        0.6907276042968185,
+        0.7035759189016402,
+        0.7151899119240616,
+        0.7256682801274003,
+        0.7297511278617927,
+        0.7953559083790385,
+        0.7960768045710778
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.2446444820528827,
+      0.24070224778225136,
+      0.13765257262056096,
+      0.29620496367105503,
+      0.29373525931192385,
+      -0.2599534097560989,
+      0.2448363952458955,
+      0.12986981158036315,
+      -0.10939566312770924,
+      0.08145536709712423,
+      0.27009984370737805,
+      0.0652848199733328
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.2446444820528827,
+      "left_hip_roll": 0.24070224778225136,
+      "left_hip_yaw": 0.13765257262056096,
+      "left_knee": 0.19620496367105503,
+      "left_ankle_pitch": 0.34373525931192384,
+      "left_ankle_roll": -0.2599534097560989,
+      "right_hip_pitch": 0.2448363952458955,
+      "right_hip_roll": 0.12986981158036315,
+      "right_hip_yaw": -0.10939566312770924,
+      "right_knee": -0.01854463290287578,
+      "right_ankle_pitch": 0.32009984370737804,
+      "right_ankle_roll": 0.0652848199733328
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "11/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 31.7% (need >= 15%, over 11 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1920 N vs unprotected 2592 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.121 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 11,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6289.151443239107,
+      "median_unprotected_weighted_force_n": 9080.100870434788
+    },
+    "tuning_seconds": 932.7
+  },
+  "s07_floor_tilt_pitch/mid": {
+    "unit": "s07_floor_tilt_pitch",
+    "scenario_ids": [
+      7
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 6,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 6,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.6835274096851168,
+      "select_score": 0.6912979266324277,
+      "shortlist_select_scores": [
+        0.6912979266324277,
+        0.6922652149640746,
+        0.6947057243324329,
+        0.6977076678542394
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.7021069516667646,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6754729364810845,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6951075229840203,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6972630022612272,
+        0.7351504904320777,
+        0.7884436766301006,
+        0.7912498528636789,
+        0.7961961281014597,
+        0.8035129614251215,
+        0.8068226919147203,
+        0.8404689080159156,
+        0.8444793799217656,
+        0.9019924733630047
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      -0.19829908250797906,
+      -0.08812273478369356,
+      0.24634692828819055,
+      4.805947278862337e-10,
+      -0.4359928836972543,
+      -0.03848143859990669,
+      0.07998509914423768,
+      -0.241427023119976,
+      -0.33615838889773686,
+      0.38101324675597104,
+      0.07510034562597556,
+      0.2606454025571854
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.19829908250797906,
+      "left_hip_roll": -0.08812273478369356,
+      "left_hip_yaw": 0.24634692828819055,
+      "left_knee": -0.09999999951940527,
+      "left_ankle_pitch": -0.3859928836972543,
+      "left_ankle_roll": -0.03848143859990669,
+      "right_hip_pitch": 0.07998509914423768,
+      "right_hip_roll": -0.241427023119976,
+      "right_hip_yaw": -0.33615838889773686,
+      "right_knee": 0.28101324675597106,
+      "right_ankle_pitch": 0.12510034562597555,
+      "right_ankle_roll": 0.2606454025571854
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "12/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 31.6% (need >= 15%, over 12 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1963 N vs unprotected 3419 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.135 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 12,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6652.367655825588,
+      "median_unprotected_weighted_force_n": 9810.523924148289
+    },
+    "tuning_seconds": 1276.3
+  },
+  "s01_push/high": {
+    "unit": "s01_push",
+    "scenario_ids": [
+      1
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.6785740806735778,
+      "select_score": 0.6893545598722441,
+      "shortlist_select_scores": [
+        0.6893545598722441,
+        0.6938567107082009,
+        0.7201229790530604,
+        0.7261782606656133
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.6952284298614553,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6785740806735778,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6812116887295783,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6894789971303892,
+        0.6978547180145419,
+        0.6990769225720102,
+        0.7040811619515113,
+        0.7117198167302761,
+        0.735192237714162,
+        0.7420245972581336,
+        0.7706795418733183,
+        0.7832096277740062,
+        0.7995505184531412
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.2536895959950146,
+      0.2396658857824765,
+      -0.010702235035640217,
+      0.37324000164225035,
+      0.40803763032537627,
+      -0.19917611374950833,
+      0.2616001538592361,
+      0.26067730209688156,
+      -0.15563462954809668,
+      0.05021296159033996,
+      0.40628581354585125,
+      0.056737825515345286
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.2536895959950146,
+      "left_hip_roll": 0.2396658857824765,
+      "left_hip_yaw": -0.010702235035640217,
+      "left_knee": 0.2732400016422504,
+      "left_ankle_pitch": 0.45803763032537625,
+      "left_ankle_roll": -0.19917611374950833,
+      "right_hip_pitch": 0.2616001538592361,
+      "right_hip_roll": 0.26067730209688156,
+      "right_hip_yaw": -0.15563462954809668,
+      "right_knee": -0.04978703840966005,
+      "right_ankle_pitch": 0.45628581354585124,
+      "right_ankle_roll": 0.056737825515345286
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 30.5% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1970 N vs unprotected 2628 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.127 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6352.960743145017,
+      "median_unprotected_weighted_force_n": 9165.318167157553
+    },
+    "tuning_seconds": 1785.7
+  },
+  "s01_push/mid": {
+    "unit": "s01_push",
+    "scenario_ids": [
+      1
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 11,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 2,
+      "tuning_score_of_winner": 0.668451187166251,
+      "select_score": 0.6702674910404868,
+      "shortlist_select_scores": [
+        0.6702674910404868,
+        0.6751204645472613,
+        0.6791720959998883,
+        0.6846203436090257
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.6880154048406217,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.669908632495717,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.668451187166251,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6806159005794694,
+        0.6826309048424486,
+        0.694773998486427,
+        0.7026306704188383,
+        0.7125996300027155,
+        0.7193470697882545,
+        0.7225412254350518,
+        0.7319005819557293,
+        0.7771542080194469,
+        0.7789963936067645
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.262473288348694,
+      0.26322170222444696,
+      0.0519682948910799,
+      0.3112932432702719,
+      0.40441924015992375,
+      -0.25012764203843935,
+      0.2590543800317505,
+      0.25998592074203264,
+      -0.03585718586579739,
+      0.07354459435964321,
+      0.35773465220831013,
+      0.09142921369658841
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.262473288348694,
+      "left_hip_roll": 0.26322170222444696,
+      "left_hip_yaw": 0.0519682948910799,
+      "left_knee": 0.2112932432702719,
+      "left_ankle_pitch": 0.45441924015992374,
+      "left_ankle_roll": -0.25012764203843935,
+      "right_hip_pitch": 0.2590543800317505,
+      "right_hip_roll": 0.25998592074203264,
+      "right_hip_yaw": -0.03585718586579739,
+      "right_knee": -0.026455405640356797,
+      "right_ankle_pitch": 0.4077346522083101,
+      "right_ankle_roll": 0.09142921369658841
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "20/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 31.3% (need >= 15%, over 20 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1894 N vs unprotected 2604 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.128 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 20,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6186.360937567186,
+      "median_unprotected_weighted_force_n": 9010.869006345903
+    },
+    "tuning_seconds": 1809.5
+  },
+  "s10_low_friction/high": {
+    "unit": "s10_low_friction",
+    "scenario_ids": [
+      10
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 2,
+      "winning_restart": 2,
+      "tuning_score_of_winner": 0.6718747120261414,
+      "select_score": 0.6766755961090305,
+      "shortlist_select_scores": [
+        0.6766755961090305,
+        0.6782808728812645,
+        0.6798460796684682,
+        0.7057370081874144
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.6992423233673964,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6682923885424813,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6718747120261414,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6821434110031981,
+        0.6905323407363382,
+        0.6939713593495118,
+        0.7101936115058354,
+        0.7174125258047821,
+        0.7201980734014319,
+        0.7259732537186029,
+        0.7568179682921972,
+        0.7871879060902706,
+        0.7894565844652919
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.2617721502795026,
+      -0.2080857099651472,
+      -0.05580924011830679,
+      0.09473119178646286,
+      0.18042172249268967,
+      -0.01574156075658334,
+      0.26228950643505644,
+      -0.09358521718309099,
+      -0.11389101793841033,
+      0.32913017273142825,
+      0.33696817303672677,
+      0.12248194348127617
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.2617721502795026,
+      "left_hip_roll": -0.2080857099651472,
+      "left_hip_yaw": -0.05580924011830679,
+      "left_knee": -0.005268808213537146,
+      "left_ankle_pitch": 0.23042172249268966,
+      "left_ankle_roll": -0.01574156075658334,
+      "right_hip_pitch": 0.26228950643505644,
+      "right_hip_roll": -0.09358521718309099,
+      "right_hip_yaw": -0.11389101793841033,
+      "right_knee": 0.22913017273142824,
+      "right_ankle_pitch": 0.38696817303672676,
+      "right_ankle_roll": 0.12248194348127617
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "23/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 32.4% (need >= 15%, over 23 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1875 N vs unprotected 2601 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.128 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 23,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6181.752686257247,
+      "median_unprotected_weighted_force_n": 9145.637942731806
+    },
+    "tuning_seconds": 1851.3
+  },
+  "s07_floor_tilt_pitch/high": {
+    "unit": "s07_floor_tilt_pitch",
+    "scenario_ids": [
+      7
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.6657578722273768,
+      "select_score": 0.6863788116802019,
+      "shortlist_select_scores": [
+        0.6863788116802019,
+        0.6894501916278156,
+        0.6998541971992096,
+        0.7177389032232839
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.7099019711270838,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6657578722273768,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6873570047729469,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6968921648716339,
+        0.7171969537613014,
+        0.7704278829069089,
+        0.7864325272075667,
+        0.7965682438249315,
+        0.8124246976041752,
+        0.8321293324024359,
+        0.8405265288448105,
+        0.848795568138032,
+        0.8948703049495563
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      -0.22092122472090642,
+      -0.1470465439908843,
+      -0.3488167555426025,
+      8.755059806965181e-05,
+      -0.4302239484871252,
+      -0.002235011945343035,
+      0.10780013004279743,
+      -0.2265903308316759,
+      -0.335686237115189,
+      0.4779255243161818,
+      -0.4082956774518373,
+      0.24462345061939372
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.22092122472090642,
+      "left_hip_roll": -0.1470465439908843,
+      "left_hip_yaw": -0.3488167555426025,
+      "left_knee": -0.09991244940193035,
+      "left_ankle_pitch": -0.3802239484871252,
+      "left_ankle_roll": -0.002235011945343035,
+      "right_hip_pitch": 0.10780013004279743,
+      "right_hip_roll": -0.2265903308316759,
+      "right_hip_yaw": -0.335686237115189,
+      "right_knee": 0.37792552431618176,
+      "right_ankle_pitch": -0.3582956774518373,
+      "right_ankle_roll": 0.24462345061939372
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 32.8% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1968 N vs unprotected 3499 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.131 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6756.462767966108,
+      "median_unprotected_weighted_force_n": 9997.790284853963
+    },
+    "tuning_seconds": 1888.2
+  },
+  "s03_push/low": {
+    "unit": "s03_push",
+    "scenario_ids": [
+      3
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 1 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 1 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.5
+  },
+  "s04_push/low": {
+    "unit": "s04_push",
+    "scenario_ids": [
+      4
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 0 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 0 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.6
+  },
+  "s05_push/low": {
+    "unit": "s05_push",
+    "scenario_ids": [
+      5
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 1 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 1 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.5
+  },
+  "s02_push/low": {
+    "unit": "s02_push",
+    "scenario_ids": [
+      2
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 2,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 2,
+      "tuning_score_of_winner": 0.6677173236263296,
+      "select_score": 0.697156647191731,
+      "shortlist_select_scores": [
+        0.697156647191731,
+        0.7041892206019215,
+        0.7161629633916458,
+        0.7335270903948634
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.7207353943241914,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6893478663573185,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6677173236263296,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.7299240102714168,
+        0.7348584049661702,
+        0.794955110599364,
+        0.8056552845433507,
+        0.8333415830915902,
+        0.8588866812980591,
+        0.8684244940607824,
+        0.8690671530505161,
+        0.9018107367704198,
+        0.9560434940493943
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      -0.17670403184983174,
+      -0.1314738555843785,
+      -0.296879954416039,
+      0.002919723028768229,
+      -0.289567813600103,
+      0.09707686630381318,
+      0.15092549836875768,
+      -0.07219311839088749,
+      -0.3388554168971445,
+      0.36340954581934715,
+      -0.21140280874746803,
+      0.26125064639933526
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.17670403184983174,
+      "left_hip_roll": -0.1314738555843785,
+      "left_hip_yaw": -0.296879954416039,
+      "left_knee": -0.09708027697123178,
+      "left_ankle_pitch": -0.23956781360010299,
+      "left_ankle_roll": 0.09707686630381318,
+      "right_hip_pitch": 0.15092549836875768,
+      "right_hip_roll": -0.07219311839088749,
+      "right_hip_yaw": -0.3388554168971445,
+      "right_knee": 0.26340954581934717,
+      "right_ankle_pitch": -0.16140280874746804,
+      "right_ankle_roll": 0.26125064639933526
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "15/24 held-out conditions produced a genuine unprotected fall (need >= 6), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 29.5% (need >= 15%, over 15 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1879 N vs unprotected 3107 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.132 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 15,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6408.522757974413,
+      "median_unprotected_weighted_force_n": 9067.481491656485
+    },
+    "tuning_seconds": 799.1
+  },
+  "s03_push/mid": {
+    "unit": "s03_push",
+    "scenario_ids": [
+      3
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 3,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.7379463541191738,
+      "select_score": NaN,
+      "shortlist_select_scores": [],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.7548096643423371,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7379463541191738,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7595456345129662,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.7708545829041267,
+        0.8149156501768471,
+        0.8679086740602231,
+        0.90816276823098,
+        0.9461213893455046,
+        0.9778839568935829,
+        1.0077600268671034,
+        1.013550975041175,
+        1.0478374956354863,
+        1.0500740794162364
+      ]
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.21656443546415777,
+      "left_hip_roll": -0.20310269919701585,
+      "left_hip_yaw": -0.2884391687610927,
+      "left_knee": -0.09908959568799226,
+      "left_ankle_pitch": 0.21291607939984014,
+      "left_ankle_roll": 0.09439644041478407,
+      "right_hip_pitch": -0.27096070578742326,
+      "right_hip_roll": -0.1485335108319602,
+      "right_hip_yaw": -0.11872387249254102,
+      "right_knee": -0.09982294416844484,
+      "right_ankle_pitch": 0.2209613866275995,
+      "right_ankle_roll": -0.18443119704149508
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": false,
+        "msg": "5/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 20.4% (need >= 15%, over 5 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1526 N vs unprotected 1779 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.137 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 5,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6816.007277185367,
+      "median_unprotected_weighted_force_n": 7660.678961663468
+    },
+    "tuning_seconds": 872.3
+  },
+  "s06_push/low": {
+    "unit": "s06_push",
+    "scenario_ids": [
+      6
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 0 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 0 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.6
+  },
+  "s04_push/mid": {
+    "unit": "s04_push",
+    "scenario_ids": [
+      4
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 3,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 1,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.7156500706536864,
+      "select_score": 0.7278427971840934,
+      "shortlist_select_scores": [
+        0.7278427971840934,
+        0.7390305285073486,
+        0.7395023384008343,
+        0.7484564738019025
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.724884615445227,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7098588102837537,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7194338696104671,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.7402787576655248,
+        0.7829225473965512,
+        0.8195592843807885,
+        0.8949127986029646,
+        0.9688488785624862,
+        0.9735121893480101,
+        1.0163646125688865,
+        1.0446865149965425,
+        1.0573135928563722,
+        1.0626736282090998
+      ]
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.27757445039463396,
+      "left_hip_roll": 0.09608177816410252,
+      "left_hip_yaw": 0.22246415947880321,
+      "left_knee": -0.09360001460888512,
+      "left_ankle_pitch": 0.08113929080218481,
+      "left_ankle_roll": -0.2592435081708041,
+      "right_hip_pitch": -0.26011416816058824,
+      "right_hip_roll": 0.2481886549976422,
+      "right_hip_yaw": 0.082748267765269,
+      "right_knee": -0.08072980636587454,
+      "right_ankle_pitch": -0.385618167856,
+      "right_ankle_roll": -0.20128337253180228
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": false,
+        "msg": "5/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 24.5% (need >= 15%, over 5 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1228 N vs unprotected 1776 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.137 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 5,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 5847.824710426709,
+      "median_unprotected_weighted_force_n": 7658.975813928487
+    },
+    "tuning_seconds": 891.2
+  },
+  "s05_push/mid": {
+    "unit": "s05_push",
+    "scenario_ids": [
+      5
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 8,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 3,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.6683864623505662,
+      "select_score": 0.7710189123300739,
+      "shortlist_select_scores": [
+        0.7710189123300739,
+        0.8329592636102827,
+        0.8399379908437552,
+        0.8631577590527899
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.6770867210832808,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6683864623505662,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6665531786479351,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6866750257902245,
+        0.6876661757819083,
+        0.6893750720618781,
+        0.7082442594487715,
+        0.7088758859090032,
+        0.7238185708876729,
+        0.7641269437293241,
+        0.7766616373872548,
+        0.7914983891549981,
+        0.7931100566597195
+      ]
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.26144392710802,
+      "left_hip_roll": 0.1443938274779945,
+      "left_hip_yaw": 0.041510600633414274,
+      "left_knee": 0.2057101743241617,
+      "left_ankle_pitch": 0.43191345784406343,
+      "left_ankle_roll": 0.042739957591220346,
+      "right_hip_pitch": 0.2568339997153062,
+      "right_hip_roll": 0.14201402740920266,
+      "right_hip_yaw": 0.04980930739026718,
+      "right_knee": -0.04501003729963559,
+      "right_ankle_pitch": 0.40926516277386854,
+      "right_ankle_roll": -0.040004234672581435
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": false,
+        "msg": "6/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 32.7% (need >= 15%, over 6 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1872 N vs unprotected 2621 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.128 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 6,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6182.423978702215,
+      "median_unprotected_weighted_force_n": 9222.144214075106
+    },
+    "tuning_seconds": 1498.7
+  },
+  "s08_floor_tilt_roll/low": {
+    "unit": "s08_floor_tilt_roll",
+    "scenario_ids": [
+      8
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 0 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 0 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.7
+  },
+  "s03_push/high": {
+    "unit": "s03_push",
+    "scenario_ids": [
+      3
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.6647785645788276,
+      "select_score": 0.7120455854111294,
+      "shortlist_select_scores": [
+        0.7120455854111294,
+        0.7141476507329223,
+        0.7153883084144665,
+        0.7269030336701043
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.737508631683514,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6647785645788276,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6774763754201132,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.7226070987518216,
+        0.7662957012810856,
+        0.7914804316443029,
+        0.8768004989395716,
+        0.9041564408788064,
+        0.944347958716397,
+        0.9781103809290737,
+        0.9839163666119817,
+        1.0270674869258898,
+        1.0314260583465145
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.10374533310526368,
+      -0.2623587191073052,
+      0.0789059944954264,
+      0.2781449669846273,
+      0.38662688741208656,
+      0.1624908166792275,
+      -0.17311360530374192,
+      -0.05486919436175497,
+      -0.08829185057458272,
+      0.003009530148260662,
+      -0.22561290479760035,
+      0.01759938503295294
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.10374533310526368,
+      "left_hip_roll": -0.2623587191073052,
+      "left_hip_yaw": 0.0789059944954264,
+      "left_knee": 0.1781449669846273,
+      "left_ankle_pitch": 0.43662688741208655,
+      "left_ankle_roll": 0.1624908166792275,
+      "right_hip_pitch": -0.17311360530374192,
+      "right_hip_roll": -0.05486919436175497,
+      "right_hip_yaw": -0.08829185057458272,
+      "right_knee": -0.09699046985173934,
+      "right_ankle_pitch": -0.17561290479760033,
+      "right_ankle_roll": 0.01759938503295294
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 31.1% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "4% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1149 N vs unprotected 1779 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.111 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 5183.080834126944,
+      "median_unprotected_weighted_force_n": 7562.070163397593
+    },
+    "tuning_seconds": 1708.2
+  },
+  "s04_push/high": {
+    "unit": "s04_push",
+    "scenario_ids": [
+      4
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 6,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.7076611147722887,
+      "select_score": 0.6737981713024258,
+      "shortlist_select_scores": [
+        0.6737981713024258,
+        0.677037624570222,
+        0.6887523633681487,
+        0.6983829029289625
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.7386686855571318,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7076611147722887,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6982932768164587,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.738952581060498,
+        0.7418888283297523,
+        0.7744134428552563,
+        0.792895412073114,
+        0.7976364957716011,
+        0.8207589596852887,
+        0.8712010142114484,
+        0.9153624387334982,
+        1.0870171863731986,
+        1.1315170041822196
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      -0.16963757273103625,
+      0.00842588405369804,
+      -0.10630299803163737,
+      0.0019864683246201675,
+      -0.02027721350696149,
+      0.12988950598782073,
+      0.047225705324182354,
+      0.2596750543993881,
+      -0.11475220285031565,
+      0.3203663395395169,
+      0.3427307749913311,
+      -0.2473491982630307
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.16963757273103625,
+      "left_hip_roll": 0.00842588405369804,
+      "left_hip_yaw": -0.10630299803163737,
+      "left_knee": -0.09801353167537984,
+      "left_ankle_pitch": 0.029722786493038514,
+      "left_ankle_roll": 0.12988950598782073,
+      "right_hip_pitch": 0.047225705324182354,
+      "right_hip_roll": 0.2596750543993881,
+      "right_hip_yaw": -0.11475220285031565,
+      "right_knee": 0.22036633953951687,
+      "right_ankle_pitch": 0.3927307749913311,
+      "right_ankle_roll": -0.2473491982630307
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 32.0% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "8% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1193 N vs unprotected 1808 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.107 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 5224.721268435684,
+      "median_unprotected_weighted_force_n": 7761.126178030587
+    },
+    "tuning_seconds": 1780.6
+  },
+  "s09_floor_drop/low": {
+    "unit": "s09_floor_drop",
+    "scenario_ids": [
+      9
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 0 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 0 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.5
+  },
+  "s02_push/high": {
+    "unit": "s02_push",
+    "scenario_ids": [
+      2
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.70953907245405,
+      "select_score": 0.6914182976690959,
+      "shortlist_select_scores": [
+        0.6914182976690959,
+        0.7239935686855328,
+        0.7271902267621873,
+        0.7398199547587887
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.7305345254642821,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.70953907245405,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7303671545533335,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.7607860225552391,
+        0.7783859483702785,
+        0.7865914383687411,
+        0.7931619583451994,
+        0.8534433609828191,
+        0.8581598237848799,
+        0.862659744428795,
+        0.8763290760747287,
+        0.921813670604084,
+        0.9357330280894922
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      -0.27710424360621133,
+      0.03804409906957695,
+      0.20010482892901166,
+      6.452719923220866e-07,
+      -0.03649513365386481,
+      0.21336130880395154,
+      -0.305693390749219,
+      0.012245022523152294,
+      0.252945336817369,
+      0.02843452824937137,
+      0.011796208935991148,
+      0.13709328286857814
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.27710424360621133,
+      "left_hip_roll": 0.03804409906957695,
+      "left_hip_yaw": 0.20010482892901166,
+      "left_knee": -0.09999935472800768,
+      "left_ankle_pitch": 0.013504866346135194,
+      "left_ankle_roll": 0.21336130880395154,
+      "right_hip_pitch": -0.305693390749219,
+      "right_hip_roll": 0.012245022523152294,
+      "right_hip_yaw": 0.252945336817369,
+      "right_knee": -0.07156547175062863,
+      "right_ankle_pitch": 0.06179620893599115,
+      "right_ankle_roll": 0.13709328286857814
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 29.9% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1557 N vs unprotected 3199 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.133 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6511.587788555942,
+      "median_unprotected_weighted_force_n": 9318.325569740035
+    },
+    "tuning_seconds": 1869.0
+  },
+  "s06_push/mid": {
+    "unit": "s06_push",
+    "scenario_ids": [
+      6
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 5,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 3,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.5904051213411308,
+      "select_score": 0.7048491371133001,
+      "shortlist_select_scores": [
+        0.7048491371133001,
+        0.7117602438331239,
+        0.7123980595677797,
+        0.8343543314054568
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.6240332208684162,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.5889388527100341,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.582593434889914,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6172129985545936,
+        0.6181729823248052,
+        0.6275687725947924,
+        0.6324372308526571,
+        0.6374833449483366,
+        0.7459893804981172,
+        0.751790291125568,
+        0.7870416262780063,
+        0.8701731485804989,
+        0.8943409360264356
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.22660004907351572,
+      0.1210743150506367,
+      0.06539762559110673,
+      0.3451705722008982,
+      0.27416273394438445,
+      -0.01800789389124899,
+      0.23993992799677033,
+      0.25907541397392564,
+      0.03647814852468434,
+      0.042560845336808144,
+      0.4079320072606788,
+      -0.11237377053242523
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.22660004907351572,
+      "left_hip_roll": 0.1210743150506367,
+      "left_hip_yaw": 0.06539762559110673,
+      "left_knee": 0.2451705722008982,
+      "left_ankle_pitch": 0.32416273394438444,
+      "left_ankle_roll": -0.01800789389124899,
+      "right_hip_pitch": 0.23993992799677033,
+      "right_hip_roll": 0.25907541397392564,
+      "right_hip_yaw": 0.03647814852468434,
+      "right_knee": -0.05743915466319186,
+      "right_ankle_pitch": 0.4579320072606788,
+      "right_ankle_roll": -0.11237377053242523
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "11/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 31.3% (need >= 15%, over 11 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1909 N vs unprotected 2586 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.126 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 11,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6288.141426565623,
+      "median_unprotected_weighted_force_n": 9041.550130894699
+    },
+    "tuning_seconds": 1114.5
+  },
+  "s12_actuator_stuck/low": {
+    "unit": "s12_actuator_stuck",
+    "scenario_ids": [
+      12
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 0 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 0 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.5
+  },
+  "s02_push/mid": {
+    "unit": "s02_push",
+    "scenario_ids": [
+      2
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 0,
+      "tuning_score_of_winner": 0.695995811448348,
+      "select_score": 0.704385773502827,
+      "shortlist_select_scores": [
+        0.704385773502827,
+        0.7077785584592318,
+        0.7097675675121294,
+        0.7204674507526622
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.695995811448348,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7140529831465592,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7027800808550213,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.7351820113086656,
+        0.736160074043682,
+        0.7878582455483389,
+        0.8054485679550831,
+        0.8318781022820353,
+        0.8535417161059922,
+        0.8606960368889898,
+        0.8744861428405286,
+        0.9030687834645097,
+        0.9393582769480371
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      -0.2739916818495103,
+      0.09501493187075227,
+      0.13002272570578338,
+      0.022837873597703465,
+      -0.17758707482397518,
+      0.16027062731561081,
+      -0.3009376813887049,
+      -0.17447107130688433,
+      0.09036882438231475,
+      0.0005031357372155998,
+      0.15266927569853006,
+      0.02075556562447406
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.2739916818495103,
+      "left_hip_roll": 0.09501493187075227,
+      "left_hip_yaw": 0.13002272570578338,
+      "left_knee": -0.07716212640229654,
+      "left_ankle_pitch": -0.1275870748239752,
+      "left_ankle_roll": 0.16027062731561081,
+      "right_hip_pitch": -0.3009376813887049,
+      "right_hip_roll": -0.17447107130688433,
+      "right_hip_yaw": 0.09036882438231475,
+      "right_knee": -0.09949686426278441,
+      "right_ankle_pitch": 0.20266927569853005,
+      "right_ankle_roll": 0.02075556562447406
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 29.9% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1535 N vs unprotected 3129 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.132 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6441.980026337016,
+      "median_unprotected_weighted_force_n": 9110.514533526395
+    },
+    "tuning_seconds": 2024.4
+  },
+  "s09_floor_drop/high": {
+    "unit": "s09_floor_drop",
+    "scenario_ids": [
+      9
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 603,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": -1,
+      "tuning_score_of_winner": 0.0,
+      "select_score": 0.0,
+      "shortlist_select_scores": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.0,
+          "stopped_by": [
+            "tolflatfitness"
+          ],
+          "hit_maxiter": false
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.0,
+          "stopped_by": [
+            "tolfunhist"
+          ],
+          "hit_maxiter": false
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.0,
+          "stopped_by": [
+            "tolfunhist"
+          ],
+          "hit_maxiter": false
+        }
+      ],
+      "seed_scores": [
+        0.0,
+        0.0,
+        0.7898156578417805,
+        0.870138933238499,
+        0.9172751922951711,
+        0.9717649006761424,
+        1.0053990843471845,
+        1.0054141005400181,
+        1.0182238953912521,
+        1.0289218132459514
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.11721588846561737,
+      0.03788879610166379,
+      0.041845872949941965,
+      0.25324427030023655,
+      -0.19066056495571965,
+      0.04987328497731586,
+      -0.031144173045089374,
+      -0.1138171887087785,
+      -0.032879790499429296,
+      0.17394788375754722,
+      0.024563333393706033,
+      0.03299641586822433
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.11721588846561737,
+      "left_hip_roll": 0.03788879610166379,
+      "left_hip_yaw": 0.041845872949941965,
+      "left_knee": 0.15324427030023655,
+      "left_ankle_pitch": -0.14066056495571966,
+      "left_ankle_roll": 0.04987328497731586,
+      "right_hip_pitch": -0.031144173045089374,
+      "right_hip_roll": -0.1138171887087785,
+      "right_hip_yaw": -0.032879790499429296,
+      "right_knee": 0.07394788375754721,
+      "right_ankle_pitch": 0.07456333339370604,
+      "right_ankle_roll": 0.03299641586822433
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 100.0% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 0 N vs unprotected 1711 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.090 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 0.0,
+      "median_unprotected_weighted_force_n": 7342.49517943208
+    },
+    "tuning_seconds": 637.7
+  },
+  "s14_trip/low": {
+    "unit": "s14_trip",
+    "scenario_ids": [
+      14
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 0 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 0 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.7
+  },
+  "s09_floor_drop/mid": {
+    "unit": "s09_floor_drop",
+    "scenario_ids": [
+      9
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 8,
+      "n_evaluations": 987,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": -1,
+      "tuning_score_of_winner": 0.0,
+      "select_score": 0.0,
+      "shortlist_select_scores": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.0,
+          "stopped_by": [
+            "tolflatfitness"
+          ],
+          "hit_maxiter": false
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.0,
+          "stopped_by": [
+            "tolfunhist"
+          ],
+          "hit_maxiter": false
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.0,
+          "stopped_by": [
+            "tolflatfitness"
+          ],
+          "hit_maxiter": false
+        }
+      ],
+      "seed_scores": [
+        0.0,
+        0.07458842460746608,
+        0.5035137743028817,
+        1.0583600496245194,
+        387018674.94690895,
+        444437024.59200966,
+        447077096.0874236,
+        450271688.3055215,
+        456012212.2418986,
+        458322558.16166544
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.11721588846561737,
+      0.03788879610166379,
+      0.041845872949941965,
+      0.25324427030023655,
+      -0.19066056495571965,
+      0.04987328497731586,
+      -0.031144173045089374,
+      -0.1138171887087785,
+      -0.032879790499429296,
+      0.17394788375754722,
+      0.024563333393706033,
+      0.03299641586822433
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.11721588846561737,
+      "left_hip_roll": 0.03788879610166379,
+      "left_hip_yaw": 0.041845872949941965,
+      "left_knee": 0.15324427030023655,
+      "left_ankle_pitch": -0.14066056495571966,
+      "left_ankle_roll": 0.04987328497731586,
+      "right_hip_pitch": -0.031144173045089374,
+      "right_hip_roll": -0.1138171887087785,
+      "right_hip_yaw": -0.032879790499429296,
+      "right_knee": 0.07394788375754721,
+      "right_ankle_pitch": 0.07456333339370604,
+      "right_ankle_roll": 0.03299641586822433
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "13/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 100.0% (need >= 15%, over 13 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 0 N vs unprotected 1742 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.090 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 13,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 0.0,
+      "median_unprotected_weighted_force_n": 7454.2503824333035
+    },
+    "tuning_seconds": 793.2
+  },
+  "s06_push/high": {
+    "unit": "s06_push",
+    "scenario_ids": [
+      6
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.660434829710487,
+      "select_score": 0.784783108895946,
+      "shortlist_select_scores": [
+        0.784783108895946,
+        0.7879448270194995,
+        0.8189396346473794,
+        0.8270643780933555
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.6795666227638604,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.660434829710487,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6654706015901577,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6752969456452409,
+        0.7084814035385163,
+        0.7619988563146571,
+        0.7686960054426035,
+        0.783054045512191,
+        0.8164320509044403,
+        0.8279005937698884,
+        0.8601479115620752,
+        1.0747847319984563,
+        1.2489294151923849
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      -0.14163159065626674,
+      0.05454029200378735,
+      -0.003171496340715063,
+      0.3437597264209755,
+      -0.17423465492684848,
+      -0.05956994144203456,
+      0.04577757565371943,
+      0.24224293495485505,
+      -0.13714537887482817,
+      0.3822376131704795,
+      0.20268634562448518,
+      -0.2155735230925113
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.14163159065626674,
+      "left_hip_roll": 0.05454029200378735,
+      "left_hip_yaw": -0.003171496340715063,
+      "left_knee": 0.24375972642097551,
+      "left_ankle_pitch": -0.12423465492684847,
+      "left_ankle_roll": -0.05956994144203456,
+      "right_hip_pitch": 0.04577757565371943,
+      "right_hip_roll": 0.24224293495485505,
+      "right_hip_yaw": -0.13714537887482817,
+      "right_knee": 0.28223761317047946,
+      "right_ankle_pitch": 0.25268634562448516,
+      "right_ankle_roll": -0.2155735230925113
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 22.3% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1782 N vs unprotected 2220 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.108 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6441.242627629719,
+      "median_unprotected_weighted_force_n": 8614.352361103796
+    },
+    "tuning_seconds": 1842.8
+  },
+  "s05_push/high": {
+    "unit": "s05_push",
+    "scenario_ids": [
+      5
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 2,
+      "tuning_score_of_winner": 0.7122548865936567,
+      "select_score": 0.7136176395429593,
+      "shortlist_select_scores": [
+        0.7136176395429593,
+        0.7244846724504609,
+        0.7260648061490687,
+        0.729908026617041
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.7313405147260532,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7260627645707058,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7122548865936567,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.7296594845930233,
+        0.7792402787317888,
+        0.8440492921419025,
+        0.8555980496800732,
+        0.8565249763071531,
+        0.8988472795595842,
+        0.9165917438109148,
+        0.9406593948806317,
+        0.979548320229791,
+        0.9948114544632001
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.16532824227762755,
+      -0.2600748676501052,
+      0.05201875725818356,
+      0.284376424858719,
+      0.4372432610634052,
+      0.06269879503712461,
+      0.2584890320884089,
+      -0.025288707348844308,
+      0.06894910994252662,
+      0.0319236260811985,
+      0.27744591024567744,
+      0.03124041482701584
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.16532824227762755,
+      "left_hip_roll": -0.2600748676501052,
+      "left_hip_yaw": 0.05201875725818356,
+      "left_knee": 0.184376424858719,
+      "left_ankle_pitch": 0.4872432610634052,
+      "left_ankle_roll": 0.06269879503712461,
+      "right_hip_pitch": 0.2584890320884089,
+      "right_hip_roll": -0.025288707348844308,
+      "right_hip_yaw": 0.06894910994252662,
+      "right_knee": -0.0680763739188015,
+      "right_ankle_pitch": 0.32744591024567743,
+      "right_ankle_roll": 0.03124041482701584
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 27.7% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1478 N vs unprotected 1844 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.113 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 5917.520633864433,
+      "median_unprotected_weighted_force_n": 8244.088672033218
+    },
+    "tuning_seconds": 1941.0
+  },
+  "s15_sudden_load/low": {
+    "unit": "s15_sudden_load",
+    "scenario_ids": [
+      15
+    ],
+    "velocity_bin": "low",
+    "candidate_selection": {
+      "skipped": "only 0 natural fall(s) in the tuning set (< 2)"
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "skipped_reason": "only 0 natural fall(s) in the tuning set (< 2)",
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "gate_checks": {},
+    "static_violations": [],
+    "tuning_seconds": 1.6
+  },
+  "s08_floor_tilt_roll/mid": {
+    "unit": "s08_floor_tilt_roll",
+    "scenario_ids": [
+      8
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 8,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 4,
+      "winning_restart": 2,
+      "tuning_score_of_winner": 0.6378877111125293,
+      "select_score": 0.655778001511603,
+      "shortlist_select_scores": [
+        0.655778001511603,
+        0.6597223008968096,
+        0.664825967133098,
+        0.6684631001202419
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.6489687376734168,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6337362977289469,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6378877111125293,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6685848009340857,
+        0.6731835498034174,
+        0.6746720544136778,
+        0.6748219618968747,
+        0.7172410214116001,
+        0.7839334704240208,
+        0.8053151817428423,
+        0.8110922704179686,
+        0.9783964746377432,
+        0.9828573862249923
+      ]
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.12401806824683081,
+      "left_hip_roll": -0.03162449265612485,
+      "left_hip_yaw": -0.20800834379814648,
+      "left_knee": 0.2679381514165019,
+      "left_ankle_pitch": -0.21914695744117207,
+      "left_ankle_roll": 0.23773987869754476,
+      "right_hip_pitch": -0.20389020933438562,
+      "right_hip_roll": 0.2627576035034369,
+      "right_hip_yaw": -0.05328713565365584,
+      "right_knee": 0.14443000089887637,
+      "right_ankle_pitch": 0.4568555600561814,
+      "right_ankle_roll": -0.19661092190478563
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": false,
+        "msg": "9/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 34.6% (need >= 15%, over 9 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1514 N vs unprotected 2173 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.089 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 9,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 5967.19461915896,
+      "median_unprotected_weighted_force_n": 9092.11821512195
+    },
+    "tuning_seconds": 1415.9
+  },
+  "s08_floor_tilt_roll/high": {
+    "unit": "s08_floor_tilt_roll",
+    "scenario_ids": [
+      8
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 11,
+      "winning_restart": 2,
+      "tuning_score_of_winner": 0.6286396994808241,
+      "select_score": 0.6435696798431412,
+      "shortlist_select_scores": [
+        0.6435696798431412,
+        0.6467171789983617,
+        0.6502061832995099,
+        0.6517245622308363
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.6461012426731476,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6332857747566918,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6235420732248305,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6500030488118511,
+        0.6583008593361307,
+        0.6653629983856071,
+        0.6794042950784585,
+        0.7128571041985832,
+        0.7675321464114505,
+        0.7682252658161195,
+        0.7699789101956316,
+        0.886980399242647,
+        0.9408284482828342
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      -0.22820476068361728,
+      0.09573027926080224,
+      -0.14595300121915936,
+      0.34604544204549087,
+      -0.22352130002045179,
+      0.19579793431643033,
+      -0.11492734625382639,
+      0.2622932632535696,
+      -0.1453912034257911,
+      0.22952951068237298,
+      0.26478168413883474,
+      -0.06268292408861939
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.22820476068361728,
+      "left_hip_roll": 0.09573027926080224,
+      "left_hip_yaw": -0.14595300121915936,
+      "left_knee": 0.24604544204549086,
+      "left_ankle_pitch": -0.1735213000204518,
+      "left_ankle_roll": 0.19579793431643033,
+      "right_hip_pitch": -0.11492734625382639,
+      "right_hip_roll": 0.2622932632535696,
+      "right_hip_yaw": -0.1453912034257911,
+      "right_knee": 0.12952951068237298,
+      "right_ankle_pitch": 0.3147816841388347,
+      "right_ankle_roll": -0.06268292408861939
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 36.2% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1534 N vs unprotected 2282 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.112 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6090.394237778704,
+      "median_unprotected_weighted_force_n": 9468.143008340743
+    },
+    "tuning_seconds": 1863.6
+  },
+  "s12_actuator_stuck/mid": {
+    "unit": "s12_actuator_stuck",
+    "scenario_ids": [
+      12
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 10,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 32,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.7121692096035872,
+      "select_score": 0.7900815928732652,
+      "shortlist_select_scores": [
+        0.7900815928732652,
+        0.8003111514856537,
+        0.8132045982445859,
+        0.8178662630807834
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.7309304415095281,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7004254816780575,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7201389891784857,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.7163983618585763,
+        1.003509403518421,
+        1.5223328965832936,
+        1.6548654432890244,
+        1.6643153543246525,
+        1.70852951442133,
+        1.7211635539342596,
+        1.8392374480716338,
+        2.065721502587399,
+        2.0771298084176006
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      -0.2874347702196195,
+      -0.2463751029086596,
+      -0.007274102837562746,
+      0.33969838323241597,
+      -0.3186961164723483,
+      0.07601322747789913,
+      0.2622484979616142,
+      -0.154634940608608,
+      -0.2875836668228342,
+      0.5059307500147221,
+      -0.43361676820675105,
+      -0.15132573900472263
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.2874347702196195,
+      "left_hip_roll": -0.2463751029086596,
+      "left_hip_yaw": -0.007274102837562746,
+      "left_knee": 0.23969838323241596,
+      "left_ankle_pitch": -0.2686961164723483,
+      "left_ankle_roll": 0.07601322747789913,
+      "right_hip_pitch": 0.2622484979616142,
+      "right_hip_roll": -0.154634940608608,
+      "right_hip_yaw": -0.2875836668228342,
+      "right_knee": 0.4059307500147221,
+      "right_ankle_pitch": -0.38361676820675106,
+      "right_ankle_roll": -0.15132573900472263
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "14/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 27.7% (need >= 15%, over 14 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1206 N vs unprotected 2288 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.140 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 14,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 5266.834478944485,
+      "median_unprotected_weighted_force_n": 7311.279620433168
+    },
+    "tuning_seconds": 1712.4
+  },
+  "s14_trip/mid": {
+    "unit": "s14_trip",
+    "scenario_ids": [
+      14
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 5,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 2,
+      "winning_restart": 2,
+      "tuning_score_of_winner": 0.6757902173447325,
+      "select_score": 0.726198006425947,
+      "shortlist_select_scores": [
+        0.726198006425947,
+        0.7478062436565541,
+        0.7570217549363234,
+        0.7587543116579147
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.6875244283766684,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6912023904811428,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.6688332326305093,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.6786361089641455,
+        0.6945820019425244,
+        0.7016350818987065,
+        0.7019365348408741,
+        0.7043256740378447,
+        0.7110161277895016,
+        0.7110691904094188,
+        0.743855574824895,
+        0.7863883578101641,
+        0.789572987217142
+      ]
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": 0.25930291799471106,
+      "left_hip_roll": 0.24574607371698431,
+      "left_hip_yaw": 0.12305312156810183,
+      "left_knee": 0.20618112809379832,
+      "left_ankle_pitch": 0.39794538213426744,
+      "left_ankle_roll": -0.08334658699787814,
+      "right_hip_pitch": 0.26272580894835595,
+      "right_hip_roll": 0.17653972118890493,
+      "right_hip_yaw": 0.05746189620975811,
+      "right_knee": -0.08645054705045113,
+      "right_ankle_pitch": 0.4776284242736549,
+      "right_ankle_roll": 0.08811604834738196
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": false,
+        "msg": "9/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 31.8% (need >= 15%, over 9 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1848 N vs unprotected 2561 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.129 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 9,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 6094.3067973100115,
+      "median_unprotected_weighted_force_n": 8988.70097653817
+    },
+    "tuning_seconds": 1222.9
+  },
+  "s15_sudden_load/mid": {
+    "unit": "s15_sudden_load",
+    "scenario_ids": [
+      15
+    ],
+    "velocity_bin": "mid",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 5,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 3,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.924179977706235,
+      "select_score": 0.9410994195458483,
+      "shortlist_select_scores": [
+        0.9410994195458483,
+        0.949820478492494,
+        0.955500648358198,
+        0.9560670590609941
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.9260480211518503,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.9219912420653116,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.9120576520669057,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.9708220395443328,
+        0.9909182267550314,
+        0.9919824514059853,
+        0.996625265967483,
+        1.0235082760718162,
+        1.0238274450644718,
+        1.027811295899009,
+        1.0300025032091018,
+        1.0357273011497432,
+        1.0388710607352696
+      ]
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.04976038981714209,
+      "left_hip_roll": -0.11222729001868523,
+      "left_hip_yaw": -0.17825141801123018,
+      "left_knee": 0.5252896771469234,
+      "left_ankle_pitch": -0.0031437149773754086,
+      "left_ankle_roll": -0.17664750777485788,
+      "right_hip_pitch": -0.03500109504189147,
+      "right_hip_roll": -0.027504572918354397,
+      "right_hip_yaw": 0.3348738606567458,
+      "right_knee": 0.5729200385979938,
+      "right_ankle_pitch": 0.4683765481462265,
+      "right_ankle_roll": -0.2111436145283507
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": false,
+        "msg": "6/24 held-out conditions produced a genuine unprotected fall (need >= 10), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": false,
+        "msg": "median weighted-force reduction 6.8% (need >= 15%, over 6 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": false,
+        "msg": "median head force 6905 N vs unprotected 6487 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.106 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 6,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 13809.911255215833,
+      "median_unprotected_weighted_force_n": 14741.25983315991
+    },
+    "tuning_seconds": 1168.3
+  },
+  "s12_actuator_stuck/high": {
+    "unit": "s12_actuator_stuck",
+    "scenario_ids": [
+      12
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 11,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 1.3735820005286348,
+      "select_score": 1.5067520164636572,
+      "shortlist_select_scores": [
+        1.5067520164636572,
+        1.5139909459014804,
+        1.5262603685604605,
+        1.5311303817393327
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 1.3940701819498955,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 1.3735820005286348,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 1.4188117909208926,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        1.491836488931833,
+        1.4937381134824959,
+        2.158092334968816,
+        2.2600212271325857,
+        2.33896455249958,
+        2.488436528290924,
+        2.579690046604126,
+        2.5925785156069194,
+        2.665464644885853,
+        2.6787278770152274
+      ]
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.3119621188087278,
+      "left_hip_roll": -0.2576826331922901,
+      "left_hip_yaw": -0.04912105737296013,
+      "left_knee": 0.1907665673617661,
+      "left_ankle_pitch": -0.2981752140740606,
+      "left_ankle_roll": 0.04638970398098563,
+      "right_hip_pitch": 0.26239277810757067,
+      "right_hip_roll": -0.20546179626684308,
+      "right_hip_yaw": -0.3434002918204365,
+      "right_knee": 0.4572882582380805,
+      "right_ankle_pitch": 0.11884219201703035,
+      "right_ankle_roll": -0.018867280267031605
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "17/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 25.3% (need >= 15%, over 17 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1221 N vs unprotected 2207 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": false,
+        "msg": "median peak tracking error 0.186 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 17,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 5347.0801469796,
+      "median_unprotected_weighted_force_n": 7154.699776653257
+    },
+    "tuning_seconds": 1891.3
+  },
+  "s14_trip/high": {
+    "unit": "s14_trip",
+    "scenario_ids": [
+      14
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 11,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 1,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.7383960775074283,
+      "select_score": 0.7443000008003011,
+      "shortlist_select_scores": [
+        0.7443000008003011,
+        0.760515223488267,
+        0.7620581868784423,
+        0.7646815959761841
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.755915095168325,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7335260704676279,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.7731598379484412,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.7935575237334163,
+        0.8572304266617525,
+        0.8969077780050116,
+        0.9323704141491744,
+        0.9536992269877058,
+        0.9658047051929535,
+        0.9755054999753869,
+        1.1147102770445678,
+        1.1286848753477852,
+        1.131127401932547
+      ]
+    },
+    "kind": "pose",
+    "gate_passed": true,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      -0.1933052398878688,
+      0.03822330445492178,
+      0.34903329620054085,
+      0.007617098200067531,
+      -0.1813310340275291,
+      -0.14062018094126405,
+      0.14427006992934743,
+      0.1273784545286093,
+      -0.22824448717227852,
+      0.18365705781354613,
+      0.3336619841981171,
+      -0.20902858911511174
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.1933052398878688,
+      "left_hip_roll": 0.03822330445492178,
+      "left_hip_yaw": 0.34903329620054085,
+      "left_knee": -0.09238290179993247,
+      "left_ankle_pitch": -0.1313310340275291,
+      "left_ankle_roll": -0.14062018094126405,
+      "right_hip_pitch": 0.14427006992934743,
+      "right_hip_roll": 0.1273784545286093,
+      "right_hip_yaw": -0.22824448717227852,
+      "right_knee": 0.08365705781354613,
+      "right_ankle_pitch": 0.3836619841981171,
+      "right_ankle_roll": -0.20902858911511174
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "23/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": true,
+        "msg": "median weighted-force reduction 24.1% (need >= 15%, over 23 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "4% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 1366 N vs unprotected 2581 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.120 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 23,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 5872.643943243356,
+      "median_unprotected_weighted_force_n": 8509.067852626235
+    },
+    "tuning_seconds": 1673.0
+  },
+  "s15_sudden_load/high": {
+    "unit": "s15_sudden_load",
+    "scenario_ids": [
+      15
+    ],
+    "velocity_bin": "high",
+    "candidate_selection": {
+      "n_tuning_natural_falls": 12,
+      "n_evaluations": 1467,
+      "n_shortlist": 4,
+      "selected_rank_on_tuning": 0,
+      "winning_restart": 1,
+      "tuning_score_of_winner": 0.9162389408937641,
+      "select_score": 0.9176150471766259,
+      "shortlist_select_scores": [
+        0.9176150471766259,
+        0.9230094293624757,
+        0.9274620550094697,
+        0.927597677675974
+      ],
+      "per_restart": [
+        {
+          "start": "stand",
+          "best_tuning_score": 0.935463509008043,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.9162389408937641,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        },
+        {
+          "start": "seed",
+          "best_tuning_score": 0.9273993853370464,
+          "stopped_by": [
+            "maxiter"
+          ],
+          "hit_maxiter": true
+        }
+      ],
+      "seed_scores": [
+        0.9399203721076356,
+        0.9747188096234818,
+        0.992006652095536,
+        0.9976172931857668,
+        1.0107247001123736,
+        1.027077162916475,
+        1.0272214286808512,
+        1.0371582374152317,
+        1.0396015709882573,
+        1.054169283900316
+      ]
+    },
+    "kind": "stand",
+    "gate_passed": false,
+    "pose_ctrl": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      -0.05,
+      0.0
+    ],
+    "searched_delta_from_stand_rad": {
+      "left_hip_pitch": -0.1422335606195959,
+      "left_hip_roll": 0.11472311561390552,
+      "left_hip_yaw": -0.24152019116677687,
+      "left_knee": 0.5050212047448169,
+      "left_ankle_pitch": -0.3476286054055651,
+      "left_ankle_roll": -0.14123428729223003,
+      "right_hip_pitch": -0.10012280576748589,
+      "right_hip_roll": -0.1485936932271365,
+      "right_hip_yaw": 0.16925249335345854,
+      "right_knee": 0.6472914708556579,
+      "right_ankle_pitch": 0.33177075762100433,
+      "right_ankle_roll": -0.0778132610431975
+    },
+    "gate_checks": {
+      "evidence": {
+        "ok": true,
+        "msg": "24/24 held-out conditions produced a genuine unprotected fall (need >= 12), 10 no-fall pairs (need 8)"
+      },
+      "do_no_harm": {
+        "ok": true,
+        "msg": "pose caused a fall in 0/10 cases the robot would have survived (limit 0%)"
+      },
+      "median_reduction": {
+        "ok": false,
+        "msg": "median weighted-force reduction 5.5% (need >= 15%, over 24 genuine falls)"
+      },
+      "regressions": {
+        "ok": true,
+        "msg": "0% of conditions worse than unprotected (limit 20%)"
+      },
+      "head_not_worse": {
+        "ok": true,
+        "msg": "median head force 7472 N vs unprotected 7247 N"
+      },
+      "fragile_first_contact": {
+        "ok": true,
+        "msg": "knee/shank hits the floor first in 0% of protected falls (limit 5%)"
+      },
+      "tracking_error": {
+        "ok": true,
+        "msg": "median peak tracking error 0.125 rad (limit 0.15)"
+      }
+    },
+    "static_violations": [],
+    "gate_diagnostics": {
+      "n_genuine_falls": 24,
+      "frac_protected_still_fall": 1.0,
+      "median_protected_weighted_force_n": 14943.60033148774,
+      "median_unprotected_weighted_force_n": 15865.29537369409
+    },
+    "tuning_seconds": 2077.1
+  }
+}

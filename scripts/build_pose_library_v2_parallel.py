@@ -27,6 +27,49 @@ What changed vs v1
     * Fixed: condition sampling used Python's salted hash(), so the tuning /
       select / holdout sets changed between runs. Now seeded via crc32.
 
+v2.3 (driven by the full-scenario widebox run: median reduction 29.1% ->
+31.3%, entirely from the tracking-penalty fix, NOT the wider box -- on the
+real model the box changed by < 0.0001 rad, so that lever is now closed too)
+    * gate_diagnostics sanity check widened: a bin now ALSO gets a printed
+      WARNING when the median protected force is ~0 N while the robot still
+      falls in most trials (frac_protected_still_fall high). That combination
+      is physically impossible for a genuine impact and usually means the
+      contact/force measurement isn't seeing the real landing (e.g. the
+      observation window ends before ground contact, or geom IDs don't match
+      after the scenario moves something like the floor). The OLD warning
+      (near-0 fall fraction => maybe the fall was prevented) is kept as a
+      separate, second condition.
+    * --exclude units now leave a placeholder entry per bin instead of
+      vanishing silently ({"kind": "stand", "excluded": true, "reason": ...})
+      so the output JSON is self-documenting: a missing key used to be
+      ambiguous between "excluded on purpose" and "some other error".
+    * --regate-from <existing library json> [--regate-holdout-n N]: re-runs
+      ONLY gate_pose on every non-skipped, non-excluded entry's already-found
+      pose, with a (usually larger) holdout set -- no CMA-ES, so it's cheap.
+      For bins that failed only on 'evidence' (too few held-out falls in a
+      small set), a bigger holdout can resolve them without new search.
+
+v2.2 (driven by the seeded v2.1 run: seed poses from unrelated scenarios all
+scored within ~1-2% of CMA-ES's own winner -- the search itself was not the
+bottleneck, the SEARCH BOX likely is)
+    * Old box-finder moved ONE joint at a time from 'stand' with every other
+      joint frozen -- an axis-aligned probe of what may be a non-axis-aligned
+      feasible region. A joint that is only allowed to move far when a SECOND
+      joint compensates (a common biomechanical coupling: e.g. hip flexion
+      paired with ankle dorsiflexion) would be reported as far more limited
+      than it really is.
+    * New default: after the axis-only pass, bisect --box-directions (default
+      250) random COMBINED directions across all searched joints, both signs.
+      Each joint's lo/hi is the widest extent seen in EITHER pass, so the box
+      only ever grows -- old seed poses (which fit inside the smaller v2.1 box)
+      still map into [0,1] correctly under the new one.
+    * This still produces a hyper-rectangle (an over-approximation), not the
+      true polytope, so some box corners can still be infeasible -- exactly
+      like before, make_objective()'s graded penalty on check_pose_ctrl is
+      what actually keeps CMA-ES out of them. Widening the box only helps if
+      the true envelope truly extends further; --box-directions 0 reproduces
+      the old axis-only box exactly, for an apples-to-apples before/after run.
+
 v2.1 (driven by the first full run: 17 pass / 10 fail / 18 skipped, median
 reduction plateaued at ~29-30% in almost every bin)
     * Every bin used its FULL 720-evaluation budget -> CMA-ES never converged.
@@ -69,6 +112,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
+import tempfile
+import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 import zlib
 from dataclasses import dataclass
@@ -158,10 +205,12 @@ def _n_violations(v) -> int:
         return 1 if v else 0
 
 
-def _oracle_bounds(spec: ValiditySpec, idx: np.ndarray, stand: np.ndarray, t_max: float = 1.5):
+def _oracle_bounds_axis(spec: ValiditySpec, idx: np.ndarray, stand: np.ndarray, t_max: float = 1.5):
     """Largest single-joint excursion from 'stand' (each direction) that
-    check_pose_ctrl still accepts. Conservative (other joints at stand), but
-    needs nothing from ValiditySpec beyond stand_ctrl + the checker."""
+    check_pose_ctrl still accepts, with every OTHER searched joint pinned at
+    stand. Conservative: needs nothing from ValiditySpec beyond stand_ctrl +
+    the checker, but under-estimates any joint whose real range depends on a
+    compensating move elsewhere (see _oracle_bounds, which extends this)."""
     if _n_violations(check_pose_ctrl(spec, stand)):
         raise RuntimeError("check_pose_ctrl rejects spec.stand_ctrl itself -- cannot derive a search box")
     lo, hi = np.empty(len(idx)), np.empty(len(idx))
@@ -181,10 +230,56 @@ def _oracle_bounds(spec: ValiditySpec, idx: np.ndarray, stand: np.ndarray, t_max
                     else:
                         a = m
             out[k] = stand[j] + sign * a
-    return lo, hi, f"oracle: bisect check_pose_ctrl from stand (cap +/-{t_max} rad)"
+    return lo, hi, f"oracle-axis: bisect one joint at a time from stand (cap +/-{t_max} rad)"
 
 
-def build_search_space(spec: ValiditySpec, model) -> SearchSpace:
+def _oracle_bounds(spec: ValiditySpec, idx: np.ndarray, stand: np.ndarray, t_max: float = 1.5,
+                   n_directions: int = 250, seed: int = 0, verbose: bool = True):
+    """Axis-only bounds (see _oracle_bounds_axis), THEN widened by bisecting
+    n_directions random unit vectors spanning ALL searched joints at once
+    (both signs). A joint's final lo/hi is the widest value seen in either
+    pass -- the box only grows, so an old, smaller box's poses still map into
+    [0,1] here. n_directions=0 reproduces the old axis-only box exactly.
+
+    This is still a bounding hyper-rectangle, not the true feasible polytope,
+    so corners can still be infeasible; CMA-ES's graded penalty (see
+    make_objective) handles that, same as before."""
+    lo, hi, axis_src = _oracle_bounds_axis(spec, idx, stand, t_max)
+    n_widened = 0
+    if n_directions > 0:
+        rng = np.random.default_rng(seed)
+        d = len(idx)
+        for _ in range(n_directions):
+            v = rng.normal(size=d)
+            v /= np.linalg.norm(v) + 1e-12
+            for sign in (+1.0, -1.0):
+                c = stand.copy()
+                c[idx] = stand[idx] + sign * t_max * v
+                if not _n_violations(check_pose_ctrl(spec, c)):
+                    a = t_max
+                else:
+                    a, b = 0.0, t_max
+                    for _ in range(14):
+                        m = 0.5 * (a + b)
+                        c[idx] = stand[idx] + sign * m * v
+                        if _n_violations(check_pose_ctrl(spec, c)):
+                            b = m
+                        else:
+                            a = m
+                point = stand[idx] + sign * a * v
+                widened = (point < lo) | (point > hi)
+                n_widened += int(np.count_nonzero(widened))
+                lo, hi = np.minimum(lo, point), np.maximum(hi, point)
+    src = (axis_src if n_directions == 0 else
+          f"oracle: axis pass + {n_directions} random-direction bisections, widest-of-both per joint "
+          f"(cap +/-{t_max} rad)")
+    if verbose and n_directions > 0:
+        print(f"  box-finder: {n_directions} random directions widened {n_widened} joint-bound(s) "
+              f"beyond the axis-only pass")
+    return lo, hi, src
+
+
+def build_search_space(spec: ValiditySpec, model, box_directions: int = 250, box_seed: int = 0) -> SearchSpace:
     import mujoco
     nu = int(model.nu)
     names = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_ACTUATOR, i) or f"act{i}" for i in range(nu)]
@@ -194,7 +289,7 @@ def build_search_space(spec: ValiditySpec, model) -> SearchSpace:
     stand = np.asarray(spec.stand_ctrl, float).copy()
 
     found = _spec_bounds(spec, nu, idx)
-    lo, hi, src = found if found else _oracle_bounds(spec, idx, stand)
+    lo, hi, src = found if found else _oracle_bounds(spec, idx, stand, n_directions=box_directions, seed=box_seed)
 
     if hasattr(model, "actuator_ctrllimited"):  # never exceed the actuator's own ctrlrange
         for k, j in enumerate(idx):
@@ -634,6 +729,26 @@ def _json_default(o):
     raise TypeError(f"Object of type {o.__class__.__name__} is not JSON serializable")
 
 
+def excluded_placeholder_entries(excluded_units: Dict[str, List[int]], space: SearchSpace,
+                                 reason: str, bins: Optional[Sequence[str]] = None) -> Dict[str, dict]:
+    """One 'stand' entry per (excluded unit, bin) so the output JSON is
+    self-documenting -- a missing key used to be ambiguous between 'excluded
+    on purpose' and 'some other error'. `excluded: True` distinguishes this
+    from a genuine 0-natural-fall skip, which also lands at 'stand' but was
+    actually evaluated."""
+    run_bins = tuple(bins) if bins else VELOCITY_BINS
+    out: Dict[str, dict] = {}
+    for unit, sids in excluded_units.items():
+        for bin_name in run_bins:
+            out[f"{unit}/{bin_name}"] = {
+                "unit": unit, "scenario_ids": sids, "velocity_bin": bin_name,
+                "kind": "stand", "excluded": True, "gate_passed": False, "skipped_reason": reason,
+                "pose_ctrl": space.stand.tolist(), "gate_checks": {}, "static_violations": [],
+                "candidate_selection": {"skipped": reason},
+            }
+    return out
+
+
 def _save(path: str, library: dict, space: SearchSpace) -> None:
     payload = {"_meta": {"search_box_source": space.source, "joints": space.names,
                          "lo": space.lo.tolist(), "hi": space.hi.tolist(),
@@ -691,15 +806,67 @@ def build_library(spec: ValiditySpec, space: SearchSpace, units: Dict[str, List[
                 print(f"[{key:34s}] {kind:6s} gate={'PASS' if report.passed else 'FAIL'} "
                       f"evals={audit['n_evaluations']} restart={audit['winning_restart']}"
                       f"{' UNCONVERGED' if unconverged else ''} ({time.time()-t0:.1f}s)")
-                if diag.get("frac_protected_still_fall", 1.0) < 0.1 and diag.get("n_genuine_falls", 0):
+                _n_genuine = diag.get("n_genuine_falls", 0)
+                if diag.get("frac_protected_still_fall", 1.0) < 0.1 and _n_genuine:
                     print(f"    WARNING {key}: only {diag['frac_protected_still_fall']:.0%} of protected falls still "
                           f"fall (median protected force {diag['median_protected_weighted_force_n']:.0f} N vs "
                           f"{diag['median_unprotected_weighted_force_n']:.0f} N) -- a ~100% 'reduction' means the "
                           "fall is being prevented or the contact tracker isn't registering; verify in the viewer.")
+                if (_n_genuine and diag.get("frac_protected_still_fall", 0) >= 0.5
+                        and diag.get("median_protected_weighted_force_n", 1.0) < 1.0):
+                    print(f"    WARNING {key}: median protected force is ~0 N "
+                          f"({diag['median_protected_weighted_force_n']:.2f} N) while the robot STILL falls in "
+                          f"{diag['frac_protected_still_fall']:.0%} of trials -- physically implausible for a real "
+                          "impact. Likely cause: the contact/force measurement isn't capturing the actual landing "
+                          "for this scenario (observation window ends before ground contact, or geom IDs don't "
+                          "match after something in the scenario moves, e.g. floor_drop). Do not trust this "
+                          "reduction number until verified in the viewer.")
             entry["tuning_seconds"] = round(time.time() - t0, 1)
             library[key] = entry
             if out_path:
                 _save(out_path, library, space)  # partial results survive a crash / Ctrl-C
+    return library
+
+
+def regate_library(spec: ValiditySpec, space: SearchSpace, existing: dict, run_trial: Callable,
+                   iter_holdout: Callable, iter_nofall: Callable,
+                   cfg_by_bin: Dict[str, GateConfig], out_path: Optional[str] = None) -> dict:
+    """Re-runs ONLY gate_pose on every entry's already-found pose against a
+    (usually larger) holdout set -- no CMA-ES, so it's cheap. Skipped and
+    excluded entries are carried over unchanged (there is no pose to re-gate).
+    Overwrites each entry's gate_checks/gate_passed/kind/pose_ctrl/gate_diagnostics
+    in place; candidate_selection (the original tuning record) is left as-is
+    plus a note that it was re-gated."""
+    library: Dict[str, dict] = dict(existing)
+    for key, entry in existing.items():
+        if entry.get("excluded") or entry.get("skipped_reason") or not entry.get("searched_delta_from_stand_rad"):
+            continue  # nothing was searched for this bin -- carry over unchanged
+        unit, bin_name = entry["unit"], entry["velocity_bin"]
+        dl = entry["searched_delta_from_stand_rad"]
+        if any(n not in dl for n in space.names):
+            print(f"[{key:34s}] SKIPPED regate: searched_delta_from_stand_rad doesn't match this space's joints")
+            continue
+        ctrl = space.stand.copy()
+        ctrl[space.idx] = np.clip(space.stand[space.idx] + np.array([dl[n] for n in space.names]),
+                                  space.lo, space.hi)
+        x = space.x_of_ctrl(ctrl)
+        cfg = cfg_by_bin[bin_name]
+        diag: dict = {}
+        t0 = time.time()
+        report, ctrl = gate_pose(spec, space, x, unit, bin_name, run_trial, iter_holdout, iter_nofall, cfg, diag=diag)
+        static_v = check_pose_ctrl(spec, ctrl)
+        kind, final_ctrl = decide(ctrl, static_v, report, spec.stand_ctrl)
+        new_entry = dict(entry)
+        new_entry.update(kind=kind, gate_passed=report.passed, pose_ctrl=final_ctrl.tolist(),
+                         gate_checks={k: {"ok": ok, "msg": msg} for k, (ok, msg) in report.checks.items()},
+                         static_violations=static_v, gate_diagnostics=diag, regated=True,
+                         regate_seconds=round(time.time() - t0, 1))
+        flip = "" if kind == entry.get("kind") else f"  ({entry.get('kind')} -> {kind})"
+        print(f"[{key:34s}] regated {kind:6s} gate={'PASS' if report.passed else 'FAIL'}{flip} "
+              f"({time.time()-t0:.1f}s)")
+        library[key] = new_entry
+        if out_path:
+            _save(out_path, library, space)
     return library
 
 
@@ -717,15 +884,27 @@ def main(argv=None) -> int:
     ap.add_argument("--maxiter", type=int, default=30)
     ap.add_argument("--restarts", type=int, default=2)
     ap.add_argument("--only", default="", help="comma-separated unit keys (or key prefixes) to run")
+    ap.add_argument("--box-directions", type=int, default=250,
+                    help="random combined-joint directions used to widen the oracle search box beyond the "
+                         "axis-only pass (0 reproduces the old v2.1 box exactly); ignored if ValiditySpec "
+                         "exposes explicit per-actuator bounds")
+    ap.add_argument("--box-seed", type=int, default=0, help="seed for --box-directions sampling")
     ap.add_argument("--only-bin", choices=VELOCITY_BINS, default="",
                     help="run just one velocity bin (used by the parallel launcher, one job per unit/bin)")
     ap.add_argument("--exclude", default="", help="comma-separated unit keys/prefixes to drop (e.g. s11,s13)")
     ap.add_argument("--holdout-n", type=int, default=24,
                     help="held-out draws for the gate (the first 24 are identical to the default set)")
     ap.add_argument("--seed-from", default="", help="previous library JSON; its poses seed extra CMA-ES starts")
+    ap.add_argument("--regate-from", default="",
+                    help="previous library JSON; re-run ONLY the gate (no search) on every entry's pose against "
+                         "--regate-holdout-n held-out draws. Cheap way to resolve bins that failed only on "
+                         "'evidence'. Ignores --seed-from, --box-*, --popsize/--maxiter/--restarts.")
+    ap.add_argument("--regate-holdout-n", type=int, default=48, help="held-out draws to use for --regate-from")
     ap.add_argument("--tracking-weight", type=float, default=OBJ_TRACKING_WEIGHT)
     ap.add_argument("--tracking-margin", type=float, default=OBJ_TRACKING_MARGIN)
     ap.add_argument("--median-weight", type=float, default=OBJ_MEDIAN_WEIGHT)
+    ap.add_argument("--workers", type=int, default=1,
+                    help="CPU parallel workers; independent unit/bin jobs run in separate processes")
     ap.add_argument("--resume", action="store_true", help="keep finished bins already present in --out")
     ap.add_argument("--mock", action="store_true", help="fake physics: exercises CMA-ES + gate wiring only")
     ap.add_argument("--live", action="store_true", help="real harness via make_run_trial")
@@ -756,6 +935,26 @@ def main(argv=None) -> int:
         print("Pass --mock to test the pipeline, or --live to run against the real harness.")
         return 1
 
+    if args.regate_from:
+        with open(args.regate_from) as f:
+            existing = {k: v for k, v in json.load(f).items() if not k.startswith("_")}
+        space = build_search_space(spec, model, box_directions=args.box_directions, box_seed=args.box_seed)
+        print(space.describe(), "\n")
+        if args.live:
+            it, isel, ih, inf = make_condition_iters(p1, registry, holdout_n=args.regate_holdout_n)
+        else:
+            ih = lambda u, b: iter_holdout_conditions_MOCK(u, b)  # mock has a fixed-size holdout; fine for wiring
+        n_re = sum(1 for v in existing.values()
+                  if not v.get("excluded") and not v.get("skipped_reason") and v.get("searched_delta_from_stand_rad"))
+        print(f"re-gating {n_re} entrie(s) from {args.regate_from} with holdout_n={args.regate_holdout_n} "
+              f"(no CMA-ES search)\n")
+        library = regate_library(spec, space, existing, run_trial, ih, inf, GATE_CONFIG_BY_BIN, out_path=args.out)
+        n_pose = sum(1 for v in library.values() if v["kind"] == "pose")
+        n_flip = sum(1 for k, v in library.items() if v.get("regated") and v.get("kind") != existing[k].get("kind"))
+        print(f"\n{n_pose}/{len(library)} bins now produce a gate-passed pose ({n_flip} status change(s) from "
+              f"regating). wrote {args.out}")
+        return 0
+
     if args.only:
         wanted = [w.strip() for w in args.only.split(",") if w.strip()]
         units = {u: s for u, s in units.items() if any(u == w or u.startswith(w) for w in wanted)}
@@ -763,14 +962,18 @@ def main(argv=None) -> int:
             print(f"--only {args.only!r} matched no units. Exiting.")
             return 1
 
+    excluded_units: Dict[str, List[int]] = {}
     if args.exclude:
         drop = [w.strip() for w in args.exclude.split(",") if w.strip()]
-        units = {u: s_ for u, s_ in units.items() if not any(u == w or u.startswith(w) for w in drop)}
+        excluded_units = {u: s_ for u, s_ in units.items() if any(u == w or u.startswith(w) for w in drop)}
+        units = {u: s_ for u, s_ in units.items() if u not in excluded_units}
         if not units:
             print(f"--exclude {args.exclude!r} removed every unit. Exiting.")
             return 1
+        print(f"excluded {len(excluded_units)} unit(s) via --exclude {args.exclude!r}: "
+              f"{', '.join(sorted(excluded_units))} (placeholder 'stand' entries will be written for these)\n")
 
-    space = build_search_space(spec, model)
+    space = build_search_space(spec, model, box_directions=args.box_directions, box_seed=args.box_seed)
     print(space.describe(), "\n")
     seed_ctrls = load_seed_ctrls(args.seed_from, space) if args.seed_from else None
     if args.seed_from:
@@ -787,15 +990,68 @@ def main(argv=None) -> int:
         with open(args.out) as f:
             existing = {k: v for k, v in json.load(f).items() if not k.startswith("_")}
 
-    library = build_library(spec, space, units, run_trial, it, isel, ih, inf, args.popsize, args.maxiter,
-                            args.restarts, cfg=None, out_path=args.out, existing=existing,
-                            seed_ctrls=seed_ctrls, obj_kwargs=obj_kwargs,
-                            bins=([args.only_bin] if args.only_bin else None))
+    if args.workers < 1:
+        ap.error("--workers must be >= 1")
+
+    if args.workers > 1 and not args.only_bin:
+        # Isolated subprocesses each own their MuJoCo model/data and output file.
+        jobs = [(unit, b) for unit in units for b in VELOCITY_BINS
+                if f"{unit}/{b}" not in existing]
+        if not jobs:
+            library = dict(existing)
+        else:
+            print(f"CPU parallelism: {args.workers} worker processes for {len(jobs)} unit/bin jobs")
+            with tempfile.TemporaryDirectory(prefix="pose_lib_workers_") as tmpdir:
+                def run_job(job_index, unit, bin_name):
+                    job_out = os.path.join(tmpdir, f"job_{job_index:04d}.json")
+                    cmd = [sys.executable, os.path.abspath(__file__),
+                           "--model", args.model, "--out", job_out,
+                           "--granularity", args.granularity,
+                           "--popsize", str(args.popsize), "--maxiter", str(args.maxiter),
+                           "--restarts", str(args.restarts), "--only", unit,
+                           "--only-bin", bin_name, "--box-directions", str(args.box_directions),
+                           "--box-seed", str(args.box_seed), "--holdout-n", str(args.holdout_n),
+                           "--tracking-weight", str(args.tracking_weight),
+                           "--tracking-margin", str(args.tracking_margin),
+                           "--median-weight", str(args.median_weight)]
+                    cmd.append("--mock" if args.mock else "--live")
+                    if args.seed_from:
+                        cmd.extend(["--seed-from", args.seed_from])
+                    result = subprocess.run(cmd, capture_output=True, text=True)
+                    if result.returncode:
+                        raise RuntimeError(f"Parallel job {unit}/{bin_name} failed (exit {result.returncode}):\\n"
+                                           f"{result.stdout}\\n{result.stderr}")
+                    with open(job_out, encoding="utf-8") as jf:
+                        payload = json.load(jf)
+                    return {k: v for k, v in payload.items() if not k.startswith("_")}
+
+                results = {}
+                with ThreadPoolExecutor(max_workers=args.workers) as pool:
+                    futures = [pool.submit(run_job, i, u, b) for i, (u, b) in enumerate(jobs)]
+                    for future in as_completed(futures):
+                        results.update(future.result())
+                library = {**existing, **results}
+    else:
+        library = build_library(spec, space, units, run_trial, it, isel, ih, inf, args.popsize, args.maxiter,
+                                args.restarts, cfg=None, out_path=args.out, existing=existing,
+                                seed_ctrls=seed_ctrls, obj_kwargs=obj_kwargs,
+                                bins=([args.only_bin] if args.only_bin else None))
+
+    if args.workers > 1 and not args.only_bin:
+        _save(args.out, library, space)
+
+    if excluded_units:
+        reason = f"excluded via --exclude {args.exclude!r} (this scenario produced no/negligible natural falls)"
+        library.update(excluded_placeholder_entries(excluded_units, space, reason,
+                                                     bins=([args.only_bin] if args.only_bin else None)))
+        _save(args.out, library, space)
 
     n_pose = sum(1 for v in library.values() if v["kind"] == "pose")
-    n_skip = sum(1 for v in library.values() if v.get("skipped_reason"))
+    n_excl = sum(1 for v in library.values() if v.get("excluded"))
+    n_skip = sum(1 for v in library.values() if v.get("skipped_reason") and not v.get("excluded"))
     print(f"\n{n_pose}/{len(library)} bins produced a gate-passed pose; "
-          f"{len(library)-n_pose} fell back to 'stand' ({n_skip} skipped for lack of natural falls).")
+          f"{len(library)-n_pose} fell back to 'stand' ({n_skip} skipped for lack of natural falls, "
+          f"{n_excl} excluded via --exclude).")
     print(f"wrote {args.out}")
     return 0
 

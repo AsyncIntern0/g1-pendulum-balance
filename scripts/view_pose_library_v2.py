@@ -366,41 +366,27 @@ def direction_label_from_phase3(p3, scenario):
     return mapping.get(direction, str(direction))
 
 
-def select_pose(p3, library, fn_name, direction_label, velocity):
-    fn = getattr(p3, "select_pose", None)
-    if not callable(fn):
-        raise RuntimeError(
-            "phase3_pose_jerk_v5.py with select_pose() could not be loaded."
-        )
-
-    # Use the project's actual Stage-4 selection function.
-    return fn(library, fn_name, direction_label, velocity)
-
-
-def extract_selected_pose(selected):
-    if not isinstance(selected, dict):
-        raise TypeError(
-            "Stage-4 select_pose() returned an unexpected type: "
-            f"{type(selected).__name__}"
-        )
-
-    if "joint_angles" not in selected:
+def select_pose_from_v2_library(library, scenario_id, velocity_bin):
+    """Select the v2 entry matching the Phase-1 scenario id and chosen bin."""
+    matches = []
+    for key, entry in library.items():
+        if key.startswith("_") or not isinstance(entry, dict):
+            continue
+        ids = entry.get("scenario_ids", [])
+        if scenario_id in ids and entry.get("velocity_bin") == velocity_bin:
+            matches.append((key, entry))
+    if not matches:
         raise KeyError(
-            "Selected pose does not contain 'joint_angles'."
+            f"No library entry for scenario id {scenario_id}, bin {velocity_bin}."
         )
-
-    pose = np.asarray(selected["joint_angles"], dtype=float)
-
+    # A scenario may map to a single grouped unit. Fail clearly if ambiguous.
+    if len(matches) > 1:
+        raise ValueError(f"Ambiguous library matches: {[k for k, _ in matches]}")
+    key, entry = matches[0]
+    pose = np.asarray(entry.get("pose_ctrl", []), dtype=float)
     if pose.ndim != 1:
-        raise ValueError(
-            f"Selected joint_angles must be 1-D; got shape {pose.shape}."
-        )
-
-    return pose, selected
-
-
-def get_pose_id(selected):
-    return selected.get("pose_id", "?")
+        raise ValueError(f"{key}: pose_ctrl must be a 1-D vector")
+    return pose, key, entry
 
 
 def print_force_summary(label, peak):
@@ -543,236 +529,89 @@ def run_viewer(
 
 
 def main():
-    ap = argparse.ArgumentParser()
-
-    ap.add_argument(
-        "--model",
-        default=r"C:\Users\Asyncronix\Downloads\Asyncronix_Intern"
-                r"\g1-pendulum-balance\unitree_g1\g1_pendulum.xml",
-    )
-
-    ap.add_argument(
-        "--library",
-        default=r"C:\Users\Asyncronix\Downloads\Asyncronix_Intern"
-                r"\g1-pendulum-balance\build_pose\pose_lib_widebox.json",
-    )
-
-    ap.add_argument(
-        "--p1-module",
-        default="generate_fall_dataset_final",
-    )
-
-    ap.add_argument(
-        "--p3-module",
-        default="build_pose_library_v2_parallel.py",
-    )
-
-    ap.add_argument(
-        "--scenario",
-        type=int,
-        default=9,
-    )
-
-    ap.add_argument(
-        "--magnitude",
-        type=float,
-        default=100,
-    )
-
-    ap.add_argument(
-        "--velocity",
-        type=float,
-        default=None,
-        help=(
-            "Optional override for Stage-4 lookup only. "
-            "Normally leave unset so velocity is measured at trigger."
-        ),
-    )
-
-    ap.add_argument(
-        "--timing",
-        type=float,
-        default=0.0,
-    )
-
+    ap = argparse.ArgumentParser(description="Compare unprotected and pose-library protected MuJoCo fall runs.")
+    ap.add_argument("--model", required=True, help="Path to g1_pendulum.xml")
+    ap.add_argument("--library", required=True, help="Path to pose_lib_widebox.json")
+    ap.add_argument("--p1-module", default="generate_fall_dataset_final")
+    ap.add_argument("--scenario", type=int, default=9, help="Phase-1 scenario ID")
+    ap.add_argument("--bin", dest="velocity_bin", choices=("low", "mid", "high"), default=None,
+                    help="Pose-library velocity bin; if omitted, prompt interactively")
+    ap.add_argument("--magnitude", type=float, default=100.0)
+    ap.add_argument("--timing", type=float, default=0.0)
     args = ap.parse_args()
 
     root = Path.cwd()
-
     model_path = resolve_path(root, args.model)
     library_path = resolve_path(root, args.library)
-
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}")
-
     if not library_path.exists():
-        raise FileNotFoundError(f"Library not found: {library_path}")
+        raise FileNotFoundError(f"Pose library not found: {library_path}")
 
     p1 = load_module(args.p1_module)
-    p3 = load_module(args.p3_module)
-
     scenario = find_scenario(p1, args.scenario)
-    scen_id, category, fn_name, nominal_direction = scenario_parts(
-        scenario
-    )
-
+    scen_id, category, fn_name, direction = scenario_parts(scenario)
     model = mujoco.MjModel.from_xml_path(str(model_path))
-
     with open(library_path, "r", encoding="utf-8") as f:
         library = json.load(f)
 
-    direction_label = direction_label_from_phase3(p3, scenario)
+    velocity_bin = args.velocity_bin
+    if velocity_bin is None:
+        print("Available velocity bins: low / mid / high")
+        velocity_bin = input("Select velocity bin: ").strip().lower()
+    if velocity_bin not in ("low", "mid", "high"):
+        raise ValueError("Velocity bin must be low, mid, or high.")
+
+    pose, entry_key, entry = select_pose_from_v2_library(library, int(scen_id), velocity_bin)
+    if pose.size != model.nu:
+        raise ValueError(f"Selected pose has {pose.size} controls, but model.nu={model.nu}.")
+    pose_id = entry_key + (" [gate-passed]" if entry.get("gate_passed") else " [stand/fallback]")
 
     print("\n" + "=" * 68)
-    print("PHASE-3 POSE LIBRARY VISUAL COMPARISON")
+    print("PHASE-3 POSE LIBRARY: PROTECTED vs UNPROTECTED")
     print("=" * 68)
-    print(f"Model    : {model_path}")
-    print(f"Library  : {library_path}")
-    print(f"Scenario : {scen_id}")
-    print(f"Cause    : {category}")
+    print(f"Scenario : {scen_id} / {category} ({fn_name})")
+    print(f"Bin      : {velocity_bin}")
+    print(f"Entry    : {entry_key}")
+    print(f"Kind     : {entry.get('kind', 'unknown')}")
+    print(f"Gate     : {entry.get('gate_passed', False)}")
+    if entry.get("skipped_reason"):
+        print(f"Note     : {entry['skipped_reason']}")
     print(f"Magnitude: {args.magnitude:.3f}")
-    print(f"Direction: {direction_label}")
 
-    # Find natural impact and then measure qvel[0:3] at exactly 0.30 s
-    # before that impact.
-    natural_impact, trigger_time, measured_velocity = (
-        natural_impact_and_trigger(
-            p1,
-            model,
-            scenario,
-            args.magnitude,
-            nominal_direction,
-            args.timing,
-        )
+    natural_impact, trigger_time, measured_velocity = natural_impact_and_trigger(
+        p1, model, scenario, args.magnitude, direction, args.timing
     )
-
-    lookup_velocity = (
-        float(args.velocity)
-        if args.velocity is not None
-        else measured_velocity
-    )
-
-    selected = select_pose(
-        p3,
-        library,
-        fn_name,
-        direction_label,
-        lookup_velocity,
-    )
-
-    pose, meta = extract_selected_pose(selected)
-
-    if pose.size != model.nu:
-        raise ValueError(
-            f"Selected pose has {pose.size} joint angles, "
-            f"but the XML has model.nu={model.nu} actuators."
-        )
-
-    pose_id = get_pose_id(meta)
-
     print(f"Natural impact time : {natural_impact:.3f}s")
     print(f"Trigger time        : {trigger_time:.3f}s")
-    print(
-        f"Velocity at trigger: {measured_velocity:.3f} m/s"
-    )
+    print(f"Velocity at trigger : {measured_velocity:.3f} m/s")
+    print("\nTerminal controls: u=unprotected, p=protected, r=protected again, q=quit")
 
-    if args.velocity is not None:
-        print(
-            f"Velocity used for lookup (--velocity): "
-            f"{lookup_velocity:.3f} m/s"
-        )
-    else:
-        print(
-            f"Velocity used for lookup: "
-            f"{lookup_velocity:.3f} m/s"
-        )
-
-    print(f"Pose ID             : {pose_id}")
-
-    if isinstance(meta, dict):
-        if "velocity_range_covered_mps" in meta:
-            print(
-                "Pose velocity range: "
-                f"{meta['velocity_range_covered_mps']}"
-            )
-        if "velocity_out_of_range" in meta:
-            print(
-                "Velocity out of range: "
-                f"{meta['velocity_out_of_range']}"
-            )
-
-    print("\nMuJoCo viewer controls are through this terminal:")
-    print("  u = unprotected")
-    print("  p = protected")
-    print("  r = protected again")
-    print("  q = quit")
-
-    # Save the exact experiment values so u/p/r use identical conditions.
     unprotected_peak = None
     protected_peak = None
-
     while True:
         try:
             choice = input("Choice [u/p/r/q]: ").strip().lower()
         except (EOFError, KeyboardInterrupt):
             choice = "q"
-
         if choice == "q":
             print("Viewer closed.")
             break
-
         if choice == "u":
-            unprotected_peak = run_viewer(
-                p1,
-                model,
-                scenario,
-                args.magnitude,
-                nominal_direction,
-                args.timing,
-                False,
-                None,
-                None,
-                trigger_time,
-            )
-
+            unprotected_peak = run_viewer(p1, model, scenario, args.magnitude, direction,
+                                          args.timing, False, None, None, trigger_time)
         elif choice in ("p", "r"):
-            protected_peak = run_viewer(
-                p1,
-                model,
-                scenario,
-                args.magnitude,
-                nominal_direction,
-                args.timing,
-                True,
-                pose,
-                pose_id,
-                trigger_time,
-            )
-
+            protected_peak = run_viewer(p1, model, scenario, args.magnitude, direction,
+                                        args.timing, True, pose, pose_id, trigger_time)
         else:
             print("Use u, p, r, or q.")
-
         if unprotected_peak is not None and protected_peak is not None:
             print("\n" + "=" * 68)
-            print("FORCE COMPARISON")
+            print("PEAK FORCE COMPARISON (N)")
             print("=" * 68)
-            print(f"{'':16s}{'UNPROTECTED':>16s}{'PROTECTED':>16s}")
-            print(
-                f"{'Head':16s}"
-                f"{unprotected_peak['head']:16.2f}"
-                f"{protected_peak['head']:16.2f}"
-            )
-            print(
-                f"{'Pelvis':16s}"
-                f"{unprotected_peak['pelvis']:16.2f}"
-                f"{protected_peak['pelvis']:16.2f}"
-            )
-            print(
-                f"{'Other':16s}"
-                f"{unprotected_peak['other']:16.2f}"
-                f"{protected_peak['other']:16.2f}"
-            )
-            print("=" * 68)
+            print(f"{'Body':12s}{'Unprotected':>16s}{'Protected':>16s}")
+            for part in ("head", "pelvis", "other"):
+                print(f"{part:12s}{unprotected_peak[part]:16.2f}{protected_peak[part]:16.2f}")
 
 
 if __name__ == "__main__":
