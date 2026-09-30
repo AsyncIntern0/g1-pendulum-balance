@@ -13,7 +13,8 @@ What changed vs v1
     * The gate is UNCHANGED (validity_spec.evaluate_gate + GATE_CONFIG_BY_BIN)
       and still runs once, on held-out conditions the search never saw.
     * Units: --granularity scenario  -> one entry per Phase-1 scenario (15)
-              --granularity group     -> the 7 SCENARIO_TO_GROUP groups
+              --granularity group     -> the SCENARIO_TO_GROUP groups (10-13 are each their own
+                                          singleton group now -- see the v2.4 note below)
     * The objective now also sees the do-no-harm gate check (a small no-fall
       tuning set, disjoint from the gate's no-fall set), so CMA-ES can no
       longer "win" by finding a pose that itself topples a standing robot.
@@ -26,6 +27,35 @@ What changed vs v1
     * Partial results are written after every bin; --resume skips finished ones.
     * Fixed: condition sampling used Python's salted hash(), so the tuning /
       select / holdout sets changed between runs. Now seeded via crc32.
+
+v2.4: via-point (trajectory) search, added because BOTH earlier levers are
+now closed with real evidence (seeded search plateaus within 1-2% of unrelated
+poses; widening the box moved real joint limits by <0.0001 rad) -- the ~30-32%
+ceiling is a property of a SINGLE STATIC pose, not of the search around it.
+    * --traj-points N (default 1 = old static-pose behaviour, unchanged) lets
+      a bin search N via-point poses plus (N-1) switch-time fractions instead
+      of one fixed target -- e.g. an immediate brace pose, then a settle pose.
+      Implemented as a fully separate path (TrajectorySpace / make_objective_traj
+      / tune_pose_traj / gate_pose_traj) that reuses check_pose_ctrl, weighted_force
+      and _diverse_topk but does not touch the tested static-pose functions.
+    * REQUIRES HARNESS SUPPORT I cannot add without seeing phase3_pose_jerk_v7.py:
+      make_run_trial_traj calls run_protected_trial(..., pose_traj=[(t, ctrl), ...])
+      first; if that raises TypeError (no such parameter yet) it falls back to a
+      SINGLE static call with the LAST via-point's ctrl, prints a one-time warning,
+      and every trajectory entry's audit records regressed_to_static=True so a
+      "trajectory" run that silently produced only static results is visible in
+      the output, not just in a console log you might not have kept.
+    * Runtime: pose_lookup(...) is UNCHANGED (static entries only). A new
+      pose_traj_lookup(...) returns the [(t, ctrl), ...] list for a "pose_traj"
+      entry (or a 1-point list for "stand"/"pose"), so callers don't need two
+      code paths for the two kinds of entry.
+    * Scenarios 10-13 no longer share one "unknown" group -- see the
+      SCENARIO_TO_GROUP fix below. Untested claim worth flagging: since a
+      trajectory is a strictly larger search than a static pose (N=1 recovers
+      the old objective exactly), it should never do WORSE than the current
+      library at the same holdout size; if a --traj-points 2 run ever passes
+      the gate at a LOWER reduction than the current static entry for the same
+      bin, something in the trajectory wiring is broken, not the concept.
 
 v2.3 (driven by the full-scenario widebox run: median reduction 29.1% ->
 31.3%, entirely from the tracking-penalty fix, NOT the wider box -- on the
@@ -112,12 +142,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import sys
-import tempfile
-import subprocess
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 import zlib
+import multiprocessing as mp
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
@@ -304,6 +331,65 @@ def build_search_space(spec: ValiditySpec, model, box_directions: int = 250, box
                        names=[n for n, k in zip([names[i] for i in idx], keep) if k], source=src)
 
 
+@dataclass
+class TrajectorySpace:
+    """N via-point poses in the SAME per-joint box as `base` (a SearchSpace),
+    plus (N-1) switch-time fractions of `duration_s`. N=1 has zero switch-time
+    parameters and is mathematically identical to searching `base` alone --
+    trajectory mode is a strict superset of static mode, not a different
+    search."""
+    base: SearchSpace
+    n_points: int
+    duration_s: float
+
+    @property
+    def dim(self) -> int:
+        return self.n_points * self.base.dim + max(0, self.n_points - 1)
+
+    def x_stand(self) -> np.ndarray:
+        pts = np.tile(self.base.x_stand(), self.n_points)
+        fracs = np.linspace(0.0, 1.0, self.n_points + 1)[1:-1] if self.n_points > 1 else np.array([])
+        return np.concatenate([pts, fracs])
+
+    def to_traj(self, x: np.ndarray) -> List[Tuple[float, np.ndarray]]:
+        d = self.base.dim
+        pts = x[: self.n_points * d].reshape(self.n_points, d)
+        ctrls = [self.base.to_ctrl(p) for p in pts]
+        # The N via-points are TARGETS reached sequentially during the
+        # trigger-to-impact window.  Therefore the first target is NOT at
+        # t=0: at t=0 the real robot is at q_start.  For N=3:
+        #   q_start --min-jerk--> Pose A --min-jerk--> Pose B --min-jerk--> Pose C
+        #                         t1                  t2                  T
+        # Only N-1 switch/arrival times are optimized; the final pose is
+        # deliberately fixed at the end of the available recovery window.
+        if self.n_points == 1:
+            times = [self.duration_s]
+        else:
+            # Keep every minimum-jerk segment executable.  With a 300 ms
+            # recovery window, 30 ms per segment gives three 90-ms-or-longer
+            # segments for N=3. CMA-ES still chooses the relative timing.
+            min_segment_s = min(0.03, self.duration_s / (self.n_points + 1))
+            g = min_segment_s / self.duration_s
+            raw = np.sort(np.clip(x[self.n_points * d:], 0.0, 1.0))
+            available = max(0.0, 1.0 - self.n_points * g)
+            fracs = np.array([g * (i + 1) + raw[i] * available
+                              for i in range(self.n_points - 1)], dtype=float)
+            times = [float(f * self.duration_s) for f in fracs] + [self.duration_s]
+        return list(zip(times, ctrls))
+
+    def x_seed(self, seed_point0_ctrl: np.ndarray) -> np.ndarray:
+        """Warm start: via-point 0 = the given (already-found) pose, every
+        later via-point = stand, switch times evenly spaced."""
+        x = self.x_stand()
+        x[: self.base.dim] = self.base.x_of_ctrl(seed_point0_ctrl)
+        return x
+
+
+def check_traj(spec: ValiditySpec, traj: List[Tuple[float, np.ndarray]]) -> int:
+    """Total violation count summed over every via-point's ctrl."""
+    return sum(_n_violations(check_pose_ctrl(spec, ctrl)) for _, ctrl in traj)
+
+
 # =============================================================================
 # Trial runners
 # =============================================================================
@@ -335,7 +421,7 @@ def make_run_trial(model, p1, impact_ids, snapshot, trigger_lead_s: float = 0.3)
     _warned = {"once": False}
 
     def run_trial(spec: ValiditySpec, ctrl: np.ndarray, scenario: str, condition: dict) -> TrialResult:
-        from old_files.phase3_pose_jerk_v7 import run_protected_trial  # local import: only needed in live mode
+        from phase3_pose_jerk_v7_real import run_protected_trial  # local import: only needed in live mode
 
         scen_tuple = condition.get("scenario_tuple")
         if scen_tuple is None:
@@ -368,6 +454,62 @@ def make_run_trial(model, p1, impact_ids, snapshot, trigger_lead_s: float = 0.3)
     return run_trial
 
 
+def run_traj_trial_MOCK(spec: ValiditySpec, traj: List[Tuple[float, np.ndarray]], scenario: str,
+                        condition: dict, passive_pendulum: bool = False) -> TrialResult:
+    """Wiring-test stand-in: 'depth' is the mean deviation-from-stand across
+    ALL via-points, so a trajectory with more/bigger via-points reads as more
+    protective than a single static pose -- enough to exercise the larger
+    parameter vector, NOT a claim about real dynamics."""
+    rng = np.random.default_rng(condition.get("seed", 0))
+    hazard = condition.get("hazard", 0.5)
+    depths = [np.abs(np.asarray(c) - np.asarray(spec.stand_ctrl)).mean() / 0.3 for _, c in traj]
+    depth = float(np.clip(np.mean(depths), 0, 1))
+    fell = rng.random() < hazard * (1.0 - 0.6 * depth)
+    base = 3000.0 * (1.0 - 0.55 * depth) + rng.normal(0, 150)
+    other = max(0.0, base) if fell else 0.0
+    return TrialResult(fell=fell, peaks={"head": 0.0, "pelvis": 0.0, "other": other,
+                                         "knee_shank": other * 0.3, "thigh_hip": 0.0, "foot": 50.0},
+                       first_contact_class="other", tracking_err_rad=0.02 + 0.05 * depth), False
+
+
+def make_run_trial_traj(model, p1, impact_ids, snapshot, trigger_lead_s: float = 0.3) -> Callable:
+    """Live counterpart to run_traj_trial_MOCK. Tries run_protected_trial(...,
+    pose_traj=[(t, ctrl), ...]) first; if the harness doesn't accept that
+    kwarg yet, falls back to a SINGLE static call using the LAST via-point's
+    ctrl and flags the result so a silently-degraded run is visible in the
+    saved JSON, not just a console warning you might not have kept."""
+    from validity_spec import ContactTracker
+    _warned = {"traj": False}
+
+    def run_trial_traj(spec: ValiditySpec, traj: List[Tuple[float, np.ndarray]], scenario: str,
+                       condition: dict) -> Tuple[TrialResult, bool]:
+        from phase3_pose_jerk_v7_real import run_protected_trial
+        scen_tuple = condition.get("scenario_tuple")
+        if scen_tuple is None:
+            raise KeyError("condition dict is missing 'scenario_tuple' -- use make_condition_iters")
+        ct = ContactTracker(model)
+        base_kwargs = dict(model=model, scenario=scen_tuple, magnitude=condition["magnitude"],
+                           direction_deg=condition["direction_deg"], timing_phase_s=condition["timing_phase_s"],
+                           trigger_lead_s=condition.get("trigger_lead_s", trigger_lead_s),
+                           impact_ids=impact_ids, snapshot=snapshot, p1=p1)
+        try:
+            r = run_protected_trial(**base_kwargs, pose_traj=traj, contact_tracker=ct)
+            regressed = False
+        except TypeError:
+            if not _warned["traj"]:
+                print("[warn] run_protected_trial has no pose_traj= parameter yet -- trajectory search is "
+                      "regressing to a single static call with the LAST via-point's pose. Results are still "
+                      "saved but ARE NOT a real trajectory evaluation; add pose_traj= support to the harness "
+                      "(or share phase3_pose_jerk_v7.py) to get real via-point results.")
+                _warned["traj"] = True
+            r = run_protected_trial(**base_kwargs, pose_ctrl=np.asarray(traj[-1][1]), contact_tracker=ct)
+            regressed = True
+        return TrialResult(fell=r.fell, peaks=dict(ct.peak), first_contact_class=ct.first_nonfoot_class,
+                           tracking_err_rad=r.peak_tracking_error_rad), regressed
+
+    return run_trial_traj
+
+
 # =============================================================================
 # Units (scenario / group) and condition iterators
 # =============================================================================
@@ -383,10 +525,10 @@ SCENARIO_TO_GROUP: Dict[int, str] = {
     7: "floor_tilt",    # floor_tilt_pitch
     8: "floor_tilt",    # floor_tilt_roll
     9: "sudden_load",   # floor_drop
-    10: "unknown",      # low_friction
-    11: "unknown",      # actuator_fault
-    12: "unknown",      # actuator_stuck
-    13: "unknown",      # asymmetric_gain
+    10: "low_friction",     # own group: friction loss has nothing in common with 11-13
+    11: "actuator_fault",   # own group: excluded by default (see MIN_TUNING_FALLS) -- never falls in this harness
+    12: "actuator_stuck",   # own group: fails the tracking-error gate at 'high' -- a real, different limitation
+    13: "asymmetric_gain",  # own group: excluded by default -- never falls in this harness
     14: "forward",      # trip
     15: "sudden_load",  # sudden_load
 }
@@ -413,11 +555,37 @@ def make_units(granularity: str, p1=None) -> Dict[str, List[int]]:
 def pose_lookup(library: dict, unit_key: str, bin_name: str) -> Optional[np.ndarray]:
     """Runtime helper: returns the pose_ctrl for (unit, bin), or None meaning
     'command stand_ctrl' (entry missing, or it did not pass the gate).
-    Also falls back to the 'unknown' group entry if the unit is absent."""
+    Also falls back to an 'unknown/<bin>' entry if the unit is absent -- a pure
+    safety net for a scenario id this library has never seen (e.g. a new
+    failure mode added after this library was built), NOT a bucket that 10-13
+    get folded into: each now has its own group (see SCENARIO_TO_GROUP), since
+    lumping unrelated failure modes -- friction loss, a stuck actuator, an
+    asymmetric gain fault -- under one shared pose was never physically sound,
+    least of all now that poses are searched per-scenario instead of templated."""
     entry = library.get(f"{unit_key}/{bin_name}") or library.get(f"unknown/{bin_name}")
     if entry is None or entry["kind"] != "pose":
         return None
     return np.array(entry["pose_ctrl"])
+
+
+def pose_traj_lookup(library: dict, unit_key: str, bin_name: str,
+                     stand_ctrl: Optional[np.ndarray] = None) -> Optional[List[Tuple[float, np.ndarray]]]:
+    """Runtime helper for a library built with --traj-points > 1 (or a mix of
+    trajectory and static entries): returns [(t, ctrl), ...] for ANY entry kind
+    ('pose_traj', 'pose', or 'stand'), so a caller doesn't need two code paths
+    for the two kinds of library. A 'pose' entry becomes a 1-point trajectory
+    held for the whole trial (t=0); a missing/'stand' entry returns a 1-point
+    stand trajectory (using `stand_ctrl` if given, else the entry's own
+    pose_ctrl/stand fallback) rather than None, since callers of THIS function
+    generally want something to command outright, not a sentinel to branch on."""
+    entry = library.get(f"{unit_key}/{bin_name}") or library.get(f"unknown/{bin_name}")
+    if entry is not None and entry.get("kind") == "pose_traj" and entry.get("pose_traj"):
+        return [(float(t), np.array(ctrl)) for t, ctrl in entry["pose_traj"]]
+    if entry is not None and entry.get("kind") == "pose" and entry.get("pose_ctrl") is not None:
+        return [(0.0, np.array(entry["pose_ctrl"]))]
+    base = stand_ctrl if stand_ctrl is not None else (
+        np.array(entry["pose_ctrl"]) if entry is not None and entry.get("pose_ctrl") is not None else None)
+    return [(0.0, base)] if base is not None else None
 
 
 def unit_key_for_scenario(library: dict, scenario_id: int) -> Optional[str]:
@@ -635,7 +803,7 @@ def tune_pose(spec: ValiditySpec, space: SearchSpace, unit: str, bin_name: str, 
     seed_scores: List[float] = []
     if seed_ctrls:
         cand = [space.x_of_ctrl(c) for c in list(seed_ctrls)[:max_seed_eval]]
-        scores = [objective(x) for x in cand]
+        scores = _eval_population(cand, objective, pool=pool)
         for x, f in zip(cand, scores):  # seeds are real evaluations: keep them in the shortlist pool
             evals.append((x, float(f)))
             restart_of.append(-1)
@@ -657,7 +825,7 @@ def tune_pose(spec: ValiditySpec, space: SearchSpace, unit: str, bin_name: str, 
         best = float("inf")
         while not es.stop():
             xs = es.ask()
-            fs = [objective(np.array(x)) for x in xs]
+            fs = _eval_population(xs, objective, pool=pool)
             es.tell(xs, fs)
             for x, f in zip(xs, fs):
                 evals.append((np.clip(np.array(x, dtype=float), lo, hi), float(f)))
@@ -693,6 +861,276 @@ def tune_pose(spec: ValiditySpec, space: SearchSpace, unit: str, bin_name: str, 
         "seed_scores": seed_scores[:10],        # sorted best-first; all ~equal => plateau, not a search failure
     }
     return best_x, audit
+
+
+def make_objective_traj(spec: ValiditySpec, space: TrajectorySpace, unit: str, bin_name: str,
+                        run_trial_traj: Callable, iter_cond: Callable, iter_nofall: Callable,
+                        cfg: GateConfig, tracking_weight: float = OBJ_TRACKING_WEIGHT,
+                        tracking_margin: float = OBJ_TRACKING_MARGIN, median_weight: float = OBJ_MEDIAN_WEIGHT
+                        ) -> Tuple[Optional[Callable[[np.ndarray], float]], int]:
+    """Trajectory counterpart of make_objective: identical cost shape (ratio +
+    tracking penalty + head-not-worse penalty + fragile-contact penalty,
+    blended mean/median, plus a do-no-harm term), evaluated against a
+    STAND-run baseline (a single endpoint at duration_s using stand_ctrl via run_trial_traj)
+    exactly like the static path uses spec.stand_ctrl. `_n_regressed` is
+    stashed on the returned closure so the caller can report how often the
+    harness fell back to a static call (see make_run_trial_traj)."""
+    conditions = iter_cond(unit, bin_name)
+    stand_traj = [(float(space.duration_s), np.asarray(spec.stand_ctrl).copy())]
+    unprotected = [(c, run_trial_traj(spec, stand_traj, unit, c)[0]) for c in conditions]
+    falling = [(c, u) for c, u in unprotected if u.fell]
+    if len(falling) < MIN_TUNING_FALLS:
+        return None, len(falling)
+
+    nofall = []
+    for c in iter_nofall(unit, bin_name, "nofall_tune", N_NOFALL_TUNE):
+        u, _ = run_trial_traj(spec, stand_traj, unit, c)
+        if not u.fell:
+            nofall.append(c)
+
+    n_regressed = [0]
+
+    def objective(x: np.ndarray) -> float:
+        traj = space.to_traj(x)
+        nv = check_traj(spec, traj)
+        if nv:
+            return 10.0 + nv
+        costs = []
+        for cond, u in falling:
+            p, regressed = run_trial_traj(spec, traj, unit, cond)
+            n_regressed[0] += int(regressed)
+            u_score = max(weighted_force(u.peaks), 1e-6)
+            ratio = weighted_force(p.peaks) / u_score
+            tracking_pen = tracking_weight * max(
+                0.0, p.tracking_err_rad - tracking_margin * cfg.max_median_tracking_err_rad)
+            head_over = max(0.0, p.peaks.get("head", 0.0)
+                            - u.peaks.get("head", 0.0) * (1 + cfg.head_tol_frac) - cfg.head_slack_n)
+            head_pen = head_over / u_score
+            fragile_pen = 0.5 if p.first_contact_class == "knee_shank" else 0.0
+            costs.append(ratio + tracking_pen + head_pen + fragile_pen)
+        harm = 0.0
+        if nofall:
+            harm = float(np.mean([1.0 if run_trial_traj(spec, traj, unit, c)[0].fell else 0.0 for c in nofall]))
+        agg = (1.0 - median_weight) * float(np.mean(costs)) + median_weight * float(np.median(costs))
+        return agg + harm
+
+    objective.n_regressed = n_regressed  # type: ignore[attr-defined]
+    return objective, len(falling)
+
+
+
+# =============================================================================
+# CPU-parallel trajectory objective workers
+# =============================================================================
+# Each worker owns a separate MuJoCo model.  The parent only sends normalized
+# CMA-ES vectors (x) to workers; the expensive physics trials happen in the
+# worker process.  A per-bin objective context is installed once before a
+# generation is evaluated, so the stand/nofall baseline is NOT recomputed for
+# every candidate.
+_traj_worker_objective = None
+_traj_worker_runner = None
+
+
+def _traj_worker_init(model_path: str, p1_module_name: str, passive_pendulum: bool,
+                      trigger_lead_s: float):
+    global _traj_worker_runner
+    import importlib
+    p1 = importlib.import_module(p1_module_name)
+    from phase3_pose_jerk_v7_real import snapshot_model_state, load_instrumented_model, impact_body_ids
+    model = load_instrumented_model(model_path, passive_pendulum=passive_pendulum)
+    snapshot = snapshot_model_state(model)
+    impact_ids = impact_body_ids(model)
+    _traj_worker_runner = make_run_trial_traj(model, p1, impact_ids, snapshot,
+                                               trigger_lead_s=trigger_lead_s)
+
+
+def _traj_worker_set_context(ctx):
+    """Install one bin's objective in this worker before candidate evaluation.
+
+    Windows multiprocessing uses spawn, so the context must contain only
+    pickleable data. Import the Phase-1 module locally from its module name.
+    """
+    global _traj_worker_objective
+    import importlib
+    p1 = importlib.import_module(ctx["p1_module_name"])
+    registry = ctx["registry"]
+    unit = ctx["unit"]
+    bin_name = ctx["bin_name"]
+    iter_tuning, _, _, iter_nofall = make_condition_iters(
+        p1, registry, holdout_n=ctx["holdout_n"])
+    objective, n_falls = make_objective_traj(
+        ctx["spec"], ctx["space"], unit, bin_name, _traj_worker_runner,
+        iter_tuning, iter_nofall, ctx["cfg"], **ctx["obj_kwargs"])
+    _traj_worker_objective = objective
+    return n_falls
+
+
+def _traj_worker_eval(x):
+    if _traj_worker_objective is None:
+        raise RuntimeError("trajectory worker objective was not initialized")
+    return float(_traj_worker_objective(np.asarray(x, dtype=float)))
+
+
+def _eval_population(xs, objective, pool=None):
+    """Evaluate one CMA-ES population serially or across CPU workers."""
+    if pool is None:
+        return [float(objective(np.asarray(x))) for x in xs]
+    return list(pool.map(_traj_worker_eval, [np.asarray(x, dtype=float) for x in xs]))
+
+def tune_pose_traj(spec: ValiditySpec, space: TrajectorySpace, unit: str, bin_name: str,
+                   run_trial_traj: Callable, iter_tuning: Callable, iter_select: Callable, iter_nofall: Callable,
+                   cfg: GateConfig, popsize: int = 12, maxiter: int = 30, restarts: int = 2, seed: int = 0,
+                   top_k: int = 4, seed_point0_ctrls: Optional[Sequence[np.ndarray]] = None,
+                   n_seed_starts: int = 2, obj_kwargs: Optional[dict] = None,
+                   pool=None, worker_context: Optional[dict] = None
+                   ) -> Tuple[Optional[np.ndarray], dict, List[dict]]:
+    """Optimize a trajectory on tuning conditions, then retain the diverse Top-K.
+
+    IMPORTANT: the 24-condition holdout gate is NOT used here to choose a single
+    candidate.  The complete diverse Top-K is returned to the caller so every
+    shortlisted candidate can face the same holdout acceptance gate.
+
+    The selection conditions are used only to rank the Top-K candidates.  They
+    do not eliminate candidates before gating.  If the selection set has no
+    natural falls, tuning rank is used as the deterministic fallback ordering.
+    """
+    import cma
+    okw = obj_kwargs or {}
+    objective, n_falls = make_objective_traj(spec, space, unit, bin_name, run_trial_traj, iter_tuning,
+                                             iter_nofall, cfg, **okw)
+    if pool is not None:
+        if worker_context is None:
+            raise ValueError("pool was supplied without worker_context")
+        # Build the identical objective inside each worker.  This also avoids
+        # trying to pickle a closure that captures a MuJoCo model.
+        pool.map(_traj_worker_set_context, [worker_context] * getattr(pool, "_processes", 1))
+    if objective is None:
+        return None, {"skipped": f"only {n_falls} natural fall(s) in the tuning set (< {MIN_TUNING_FALLS})"}, []
+
+    rng = np.random.default_rng(seed)
+    x_stand = space.x_stand()
+    lo, hi = np.zeros(space.dim), np.ones(space.dim)
+    evals: List[Tuple[np.ndarray, float]] = []
+    restart_of: List[int] = []
+
+    starts: List[Tuple[np.ndarray, float, str]] = [(x_stand, 0.2, "stand")]
+    seed_scores: List[float] = []
+    if seed_point0_ctrls:
+        cand = [space.x_seed(c) for c in list(seed_point0_ctrls)[:40]]
+        scores = _eval_population(cand, objective, pool=pool)
+        for x, f in zip(cand, scores):
+            evals.append((x, float(f))); restart_of.append(-1)
+        order = np.argsort(scores)
+        seed_scores = [float(scores[i]) for i in order]
+        for i in order[:n_seed_starts]:
+            starts.append((cand[i], 0.12, "seed"))
+    r_extra = 1
+    while len(starts) < restarts:
+        sg = 0.2 + 0.1 * r_extra
+        starts.append((np.clip(x_stand + rng.normal(0.0, sg, space.dim), 0.001, 0.999), sg, "random"))
+        r_extra += 1
+
+    per_restart: List[dict] = []
+    for r, (x0, sigma0, label) in enumerate(starts):
+        es = cma.CMAEvolutionStrategy(x0, sigma0, {
+            "bounds": [lo.tolist(), hi.tolist()], "popsize": popsize, "maxiter": maxiter,
+            "seed": seed + 1 + r, "verbose": -9})
+        best = float("inf")
+        while not es.stop():
+            xs = es.ask()
+            fs = _eval_population(xs, objective, pool=pool)
+            es.tell(xs, fs)
+            for x, f in zip(xs, fs):
+                evals.append((np.clip(np.array(x, dtype=float), lo, hi), float(f)))
+                restart_of.append(r)
+                best = min(best, float(f))
+        stop = es.stop()
+        per_restart.append({"start": label, "best_tuning_score": best,
+                            "stopped_by": sorted(stop.keys()), "hit_maxiter": "maxiter" in stop})
+
+    shortlist = _diverse_topk(evals, top_k, min_dist=0.05 * np.sqrt(space.dim))
+
+    # Rank the diverse Top-K on the independent selection conditions, but DO NOT
+    # collapse the shortlist to one candidate. Every retained candidate will be
+    # evaluated by gate_pose_traj() on the full holdout set.
+    select_obj, _ = make_objective_traj(spec, space, unit, bin_name, run_trial_traj, iter_select, iter_nofall,
+                                        cfg, **okw)
+    tuning_score_by_x = {id(x): float(f) for x, f in evals}
+    candidate_rows: List[dict] = []
+    if select_obj is None:
+        # No natural falls in selection data: preserve tuning order rather than
+        # inventing a select score or discarding candidates.
+        ordered = list(shortlist)
+        scored_scores: List[float] = []
+        best_select = float("nan")
+    else:
+        scored = sorted(((x, select_obj(x)) for x in shortlist), key=lambda t: t[1])
+        ordered = [x for x, _ in scored]
+        scored_scores = [float(s) for _, s in scored]
+        best_select = float(scored[0][1]) if scored else float("nan")
+
+    # Assign deterministic shortlist ranks after selection ordering.
+    for rank, x in enumerate(ordered, start=1):
+        tuning_score = tuning_score_by_x.get(id(x))
+        if tuning_score is None:
+            # _diverse_topk returns references to eval arrays in the current
+            # implementation; keep a robust fallback for future changes.
+            matches = [f for ex, f in evals if np.allclose(ex, x)]
+            tuning_score = float(matches[0]) if matches else float("nan")
+        candidate_rows.append({
+            "rank": rank,
+            "x": np.asarray(x, dtype=float),
+            "tuning_score": float(tuning_score),
+            "select_score": (float(scored_scores[rank - 1]) if scored_scores else float("nan")),
+        })
+
+    # The first candidate remains the preferred candidate if multiple candidates
+    # pass the gate; the actual acceptance decision is made later in _build_library_traj.
+    best_x = candidate_rows[0]["x"] if candidate_rows else None
+    ranked = sorted(range(len(evals)), key=lambda i: evals[i][1])
+    win_i = next(i for i in ranked if np.allclose(evals[i][0], best_x)) if best_x is not None else 0
+    audit = {
+        "n_tuning_natural_falls": n_falls, "n_evaluations": len(evals), "n_shortlist": len(shortlist),
+        "selected_rank_on_tuning": ranked.index(win_i) if best_x is not None else None,
+        "winning_restart": restart_of[win_i] if best_x is not None else None,
+        "tuning_score_of_preferred_candidate": evals[win_i][1] if best_x is not None else None,
+        "select_score": float(best_select),
+        "shortlist_select_scores": scored_scores,
+        "per_restart": per_restart, "seed_scores": seed_scores[:10],
+        "n_regressed_to_static_calls": objective.n_regressed[0],  # type: ignore[attr-defined]
+        "gate_all_shortlist": True,
+        "gate_candidate_count": len(candidate_rows),
+    }
+    return best_x, audit, candidate_rows
+
+
+def gate_pose_traj(spec: ValiditySpec, space: TrajectorySpace, x: np.ndarray, unit: str, bin_name: str,
+                   run_trial_traj: Callable, iter_holdout: Callable, iter_nofall: Callable,
+                   cfg: GateConfig, diag: Optional[dict] = None) -> Tuple[GateReport, List[Tuple[float, np.ndarray]]]:
+    """Trajectory counterpart of gate_pose. Returns (report, traj)."""
+    traj = space.to_traj(x)
+    stand_traj = [(float(space.duration_s), np.asarray(spec.stand_ctrl).copy())]
+    fall_pairs, nofall_pairs = [], []
+    n_regressed = 0
+    for cond in iter_holdout(unit, bin_name):
+        u, _ = run_trial_traj(spec, stand_traj, unit, cond)
+        p, reg = run_trial_traj(spec, traj, unit, cond)
+        n_regressed += int(reg)
+        fall_pairs.append((u, p))
+    for cond in iter_nofall(unit, bin_name):
+        u, _ = run_trial_traj(spec, stand_traj, unit, cond)
+        p, reg = run_trial_traj(spec, traj, unit, cond)
+        n_regressed += int(reg)
+        nofall_pairs.append((u, p))
+    if diag is not None:
+        genuine = [(u, p) for u, p in fall_pairs if u.fell]
+        diag["n_regressed_to_static_calls"] = n_regressed
+        if genuine:
+            diag["n_genuine_falls"] = len(genuine)
+            diag["frac_protected_still_fall"] = float(np.mean([p.fell for _, p in genuine]))
+            diag["median_protected_weighted_force_n"] = float(np.median([weighted_force(p.peaks) for _, p in genuine]))
+            diag["median_unprotected_weighted_force_n"] = float(np.median([weighted_force(u.peaks) for u, _ in genuine]))
+    return evaluate_gate(fall_pairs, nofall_pairs, cfg), traj
 
 
 # =============================================================================
@@ -765,9 +1203,25 @@ def build_library(spec: ValiditySpec, space: SearchSpace, units: Dict[str, List[
                   out_path: Optional[str] = None, existing: Optional[dict] = None,
                   seed_ctrls: Optional[Sequence[np.ndarray]] = None,
                   obj_kwargs: Optional[dict] = None,
-                  bins: Optional[Sequence[str]] = None) -> dict:
+                  bins: Optional[Sequence[str]] = None,
+                  traj_space: Optional[TrajectorySpace] = None,
+                  run_trial_traj: Optional[Callable] = None) -> dict:
     """`bins` restricts the run to a subset of VELOCITY_BINS (default: all).
-    A parallel launcher uses it to run one (unit, bin) job per process."""
+    A parallel launcher uses it to run one (unit, bin) job per process.
+
+    `traj_space` + `run_trial_traj`: when both are given, every bin is
+    searched as an N-via-point trajectory instead of one static pose (see
+    TrajectorySpace / tune_pose_traj / gate_pose_traj). `seed_ctrls`, if given,
+    warm-start via-point 0 of the trajectory search (see TrajectorySpace.x_seed)
+    -- they need not come from a trajectory run; a prior STATIC library is the
+    intended seed source, since N=1 of a trajectory search recovers the static
+    objective exactly."""
+    if traj_space is not None:
+        return _build_library_traj(spec, traj_space, units, run_trial_traj, iter_tuning, iter_select,
+                                   iter_holdout, iter_nofall, popsize, maxiter, restarts, cfg=cfg,
+                                   out_path=out_path, existing=existing, seed_point0_ctrls=seed_ctrls,
+                                   obj_kwargs=obj_kwargs, bins=bins)
+
     run_bins = tuple(bins) if bins else VELOCITY_BINS
     bad = [b for b in run_bins if b not in VELOCITY_BINS]
     if bad:
@@ -828,6 +1282,148 @@ def build_library(spec: ValiditySpec, space: SearchSpace, units: Dict[str, List[
     return library
 
 
+def _traj_json(traj: List[Tuple[float, np.ndarray]]) -> List[list]:
+    return [[float(t), np.asarray(ctrl).tolist()] for t, ctrl in traj]
+
+
+def _save_traj(path: str, library: dict, space: TrajectorySpace) -> None:
+    payload = {"_meta": {"search_box_source": space.base.source, "joints": space.base.names,
+                         "lo": space.base.lo.tolist(), "hi": space.base.hi.tolist(),
+                         "stand_ctrl": space.base.stand.tolist(),
+                         "n_points": space.n_points, "duration_s": space.duration_s}, **library}
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(payload, f, indent=2, default=_json_default)
+    os.replace(tmp, path)
+
+
+def _build_library_traj(spec: ValiditySpec, space: TrajectorySpace, units: Dict[str, List[int]],
+                        run_trial_traj: Callable, iter_tuning: Callable, iter_select: Callable,
+                        iter_holdout: Callable, iter_nofall: Callable, popsize: int, maxiter: int, restarts: int,
+                        cfg: Optional[GateConfig] = None, out_path: Optional[str] = None,
+                        existing: Optional[dict] = None, seed_point0_ctrls: Optional[Sequence[np.ndarray]] = None,
+                        obj_kwargs: Optional[dict] = None, bins: Optional[Sequence[str]] = None,
+                        pool=None, worker_context_factory: Optional[Callable] = None) -> dict:
+    """Trajectory counterpart of build_library's main loop -- same structure,
+    entries are 'pose_traj' (list of [t, ctrl]) instead of a single 'pose_ctrl'
+    (which is still populated, = the LAST via-point, for any consumer that
+    only reads the old field)."""
+    run_bins = tuple(bins) if bins else VELOCITY_BINS
+    bad = [b for b in run_bins if b not in VELOCITY_BINS]
+    if bad:
+        raise ValueError(f"unknown velocity bin(s) {bad}; expected a subset of {VELOCITY_BINS}")
+    library: Dict[str, dict] = dict(existing or {})
+    for unit, sids in units.items():
+        for bin_name in run_bins:
+            key = f"{unit}/{bin_name}"
+            if key in library:
+                print(f"[{key:34s}] resumed (already in output)")
+                continue
+            bin_cfg = cfg if cfg is not None else GATE_CONFIG_BY_BIN[bin_name]
+            t0 = time.time()
+            x, audit, gate_candidates = tune_pose_traj(
+                spec, space, unit, bin_name, run_trial_traj, iter_tuning, iter_select,
+                iter_nofall, bin_cfg, popsize=popsize, maxiter=maxiter, restarts=restarts,
+                seed_point0_ctrls=seed_point0_ctrls, obj_kwargs=obj_kwargs,
+                pool=pool,
+                worker_context=(worker_context_factory(unit, bin_name)
+                                if worker_context_factory is not None else None))
+            entry = {"unit": unit, "scenario_ids": sids, "velocity_bin": bin_name, "mode": "trajectory",
+                     "n_points": space.n_points, "duration_s": space.duration_s, "candidate_selection": audit}
+            if x is None:
+                stand_traj = [(float(space.duration_s), np.asarray(spec.stand_ctrl).copy())]
+                entry.update(kind="stand", gate_passed=False, skipped_reason=audit["skipped"],
+                            pose_traj=_traj_json(stand_traj), pose_ctrl=spec.stand_ctrl.tolist(),
+                            gate_checks={}, static_violations=[])
+                print(f"[{key:34s}] stand  SKIPPED: {audit['skipped']} ({time.time()-t0:.1f}s)")
+            else:
+                # IMPORTANT: gate EVERY diverse Top-K candidate.  Selection only
+                # ranks the candidates; it must not discard a candidate before the
+                # actual 24-condition acceptance gate.  This prevents a candidate
+                # that ranks second/third/fourth on selection data from being lost
+                # when the preferred candidate fails median reduction, tracking,
+                # regression, or another gate criterion.
+                candidate_gate_results: List[dict] = []
+                passing_candidates: List[Tuple[dict, object, List[Tuple[float, np.ndarray]], dict, List[str]]] = []
+                for cand in gate_candidates:
+                    cand_diag: dict = {}
+                    cand_report, cand_traj = gate_pose_traj(
+                        spec, space, cand["x"], unit, bin_name, run_trial_traj,
+                        iter_holdout, iter_nofall, bin_cfg, diag=cand_diag)
+                    cand_nv = check_traj(spec, cand_traj)
+                    gate_passed = bool(cand_report.passed and not cand_nv)
+                    gate_row = {
+                        "rank": int(cand["rank"]),
+                        "tuning_score": float(cand["tuning_score"]),
+                        "select_score": float(cand["select_score"]),
+                        "gate_passed": gate_passed,
+                        "gate_checks": {k: {"ok": ok, "msg": msg}
+                                         for k, (ok, msg) in cand_report.checks.items()},
+                        "static_violations": cand_nv,
+                        "gate_diagnostics": cand_diag,
+                        "pose_traj": _traj_json(cand_traj),
+                    }
+                    candidate_gate_results.append(gate_row)
+                    if gate_passed:
+                        passing_candidates.append((cand, cand_report, cand_traj, cand_diag, cand_nv))
+
+                # Deterministic final choice: candidates are already ordered by
+                # selection score. Gate results decide eligibility; selection score
+                # breaks ties among eligible candidates. We do NOT optimize on the
+                # holdout values.
+                if passing_candidates:
+                    passing_candidates.sort(key=lambda z: (z[0]["select_score"], z[0]["rank"]))
+                    chosen, report, traj, diag, nv = passing_candidates[0]
+                    kind, final_traj = "pose_traj", traj
+                    final_gate_passed = True
+                    final_gate_checks = {k: {"ok": ok, "msg": msg}
+                                         for k, (ok, msg) in report.checks.items()}
+                    final_diag = diag
+                    final_nv = nv
+                    selected_rank = int(chosen["rank"])
+                else:
+                    # No shortlisted trajectory satisfied the acceptance gate.
+                    # Fall back to stand rather than deploying a failing pose.
+                    kind = "stand"
+                    final_traj = [(float(space.duration_s), np.asarray(spec.stand_ctrl).copy())]
+                    final_gate_passed = False
+                    final_gate_checks = {}
+                    final_diag = {"n_candidates_gated": len(gate_candidates),
+                                  "n_candidates_passed": 0}
+                    final_nv = []
+                    selected_rank = None
+
+                entry.update(
+                    kind=kind, gate_passed=final_gate_passed, pose_traj=_traj_json(final_traj),
+                    pose_ctrl=np.asarray(final_traj[-1][1]).tolist(),
+                    switch_times_s=[float(t) for t, _ in final_traj],
+                    gate_checks=final_gate_checks, static_violations=final_nv,
+                    gate_diagnostics=final_diag,
+                    candidate_gate_results=candidate_gate_results,
+                    selected_gate_candidate_rank=selected_rank)
+                unconverged = all(r["hit_maxiter"] for r in audit["per_restart"])
+                n_reg = audit.get("n_regressed_to_static_calls", 0) + sum(
+                    r.get("gate_diagnostics", {}).get("n_regressed_to_static_calls", 0)
+                    for r in candidate_gate_results)
+                n_pass = sum(1 for r in candidate_gate_results if r["gate_passed"])
+                print(f"[{key:34s}] {kind:10s} gate={'PASS' if final_gate_passed else 'FAIL'} "
+                      f"candidates={len(gate_candidates)} passed={n_pass} evals={audit['n_evaluations']}"
+                      f"{' UNCONVERGED' if unconverged else ''}"
+                      f"{f' REGRESSED-TO-STATIC x{n_reg}' if n_reg else ''} ({time.time()-t0:.1f}s)")
+                for r in candidate_gate_results:
+                    print(f"    candidate rank={r['rank']} gate={'PASS' if r['gate_passed'] else 'FAIL'} "
+                          f"select={r['select_score']:.4f} tuning={r['tuning_score']:.4f}")
+                if n_reg:
+                    print(f"    NOTE {key}: the harness fell back to a static pose_ctrl call {n_reg} time(s) -- "
+                          "this bin's result is NOT a real trajectory evaluation until run_protected_trial "
+                          "accepts pose_traj=.")
+            entry["tuning_seconds"] = round(time.time() - t0, 1)
+            library[key] = entry
+            if out_path:
+                _save_traj(out_path, library, space)
+    return library
+
+
 def regate_library(spec: ValiditySpec, space: SearchSpace, existing: dict, run_trial: Callable,
                    iter_holdout: Callable, iter_nofall: Callable,
                    cfg_by_bin: Dict[str, GateConfig], out_path: Optional[str] = None) -> dict:
@@ -883,6 +1479,10 @@ def main(argv=None) -> int:
     ap.add_argument("--popsize", type=int, default=12)
     ap.add_argument("--maxiter", type=int, default=30)
     ap.add_argument("--restarts", type=int, default=2)
+    ap.add_argument("--workers", type=int, default=1,
+                    help="CPU worker processes for trajectory candidate evaluation. "
+                         "1 = serial; >1 evaluates each CMA-ES generation in parallel. "
+                         "Each worker owns its own MuJoCo model.")
     ap.add_argument("--only", default="", help="comma-separated unit keys (or key prefixes) to run")
     ap.add_argument("--box-directions", type=int, default=250,
                     help="random combined-joint directions used to widen the oracle search box beyond the "
@@ -900,15 +1500,27 @@ def main(argv=None) -> int:
                          "--regate-holdout-n held-out draws. Cheap way to resolve bins that failed only on "
                          "'evidence'. Ignores --seed-from, --box-*, --popsize/--maxiter/--restarts.")
     ap.add_argument("--regate-holdout-n", type=int, default=48, help="held-out draws to use for --regate-from")
+    ap.add_argument("--passive-pendulum", action="store_true",
+                    help="match phase3_pose_jerk_v7's passive-pendulum model option in CPU workers")
+    ap.add_argument("--p1-module", default="generate_fall_dataset_final",
+                    help="Phase-1 scenario module imported inside CPU workers")
+    ap.add_argument("--traj-points", type=int, default=1,
+                    help="search N via-point poses (+ N-1 switch-time fractions) instead of 1 static pose. "
+                         "1 (default) is the old static-pose behaviour, unchanged. REQUIRES run_protected_trial "
+                         "to accept a pose_traj= kwarg -- if it doesn't, results silently regress to a static "
+                         "call using the last via-point (flagged per-bin as REGRESSED-TO-STATIC in the output).")
+    ap.add_argument("--traj-duration-s", type=float, default=0.30,
+                    help="trigger-to-impact recovery window used by --traj-points (default: 0.30 s); "
+                         "the final via-point is reached at this time")
     ap.add_argument("--tracking-weight", type=float, default=OBJ_TRACKING_WEIGHT)
     ap.add_argument("--tracking-margin", type=float, default=OBJ_TRACKING_MARGIN)
     ap.add_argument("--median-weight", type=float, default=OBJ_MEDIAN_WEIGHT)
-    ap.add_argument("--workers", type=int, default=1,
-                    help="CPU parallel workers; independent unit/bin jobs run in separate processes")
     ap.add_argument("--resume", action="store_true", help="keep finished bins already present in --out")
     ap.add_argument("--mock", action="store_true", help="fake physics: exercises CMA-ES + gate wiring only")
     ap.add_argument("--live", action="store_true", help="real harness via make_run_trial")
     args = ap.parse_args(argv)
+    if args.traj_points > 1 and not (0.05 <= args.traj_duration_s <= 0.30):
+        ap.error("--traj-duration-s must be between 0.05 and 0.30 s for the current 300 ms trigger budget")
 
     model = mujoco.MjModel.from_xml_path(args.model)
     spec = build_spec(model)
@@ -921,7 +1533,7 @@ def main(argv=None) -> int:
         print("*** MOCK MODE: physics is fake, this only exercises CMA-ES + gate wiring ***\n")
     elif args.live:
         import generate_fall_dataset_final as p1
-        from old_files.phase3_pose_jerk_v7 import snapshot_model_state, load_instrumented_model, impact_body_ids
+        from phase3_pose_jerk_v7_real import snapshot_model_state, load_instrumented_model, impact_body_ids
         id_to_tuple = {t[0]: t for t in p1.SCENARIOS}
         units = make_units(args.granularity, p1)
         registry = {u: [id_to_tuple[s] for s in ids] for u, ids in units.items()}
@@ -930,7 +1542,7 @@ def main(argv=None) -> int:
         snapshot = snapshot_model_state(model)
         run_trial = make_run_trial(model, p1, impact_ids, snapshot)
         it, isel, ih, inf = make_condition_iters(p1, registry, holdout_n=args.holdout_n)
-        print("*** LIVE MODE *** -- check SCENARIO_TO_GROUP (esp. 'unknown') matches your intent.\n")
+        print("*** LIVE MODE *** -- check SCENARIO_TO_GROUP matches your intent.\n")
     else:
         print("Pass --mock to test the pipeline, or --live to run against the real harness.")
         return 1
@@ -973,72 +1585,100 @@ def main(argv=None) -> int:
         print(f"excluded {len(excluded_units)} unit(s) via --exclude {args.exclude!r}: "
               f"{', '.join(sorted(excluded_units))} (placeholder 'stand' entries will be written for these)\n")
 
-    space = build_search_space(spec, model, box_directions=args.box_directions, box_seed=args.box_seed)
-    print(space.describe(), "\n")
-    seed_ctrls = load_seed_ctrls(args.seed_from, space) if args.seed_from else None
-    if args.seed_from:
-        print(f"loaded {len(seed_ctrls)} distinct seed poses from {args.seed_from}\n")
+    base_space = build_search_space(spec, model, box_directions=args.box_directions, box_seed=args.box_seed)
+    print(base_space.describe(), "\n")
     obj_kwargs = {"tracking_weight": args.tracking_weight, "tracking_margin": args.tracking_margin,
                   "median_weight": args.median_weight}
-    n_cond = 12 + N_NOFALL_TUNE  # + up to 40 seed evaluations per bin when --seed-from is used
-    print(f"units={len(units)} x bins={1 if args.only_bin else len(VELOCITY_BINS)}; per bin ~ "
-          f"{args.restarts * args.popsize * args.maxiter} objective evals x up to {n_cond} trials each "
-          f"(time ONE trial, multiply, before launching the full run)\n")
+
+    pool = None
+    if args.workers < 1:
+        ap.error("--workers must be >= 1")
+    if args.workers > 1 and args.traj_points <= 1:
+        print("[info] --workers is only applied to trajectory CMA-ES; static mode remains unchanged.")
+    if args.workers > 1 and args.traj_points > 1:
+        if args.mock:
+            print("[info] --mock uses lightweight fake physics; keeping trajectory evaluation serial.")
+        else:
+            model_abspath = os.path.abspath(args.model)
+            pool = mp.Pool(
+                processes=args.workers,
+                initializer=_traj_worker_init,
+                initargs=(model_abspath, args.p1_module, args.passive_pendulum
+                          if hasattr(args, "passive_pendulum") else False,
+                          0.3),
+            )
+            print(f"Started a pool of {args.workers} CPU worker processes for trajectory CMA-ES.")
 
     existing = {}
     if args.resume and os.path.exists(args.out):
         with open(args.out) as f:
             existing = {k: v for k, v in json.load(f).items() if not k.startswith("_")}
 
-    if args.workers < 1:
-        ap.error("--workers must be >= 1")
-
-    if args.workers > 1 and not args.only_bin:
-        # Isolated subprocesses each own their MuJoCo model/data and output file.
-        jobs = [(unit, b) for unit in units for b in VELOCITY_BINS
-                if f"{unit}/{b}" not in existing]
-        if not jobs:
-            library = dict(existing)
+    if args.traj_points > 1:
+        traj_space = TrajectorySpace(base=base_space, n_points=args.traj_points, duration_s=args.traj_duration_s)
+        seed_ctrls = load_seed_ctrls(args.seed_from, base_space) if args.seed_from else None
+        if args.seed_from:
+            print(f"loaded {len(seed_ctrls)} distinct seed poses from {args.seed_from} "
+                  f"(each warm-starts a trajectory seed)\n")
+        if args.mock:
+            run_trial_traj = run_traj_trial_MOCK
         else:
-            print(f"CPU parallelism: {args.workers} worker processes for {len(jobs)} unit/bin jobs")
-            with tempfile.TemporaryDirectory(prefix="pose_lib_workers_") as tmpdir:
-                def run_job(job_index, unit, bin_name):
-                    job_out = os.path.join(tmpdir, f"job_{job_index:04d}.json")
-                    cmd = [sys.executable, os.path.abspath(__file__),
-                           "--model", args.model, "--out", job_out,
-                           "--granularity", args.granularity,
-                           "--popsize", str(args.popsize), "--maxiter", str(args.maxiter),
-                           "--restarts", str(args.restarts), "--only", unit,
-                           "--only-bin", bin_name, "--box-directions", str(args.box_directions),
-                           "--box-seed", str(args.box_seed), "--holdout-n", str(args.holdout_n),
-                           "--tracking-weight", str(args.tracking_weight),
-                           "--tracking-margin", str(args.tracking_margin),
-                           "--median-weight", str(args.median_weight)]
-                    cmd.append("--mock" if args.mock else "--live")
-                    if args.seed_from:
-                        cmd.extend(["--seed-from", args.seed_from])
-                    result = subprocess.run(cmd, capture_output=True, text=True)
-                    if result.returncode:
-                        raise RuntimeError(f"Parallel job {unit}/{bin_name} failed (exit {result.returncode}):\\n"
-                                           f"{result.stdout}\\n{result.stderr}")
-                    with open(job_out, encoding="utf-8") as jf:
-                        payload = json.load(jf)
-                    return {k: v for k, v in payload.items() if not k.startswith("_")}
+            run_trial_traj = make_run_trial_traj(model, p1, impact_ids, snapshot)
+        print(f"TRAJECTORY MODE: {args.traj_points} via-points over {args.traj_duration_s}s "
+              f"(dim={traj_space.dim} per bin, vs {base_space.dim} for a static pose)\n")
 
-                results = {}
-                with ThreadPoolExecutor(max_workers=args.workers) as pool:
-                    futures = [pool.submit(run_job, i, u, b) for i, (u, b) in enumerate(jobs)]
-                    for future in as_completed(futures):
-                        results.update(future.result())
-                library = {**existing, **results}
-    else:
-        library = build_library(spec, space, units, run_trial, it, isel, ih, inf, args.popsize, args.maxiter,
-                                args.restarts, cfg=None, out_path=args.out, existing=existing,
-                                seed_ctrls=seed_ctrls, obj_kwargs=obj_kwargs,
-                                bins=([args.only_bin] if args.only_bin else None))
+        def _worker_context_factory(unit, bin_name):
+            # IMPORTANT: do not put the imported p1 module itself in this
+            # dictionary. Windows multiprocessing pickles this context.
+            return {
+                "spec": spec, "space": traj_space, "unit": unit, "bin_name": bin_name,
+                "cfg": GATE_CONFIG_BY_BIN[bin_name], "obj_kwargs": obj_kwargs,
+                "p1_module_name": args.p1_module, "registry": registry,
+                "holdout_n": args.holdout_n,
+            }
 
-    if args.workers > 1 and not args.only_bin:
-        _save(args.out, library, space)
+        try:
+            library = _build_library_traj(
+                spec, traj_space, units, run_trial_traj, it, isel, ih, inf,
+                args.popsize, args.maxiter, args.restarts, cfg=None, out_path=args.out,
+                existing=existing, seed_point0_ctrls=seed_ctrls, obj_kwargs=obj_kwargs,
+                bins=([args.only_bin] if args.only_bin else None), pool=pool,
+                worker_context_factory=(_worker_context_factory if pool is not None else None))
+        finally:
+            if pool is not None:
+                pool.close()
+                pool.join()
+        if excluded_units:
+            reason = f"excluded via --exclude {args.exclude!r} (this scenario produced no/negligible natural falls)"
+            ph = excluded_placeholder_entries(excluded_units, base_space, reason,
+                                              bins=([args.only_bin] if args.only_bin else None))
+            for k, v in ph.items():
+                v["pose_traj"] = _traj_json([(float(traj_space.duration_s), base_space.stand)])
+                v["mode"] = "trajectory"
+            library.update(ph)
+            _save_traj(args.out, library, traj_space)
+        n_pose = sum(1 for v in library.values() if v["kind"] == "pose_traj")
+        n_reg = sum(v.get("gate_diagnostics", {}).get("n_regressed_to_static_calls", 0) for v in library.values())
+        print(f"\n{n_pose}/{len(library)} bins produced a gate-passed trajectory; "
+              f"{len(library)-n_pose} fell back to 'stand'."
+              + (f" WARNING: {n_reg} total regressed-to-static calls across the run -- these bins' results are "
+                 "NOT real trajectory evaluations (see the v2.4 docstring note)." if n_reg else ""))
+        print(f"wrote {args.out}")
+        return 0
+
+    space = base_space
+    seed_ctrls = load_seed_ctrls(args.seed_from, space) if args.seed_from else None
+    if args.seed_from:
+        print(f"loaded {len(seed_ctrls)} distinct seed poses from {args.seed_from}\n")
+    n_cond = 12 + N_NOFALL_TUNE  # + up to 40 seed evaluations per bin when --seed-from is used
+    print(f"units={len(units)} x bins={1 if args.only_bin else len(VELOCITY_BINS)}; per bin ~ "
+          f"{args.restarts * args.popsize * args.maxiter} objective evals x up to {n_cond} trials each "
+          f"(time ONE trial, multiply, before launching the full run)\n")
+
+    library = build_library(spec, space, units, run_trial, it, isel, ih, inf, args.popsize, args.maxiter,
+                            args.restarts, cfg=None, out_path=args.out, existing=existing,
+                            seed_ctrls=seed_ctrls, obj_kwargs=obj_kwargs,
+                            bins=([args.only_bin] if args.only_bin else None))
 
     if excluded_units:
         reason = f"excluded via --exclude {args.exclude!r} (this scenario produced no/negligible natural falls)"

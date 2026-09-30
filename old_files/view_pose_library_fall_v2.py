@@ -564,7 +564,7 @@ def main():
 
     ap.add_argument(
         "--p3-module",
-        default="build_pose_library_v2_parallel.py",
+        default="phase3_pose_jerk_v5.py",
     )
 
     ap.add_argument(
