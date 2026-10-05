@@ -240,7 +240,7 @@ def make_run_trial(model, p1, impact_ids, snapshot, trigger_lead_s: float = 0.3)
     _warned = {"once": False}
 
     def run_trial(spec: ValiditySpec, ctrl: np.ndarray, scenario: str, condition: dict) -> TrialResult:
-        from phase3_pose_jerk_v7 import run_protected_trial  # local import: only needed in live mode
+        from old_files.phase3_pose_jerk_v7 import run_protected_trial  # local import: only needed in live mode
 
         scen_tuple = condition.get("scenario_tuple")
         if scen_tuple is None:
@@ -742,7 +742,7 @@ def main(argv=None) -> int:
         print("*** MOCK MODE: physics is fake, this only exercises CMA-ES + gate wiring ***\n")
     elif args.live:
         import generate_fall_dataset_final as p1
-        from phase3_pose_jerk_v7 import snapshot_model_state, load_instrumented_model, impact_body_ids
+        from old_files.phase3_pose_jerk_v7 import snapshot_model_state, load_instrumented_model, impact_body_ids
         id_to_tuple = {t[0]: t for t in p1.SCENARIOS}
         units = make_units(args.granularity, p1)
         registry = {u: [id_to_tuple[s] for s in ids] for u, ids in units.items()}

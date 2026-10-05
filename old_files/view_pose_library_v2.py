@@ -22,8 +22,6 @@ Important:
 - Both modes use a fresh reset and the same disturbance.
 - The MuJoCo viewer runs in real time and remains open after impact so
   the fall and resulting pose can be inspected visually.
-HOW TO RUN THIS?
- python scripts/view_pose_library_v2.py --library build_pose/pose_lib_parallel_v2.json --model unitree_g1/g1_pendulum.xml --scenario 1
 """
 
 import argparse
@@ -179,99 +177,29 @@ def geom_name(model, geom_id):
     ) or ""
 
 
-def body_name(model, body_id):
-    if body_id < 0:
-        return ""
-    return mujoco.mj_id2name(
-        model, mujoco.mjtObj.mjOBJ_BODY, int(body_id)
-    ) or ""
-
-
 def find_ground_and_feet(model, p1):
-    """
-    Resolve the exact ground and foot geom IDs used by the Phase-3 scoring
-    pipeline.
+    ground_id = -1
+    foot_ids = set()
 
-    IMPORTANT:
-    Do NOT guess ground/feet from geom-name substrings here. The v2 viewer
-    must measure the same contacts as the pose-library scoring code.
-    """
-    ground_id = mujoco.mj_name2id(
-        model, mujoco.mjtObj.mjOBJ_GEOM, "ground"
-    )
+    for gid in range(model.ngeom):
+        name = geom_name(model, gid).lower()
 
-    if ground_id < 0:
-        raise RuntimeError(
-            "No geom named 'ground' was found in the MuJoCo model. "
-            "The viewer will not guess a ground geom by substring."
-        )
+        if ground_id < 0 and ("ground" in name or "floor" in name):
+            ground_id = gid
 
-    get_feet = getattr(p1, "get_foot_geom_ids", None)
-    if not callable(get_feet):
-        raise RuntimeError(
-            "p1.get_foot_geom_ids(model) is required so the viewer uses "
-            "the same foot-geom definition as the scoring pipeline."
-        )
+        if any(x in name for x in ("foot", "toe", "ankle")):
+            foot_ids.add(gid)
 
-    foot_ids = set(int(x) for x in get_feet(model))
+    fn = getattr(p1, "get_foot_geom_ids", None)
+    if callable(fn):
+        try:
+            ids = fn(model)
+            if ids is not None:
+                foot_ids.update(int(x) for x in ids)
+        except Exception:
+            pass
+
     return ground_id, foot_ids
-
-
-def impact_body_ids(model):
-    """
-    Resolve the exact BODY IDs used by Phase-3:
-      pelvis      -> pelvis body
-      head proxy  -> pendulum_bob body
-
-    Contact classification is by BODY ID, not by geom-name substring.
-    """
-    pelvis_id = mujoco.mj_name2id(
-        model, mujoco.mjtObj.mjOBJ_BODY,
-        "pelvis"
-    )
-    bob_id = mujoco.mj_name2id(
-        model, mujoco.mjtObj.mjOBJ_BODY, "pendulum_bob"
-    )
-
-    if pelvis_id < 0 or bob_id < 0:
-        raise RuntimeError(
-            f"Could not resolve impact bodies: "
-            f"pelvis={pelvis_id}, pendulum_bob={bob_id}"
-        )
-
-    return {"pelvis": pelvis_id, "head": bob_id}
-
-
-def print_geom_check(model, ground_id, foot_ids, body_ids):
-    """Print the actual MuJoCo IDs/names used for impact measurement."""
-    print("\n" + "-" * 68)
-    print("GEOM / BODY CHECK")
-    print("-" * 68)
-
-    print(
-        f"Ground geom : id={ground_id}, "
-        f"name='{geom_name(model, ground_id)}'"
-    )
-
-    print("Foot geoms  :")
-    if foot_ids:
-        for gid in sorted(foot_ids):
-            print(
-                f"  id={gid:3d}, name='{geom_name(model, gid)}', "
-                f"body_id={int(model.geom_bodyid[gid])}, "
-                f"body='{body_name(model, int(model.geom_bodyid[gid]))}'"
-            )
-    else:
-        print("  NONE")
-
-    print("Impact bodies:")
-    for label, bid in body_ids.items():
-        print(
-            f"  {label:7s}: body_id={bid}, "
-            f"body='{body_name(model, bid)}'"
-        )
-
-    print("-" * 68)
 
 
 def contact_force(model, data, contact_id):
@@ -280,14 +208,23 @@ def contact_force(model, data, contact_id):
     return float(np.linalg.norm(wrench[:3]))
 
 
-def measure_ground_contacts(model, data, ground_id, foot_ids, body_ids):
-    """
-    Measure ONLY non-foot contacts against the exact ground geom.
+def classify_contact(name):
+    n = name.lower()
 
-    Contacts are classified by the BODY ID of the non-ground geom:
-      pelvis       -> pelvis
-      pendulum_bob -> head
-      anything else -> other
+    if any(x in n for x in ("head", "bob", "pendulum")):
+        return "head"
+
+    if any(x in n for x in ("pelvis", "hip", "waist")):
+        return "pelvis"
+
+    return "other"
+
+
+def measure_ground_contacts(model, data, ground_id, foot_ids):
+    """
+    Return current ground-contact forces grouped as head/pelvis/other.
+
+    Foot contacts are deliberately excluded from the impact groups.
     """
     forces = {
         "head": 0.0,
@@ -301,47 +238,32 @@ def measure_ground_contacts(model, data, ground_id, foot_ids, body_ids):
         "other": False,
     }
 
-    contact_details = []
-
     for i in range(data.ncon):
         c = data.contact[i]
 
-        if ground_id not in (c.geom1, c.geom2):
+        if ground_id >= 0:
+            if c.geom1 != ground_id and c.geom2 != ground_id:
+                continue
+
+            body_geom = c.geom2 if c.geom1 == ground_id else c.geom1
+        else:
+            # No named ground geom was found. Treat non-foot contacts as
+            # candidate ground contacts, as a fallback.
+            if c.geom1 in foot_ids or c.geom2 in foot_ids:
+                continue
+            body_geom = c.geom1
+
+        if body_geom in foot_ids:
             continue
 
-        other_geom = c.geom2 if c.geom1 == ground_id else c.geom1
+        part = classify_contact(geom_name(model, body_geom))
+        f = contact_force(model, data, i)
 
-        # Ignore normal foot-ground support contacts.
-        if other_geom in foot_ids:
-            continue
+        forces[part] += f
+        active[part] = True
 
-        other_body = int(model.geom_bodyid[other_geom])
-        force = contact_force(model, data, i)
+    return forces, active
 
-        matched = False
-        for part, body_id in body_ids.items():
-            if other_body == body_id:
-                if force > forces[part]:
-                    forces[part] = force
-                active[part] = True
-                matched = True
-                break
-
-        if not matched:
-            if force > forces["other"]:
-                forces["other"] = force
-            active["other"] = True
-
-        contact_details.append({
-            "contact_id": i,
-            "geom_id": int(other_geom),
-            "geom_name": geom_name(model, other_geom),
-            "body_id": other_body,
-            "body_name": body_name(model, other_body),
-            "force": force,
-        })
-
-    return forces, active, contact_details
 
 def natural_impact_and_trigger(
     p1, model, scenario, magnitude, direction, timing
@@ -364,7 +286,6 @@ def natural_impact_and_trigger(
     )
 
     ground_id, foot_ids = find_ground_and_feet(model, p1)
-    body_ids = impact_body_ids(model)
     dt = float(model.opt.timestep)
 
     impact_time = None
@@ -383,8 +304,8 @@ def natural_impact_and_trigger(
         mujoco.mj_step(model, data)
 
 
-        _, active, _ = measure_ground_contacts(
-            model, data, ground_id, foot_ids, body_ids
+        _, active = measure_ground_contacts(
+            model, data, ground_id, foot_ids
         )
 
         if any(active.values()):
@@ -499,7 +420,6 @@ def run_viewer(
     )
 
     ground_id, foot_ids = find_ground_and_feet(model, p1)
-    body_ids = impact_body_ids(model)
 
     q_start = None
     triggered = False
@@ -567,8 +487,8 @@ def run_viewer(
             mujoco.mj_step(model, data)
 
 
-            forces, active, contact_details = measure_ground_contacts(
-                model, data, ground_id, foot_ids, body_ids
+            forces, active = measure_ground_contacts(
+                model, data, ground_id, foot_ids
             )
 
             for key in peak:
@@ -588,19 +508,6 @@ def run_viewer(
                     f"pelvis={forces['pelvis']:.2f} N, "
                     f"other={forces['other']:.2f} N"
                 )
-
-                # Diagnostic: show exactly which geom/body generated the
-                # contact so a 0 N bucket can be traced to the real model.
-                if contact_details:
-                    print("[CONTACT GEOM/BODY]")
-                    for item in contact_details:
-                        print(
-                            f"  geom_id={item['geom_id']}, "
-                            f"geom='{item['geom_name']}', "
-                            f"body_id={item['body_id']}, "
-                            f"body='{item['body_name']}', "
-                            f"force={item['force']:.2f} N"
-                        )
 
             viewer.sync()
 
@@ -678,12 +585,6 @@ def main():
     print(f"Natural impact time : {natural_impact:.3f}s")
     print(f"Trigger time        : {trigger_time:.3f}s")
     print(f"Velocity at trigger : {measured_velocity:.3f} m/s")
-
-    # Show the exact IDs/names that the contact measurement uses.
-    check_ground_id, check_foot_ids = find_ground_and_feet(model, p1)
-    check_body_ids = impact_body_ids(model)
-    print_geom_check(model, check_ground_id, check_foot_ids, check_body_ids)
-
     print("\nTerminal controls: u=unprotected, p=protected, r=protected again, q=quit")
 
     unprotected_peak = None
@@ -708,37 +609,9 @@ def main():
             print("\n" + "=" * 68)
             print("PEAK FORCE COMPARISON (N)")
             print("=" * 68)
-            print(
-                f"{'Body':12s}"
-                f"{'Unprotected':>16s}"
-                f"{'Protected':>16s}"
-                f"{'Reduction':>16s}"
-            )
-
+            print(f"{'Body':12s}{'Unprotected':>16s}{'Protected':>16s}")
             for part in ("head", "pelvis", "other"):
-                unprotected = unprotected_peak[part]
-                protected = protected_peak[part]
-
-                # Same reduction calculation used by
-                # view_pose_library_via_points.py:
-                # reduction = ((unprotected - protected) / unprotected) * 100
-                if unprotected > 1e-9:
-                    reduction = 100.0 * (unprotected - protected) / unprotected
-                    reduction_text = f"{reduction:.2f}%"
-                else:
-                    reduction_text = "N/A"
-
-                print(
-                    f"{part:12s}"
-                    f"{unprotected:16.2f}"
-                    f"{protected:16.2f}"
-                    f"{reduction_text:>16s}"
-                )
-
-            print(
-                "\nNote: Reduction is calculated for this single visualized "
-                "condition; it is not the pose-library holdout median."
-            )
+                print(f"{part:12s}{unprotected_peak[part]:16.2f}{protected_peak[part]:16.2f}")
 
 
 if __name__ == "__main__":
